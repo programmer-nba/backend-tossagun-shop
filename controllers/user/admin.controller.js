@@ -12,13 +12,11 @@ exports.create = async (req, res) => {
     const user = await Admins.findOne({
       admin_username: req.body.admin_username,
     });
-    console.log(user);
     if (user)
       return res.status(409).send({
         status: false,
         message: "มีชื่อผู้ใช้งานนี้ในระบบเเล้ว",
       });
-
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.admin_password, salt);
 

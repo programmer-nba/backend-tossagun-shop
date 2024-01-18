@@ -8,12 +8,10 @@ const auth = require("../lib/auth");
 router.post("/", auth, async (req, res) => {
   const {decoded} = req;
   try {
-    console.log("call me", decoded);
     if (decoded && decoded.row === "admin") {
       const id = decoded._id;
       Admins.findOne({_id: id})
         .then((item) => {
-          console.log(item);
           return res.status(200).send({
             name: item.admin_name,
             username: item.admin_username,
@@ -26,10 +24,8 @@ router.post("/", auth, async (req, res) => {
         );
     } else if (decoded && decoded.row === "partner") {
       const id = decoded._id;
-      console.log(id);
       Partners.findOne({_id: id})
         .then((item) => {
-          console.log(item);
           return res.status(200).send({
             _id: item._id,
             name: item.partner_name,
@@ -45,7 +41,6 @@ router.post("/", auth, async (req, res) => {
       const id = decoded._id;
       Employees.findOne({_id: id})
         .then((item) => {
-          console.log(item);
           return res.status(200).send({
             name: item.employee_name,
             username: item.employee_username,
