@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const {Employee, validate} = require("../../model/user/employee.model");
+const {Employees, validate} = require("../../model/user/employee.model");
 
 exports.create = async (req, res) => {
   console.log(req.body);
@@ -10,10 +10,9 @@ exports.create = async (req, res) => {
         .status(400)
         .send({message: error.details[0].message, status: false});
 
-    const user = await Employee.findOne({
+    const user = await Employees.findOne({
       employee_username: req.body.employee_username,
     });
-    console.log(user);
     if (user)
       return res.status(409).send({
         status: false,
@@ -22,8 +21,7 @@ exports.create = async (req, res) => {
 
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.employee_password, salt);
-
-    const result = await new Employee({
+    const result = await new Employees({
       ...req.body,
       employee_password: hashPassword,
     }).save();
@@ -39,7 +37,7 @@ exports.findByShopId = async (req, res) => {
   const id = req.params.id;
   console.log(id);
   try {
-    Employee.find({employee_shop_id: id})
+    Employees.find({employee_shop_id: id})
       .then((data) => {
         if (!data)
           res
@@ -63,7 +61,7 @@ exports.findByShopId = async (req, res) => {
 
 exports.findAll = async (req, res) => {
   try {
-    Employee.find()
+    Employees.find()
       .then(async (data) => {
         res.send({data, message: "success", status: true});
       })
@@ -80,7 +78,7 @@ exports.findAll = async (req, res) => {
 exports.findOne = async (req, res) => {
   const id = req.params.id;
   try {
-    Employee.findById(id)
+    Employees.findById(id)
       .then((data) => {
         if (!data)
           res
@@ -112,7 +110,7 @@ exports.update = async (req, res) => {
     }
     const id = req.params.id;
     if (!req.body.employee_password) {
-      Employee.findByIdAndUpdate(id, req.body, {useFindAndModify: false})
+      Employees.findByIdAndUpdate(id, req.body, {useFindAndModify: false})
         .then((data) => {
           if (!data) {
             res.status(404).send({
@@ -134,7 +132,7 @@ exports.update = async (req, res) => {
     } else {
       const salt = await bcrypt.genSalt(Number(process.env.SALT));
       const hashPassword = await bcrypt.hash(req.body.employee_password, salt);
-      Employee.findByIdAndUpdate(
+      Employees.findByIdAndUpdate(
         id,
         {...req.body, employee_password: hashPassword},
         {useFindAndModify: false}
@@ -166,7 +164,7 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {
-    Employee.findByIdAndRemove(id, {useFindAndModify: false})
+    Employees.findByIdAndDelete(id, {useFindAndModify: false})
       .then((data) => {
         console.log(data);
         if (!data) {

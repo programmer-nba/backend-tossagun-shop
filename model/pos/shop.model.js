@@ -61,14 +61,11 @@ const validate = (data) => {
     shop_number: Joi.string().required().label("กรุณากรอกรหัสร้านด้วย"),
     shop_status: Joi.boolean().default(true),
     shop_function: Joi.array().default([]), // เปิดการใช้งานบริการ
-
     shop_status_tax: Joi.string().default("ไม่มี"), // ลงทะเบียนพาณิย์, เป็นผู้เสียภาษี
     shop_tax_name: Joi.string().default("ไม่มี"), // ชื่อผู้ประกอบการ, ชื่อผู้ลงทะเบียนผู้เสียภาษี
     shop_tax_number: Joi.string().default("ไม่มี"), // เลขผู้เสียภาษี
     shop_tax_address: Joi.string().default("ไม่มี"), //
     shop_tax_phone: Joi.string().default("ไม่มี"),
-
-    shop_vat_name: Joi.string().default("ไม่มี"), // ชื่อผู้เสีย
     shop_date_start: Joi.date().raw().default(Date.now()),
   });
   return schema.validate(data);

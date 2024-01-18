@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const {Partners, validate} = require("../../model/user/partner.model");
 
 exports.create = async (req, res) => {
-  console.log("is body", req.body);
   try {
     const {error} = validate(req.body);
     if (error)
@@ -13,7 +12,6 @@ exports.create = async (req, res) => {
     const user = await Partners.findOne({
       partner_iden: req.body.partner_iden,
     });
-    console.log(user);
     if (user)
       return res.status(409).send({
         status: false,
@@ -76,7 +74,6 @@ exports.findOne = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  console.log(req.body);
   try {
     if (!req.body) {
       return res.status(400).send({
@@ -139,9 +136,8 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {
-    Partners.findByIdAndRemove(id, {useFindAndModify: false})
+    Partners.findByIdAndDelete(id, {useFindAndModify: false})
       .then((data) => {
-        console.log(data);
         if (!data) {
           res.status(404).send({
             message: `ไม่สามารถลบผู้ใช้งานนี้ได้`,

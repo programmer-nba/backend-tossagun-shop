@@ -27,8 +27,8 @@ const PartnersSchema = new mongoose.Schema({
   partner_province: {type: String, required: true},
   partner_address: {type: String, required: true},
   partner_status: {type: Boolean, required: false, default: true},
-  partner_date_start: {type: Date, required: false, default: Date.now()}, // เริ่ม
-  partner_date_end: {type: Date, required: false, default: Date.now()}, // หมดสัญญา
+  // partner_date_start: {type: Date, required: false, default: Date.now()}, // เริ่ม
+  // partner_date_end: {type: Date, required: false, default: Date.now()}, // หมดสัญญา
   partner_promise: {
     status: {type: Boolean, required: false, default: false},
     timestamp: {
@@ -73,11 +73,10 @@ const validate = (data) => {
     partner_district: Joi.string().required(),
     partner_state: Joi.string().required(),
     partner_province: Joi.string().required(),
-
     partner_address: Joi.string().required().label("ไม่มีข้อมูลที่อยู่"),
     partner_status: Joi.boolean().default(true),
-    partner_date_start: Joi.date().raw().default(Date.now()),
-    partner_date_end: Joi.date().raw().default(Date.now()),
+    // partner_date_start: Joi.date().raw().default(Date.now()),
+    // partner_date_end: Joi.date().raw().default(Date.now()),
     partner_promise: Joi.object({
       status: Joi.boolean().default(false),
       timestamp: Joi.date().default(dayjs(Date.now()).format()),

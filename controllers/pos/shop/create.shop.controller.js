@@ -1,6 +1,6 @@
 const multer = require("multer");
 const fs = require("fs");
-const {Shop, validate} = require("../../../model/pos/shop.model");
+const {Shops, validate} = require("../../../model/pos/shop.model");
 const {google} = require("googleapis");
 const {date, object} = require("joi");
 const dayjs = require("dayjs");
@@ -35,7 +35,6 @@ exports.create = async (req, res) => {
         _id: req.body.shop_partner_id,
       });
       console.log("partnerpartnerpartnerpartner", checkPartner);
-
       if (!req.file) {
         const {error} = validate(req.body);
         // const shopFunction = JSON.parse(req.body.shop_function);
@@ -44,7 +43,7 @@ exports.create = async (req, res) => {
         // console.log(req.body);
         if (error)
           return res.status(400).send({message: error.details[0].message});
-        await new Shop({
+        await new Shops({
           ...req.body,
           shop_partner_type: checkPartner.partner_type,
         }).save();
@@ -76,7 +75,7 @@ exports.create = async (req, res) => {
         const {error} = validate(req.body);
         if (error)
           return res.status(400).send({message: error.details[0].message});
-        const shop = await new Shop({
+        const shop = await new Shops({
           ...req.body,
           shop_logo: response.data.id,
         }).save();

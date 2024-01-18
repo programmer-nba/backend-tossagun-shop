@@ -1,6 +1,6 @@
 const multer = require("multer");
 const fs = require("fs");
-const {Shop, validate} = require("../../../model/pos/shop.model");
+const {Shops, validate} = require("../../../model/pos/shop.model");
 const {google} = require("googleapis");
 const CLIENT_ID = process.env.GOOGLE_DRIVE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
@@ -34,7 +34,7 @@ exports.update = async (req, res) => {
           });
         }
         const id = req.params.id;
-        Shop.findByIdAndUpdate(id, req.body, {
+        Shops.findByIdAndUpdate(id, req.body, {
           useFindAndModify: false,
         })
           .then((data) => {
@@ -83,7 +83,7 @@ async function uploadFile(req, res) {
     });
     generatePublicUrl(response.data.id);
     const id = req.params.id;
-    Shop.findByIdAndUpdate(
+    Shops.findByIdAndUpdate(
       id,
       {...req.body, shop_logo: response.data.id},
       {useFindAndModify: false}

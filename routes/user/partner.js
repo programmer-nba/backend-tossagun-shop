@@ -1,13 +1,13 @@
 const router = require("express").Router();
 const partner = require("../../controllers/user/partner.controller");
-// const auth = require("../../lib/auth");
+const authAdmin = require("../../lib/auth.admin");
 
-router.post("/", partner.create);
+router.post("/", authAdmin, partner.create);
 
-router.get("/", partner.findAll);
-router.get("/:id", partner.findOne);
+router.get("/", authAdmin, partner.findAll);
+router.get("/:id", authAdmin, partner.findOne);
 
-router.delete("/:id", partner.delete);
-router.put("/:id", partner.update);
+router.delete("/:id", authAdmin, partner.delete);
+router.put("/:id", authAdmin, partner.update);
 
 module.exports = router;

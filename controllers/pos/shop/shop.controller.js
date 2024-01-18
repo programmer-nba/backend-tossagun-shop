@@ -1,8 +1,8 @@
-const {Shop, validate} = require("../../../model/pos/shop.model");
+const {Shops, validate} = require("../../../model/pos/shop.model");
 
 exports.findAll = async (req, res, next) => {
   try {
-    Shop.find()
+    Shops.find()
       .then(async (data) => {
         res.status(201).send({data, message: "success", status: true});
       })
@@ -18,7 +18,7 @@ exports.findAll = async (req, res, next) => {
 exports.findOne = async (req, res) => {
   const id = req.params.id;
   try {
-    Shop.findById(id)
+    Shops.findById(id)
       .then((data) => {
         if (!data)
           res
@@ -43,9 +43,8 @@ exports.findOne = async (req, res) => {
 exports.findByPartner = async (req, res) => {
   const id = req.params.id;
   try {
-    Shop.find({shop_partner_id: id})
+    Shops.find({shop_partner_id: id})
       .then((data) => {
-        console.log(data);
         if (!data)
           res
             .status(404)
@@ -69,7 +68,7 @@ exports.findByPartner = async (req, res) => {
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {
-    Shop.findByIdAndRemove(id, {useFindAndModify: false})
+    Shops.findByIdAndRemove(id, {useFindAndModify: false})
       .then((data) => {
         if (!data) {
           res.status(404).send({
