@@ -26,7 +26,7 @@ AdminSchema.methods.generateAuthToken = function () {
     {_id: this._id, name: this.admin_name, row: "admin"},
     process.env.JWTPRIVATEKEY,
     {
-      expiresIn: "4h",
+      expiresIn: "1h",
     }
   );
   return token;
