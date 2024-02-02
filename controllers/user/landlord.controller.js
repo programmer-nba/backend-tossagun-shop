@@ -61,6 +61,10 @@ exports.create = async (req, res) => {
       await new Landlords({
         ...req.body,
         landlord_password: hashPassword,
+        landlord_status_type: {
+          name: "รอการตรวจสอบ",
+          timestamp: dayjs(Date.now().format()),
+        },
       }).save();
       return res.status(201).send({message: "เพิ่มข้อมูลสำเร็จ", status: true});
     } else {

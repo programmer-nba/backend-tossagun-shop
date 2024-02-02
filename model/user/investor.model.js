@@ -37,6 +37,7 @@ const InvestorSchema = new mongoose.Schema({
       default: dayjs(Date.now()).format(),
     }, // วันที่เซ็นสัญญาดิจิตอล
   },
+  invertor_status_type: {type: Array, required: true},
 });
 
 InvestorSchema.methods.generateAuthToken = function () {

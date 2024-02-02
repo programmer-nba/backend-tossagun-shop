@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const {Investors, validate} = require("../../model/user/investor.model");
 const platform = require("../../lib/platform");
+const dayjs = require("dayjs");
 
 exports.create = async (req, res) => {
   try {
@@ -35,6 +36,10 @@ exports.create = async (req, res) => {
       await new Investors({
         ...req.body,
         investor_password: hashPassword,
+        investor_status_type: {
+          name: "รอการตรวจสอบ",
+          timestamp: dayjs(Date.now().format()),
+        },
       }).save();
       return res.status(201).send({message: "สร้างข้อมูลสำเร็จ", status: true});
     } else {
