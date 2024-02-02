@@ -23,7 +23,7 @@ const LandlordSchema = new mongoose.Schema({
   landlord_address: {type: String, require: true}, // ที่อยู่
   landlord_subdistrict: {type: String, require: true}, // ตำบล
   landlord_district: {type: String, require: true}, // อำเภอ
-  landlord_provice: {type: String, require: true}, // จังหวัด
+  landlord_province: {type: String, require: true}, // จังหวัด
   landlord_postcode: {type: String, require: true}, // รหัสไปรษณีย์
   landlord_date_start: {type: Date, require: false, default: Date.now()}, // วันที่เริ่มสัญญา
   landlord_date_end: {type: Date, required: false, default: Date.now()}, // วันที่หมดสัญญา
@@ -66,7 +66,7 @@ const validate = (data) => {
     landlord_address: Joi.string().required().label("กรุณากรอกที่อยู่"),
     landlord_subdistrict: Joi.string().required().label("กรุณากรอกตำบล"),
     landlord_district: Joi.string().required().label("กรุณากรอกอำเภอ"),
-    landlord_provice: Joi.string().required().label("กรุณากรอกจังหวัด"),
+    landlord_province: Joi.string().required().label("กรุณากรอกจังหวัด"),
     landlord_postcode: Joi.string().required().label("กรุณากรอกรหัสไปรษณีย์"),
     landlord_date_start: Joi.date().raw().default(Date.now()),
     landlord_date_end: Joi.date().raw().default(Date.now()),

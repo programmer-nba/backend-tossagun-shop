@@ -23,7 +23,7 @@ const InvestorSchema = new mongoose.Schema({
   investor_address: {type: String, require: true}, // ที่อยู่
   investor_subdistrict: {type: String, require: true}, // ตำบล
   investor_district: {type: String, require: true}, // อำเภอ
-  investor_provice: {type: String, require: true}, // จังหวัด
+  investor_province: {type: String, require: true}, // จังหวัด
   investor_postcode: {type: String, require: true}, // รหัสไปรษณีย์
   investor_date_start: {type: Date, require: false, default: Date.now()}, // วันที่เริ่มสัญญา
   investor_date_end: {type: Date, required: false, default: Date.now()}, // วันที่หมดสัญญา
@@ -66,7 +66,7 @@ const validate = (data) => {
     investor_address: Joi.string().required().label("กรุณากรอกที่อยู่"),
     investor_subdistrict: Joi.string().required().label("กรุณากรอกตำบล"),
     investor_district: Joi.string().required().label("กรุณากรอกอำเภอ"),
-    investor_provice: Joi.string().required().label("กรุณากรอกจังหวัด"),
+    investor_province: Joi.string().required().label("กรุณากรอกจังหวัด"),
     investor_postcode: Joi.string().required().label("กรุณากรอกรหัสไปรษณีย์"),
     investor_date_start: Joi.date().raw().default(Date.now()),
     investor_date_end: Joi.date().raw().default(Date.now()),

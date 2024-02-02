@@ -53,7 +53,7 @@ const validate = (data) => {
     shop_tax_number: Joi.string().default("ไม่มี"), // เลขผู้เสียภาษี
     shop_tax_address: Joi.string().default("ไม่มี"), //
     shop_tax_phone: Joi.string().default("ไม่มี"),
-
+    
     shop_vat_name: Joi.string().default("ไม่มี"), // ชื่อผู้เสีย
     shop_date_start: Joi.date().raw().default(Date.now()),
   });

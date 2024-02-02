@@ -1,14 +1,14 @@
 const bcrypt = require("bcrypt");
 const {Investors, validate} = require("../../model/user/investor.model");
+const platform = require("../../lib/platform");
 
 exports.create = async (req, res) => {
   try {
-    const {error} = validate(req.body);
-    if (error)
-      return res
-        .status(400)
-        .send({message: error.details[0].message, status: false});
-
+    // const {error} = validate(req.body);
+    // if (error)
+    //   return res
+    //     .status(400)
+    //     .send({message: error.details[0].message, status: false});
     const invertor = await Investors.findOne({
       investor_iden: req.body.investor_iden,
     });
@@ -19,12 +19,29 @@ exports.create = async (req, res) => {
       });
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.investor_password, salt);
-
-    await new Investors({
-      ...req.body,
-      investor_password: hashPassword,
-    }).save();
-    return res.status(201).send({message: "สร้างข้อมูลสำเร็จ", status: true});
+    const data_platform = {
+      ref_tel: req.body.ref_tel,
+      name: req.body.investor_name,
+      tel: req.body.investor_phone,
+      password: req.body.investor_password,
+      address: req.body.investor_address,
+      subdistrict: req.body.investor_subdistrict,
+      district: req.body.investor_district,
+      province: req.body.investor_province,
+      postcode: req.body.investor_postcode,
+    };
+    const response = await platform.Register(data_platform);
+    if (response) {
+      await new Investors({
+        ...req.body,
+        investor_password: hashPassword,
+      }).save();
+      return res.status(201).send({message: "สร้างข้อมูลสำเร็จ", status: true});
+    } else {
+      return res
+        .status(401)
+        .send({message: "มีบางอย่างผิดพลาด", status: false});
+    }
   } catch (error) {
     res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
   }
