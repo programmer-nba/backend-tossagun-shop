@@ -29,6 +29,10 @@ app.use(prefix + "/landlord", require("./routes/user/landlord"));
 app.use(prefix + "/investor", require("./routes/user/invertor"));
 // Shop
 app.use(prefix + "/shop", require("./routes/pos/shop"));
+// Product
+app.use(prefix + "/product", require("./routes/pos/product"));
+// Dealer
+app.use(prefix + "/dealer", require("./routes/pos/dealer"));
 
 const port = process.env.PORT || 9999;
 

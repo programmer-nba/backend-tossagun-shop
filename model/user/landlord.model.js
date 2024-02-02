@@ -38,7 +38,7 @@ const LandlordSchema = new mongoose.Schema({
   },
 });
 
-LandlordSchema.method.generateAuthToken = function () {
+LandlordSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
     {
       _id: this._id,

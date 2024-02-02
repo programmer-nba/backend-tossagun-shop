@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const shops = require("../../controllers/pos/shop.controller");
+const shops = require("../../controllers/pos/shop.controller/shop.controller");
 const createShop = require("../../controllers/pos/shop.controller/create.shop.controller");
 const updateShop = require("../../controllers/pos/shop.controller/update.shop.controller");
 const auth = require("../../lib/auth");
