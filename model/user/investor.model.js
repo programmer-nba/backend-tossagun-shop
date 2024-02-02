@@ -25,8 +25,9 @@ const InvestorSchema = new mongoose.Schema({
   investor_district: {type: String, require: true}, // อำเภอ
   investor_province: {type: String, require: true}, // จังหวัด
   investor_postcode: {type: String, require: true}, // รหัสไปรษณีย์
-  investor_date_start: {type: Date, require: false, default: Date.now()}, // วันที่เริ่มสัญญา
-  investor_date_end: {type: Date, required: false, default: Date.now()}, // วันที่หมดสัญญา
+  // investor_date_start: {type: Date, require: false, default: Date.now()}, // วันที่เริ่มสัญญา
+  // investor_date_end: {type: Date, required: false, default: Date.now()}, // วันที่หมดสัญญา
+  invertor_timestamp: {type: Date, require: false, default: Date.now()}, //
   investor_status: {type: Boolean, required: false, default: false}, // สถานะการเปิดให้ใช้งาน
   investor_promise: {
     status: {type: Boolean, required: false, default: false}, // สถานะการเซ็นสัญญาดิจิตอล
@@ -68,8 +69,9 @@ const validate = (data) => {
     investor_district: Joi.string().required().label("กรุณากรอกอำเภอ"),
     investor_province: Joi.string().required().label("กรุณากรอกจังหวัด"),
     investor_postcode: Joi.string().required().label("กรุณากรอกรหัสไปรษณีย์"),
-    investor_date_start: Joi.date().raw().default(Date.now()),
-    investor_date_end: Joi.date().raw().default(Date.now()),
+    // investor_date_start: Joi.date().raw().default(Date.now()),
+    // investor_date_end: Joi.date().raw().default(Date.now()),
+    investor_timestamp: Joi.date().raw().default(Date.now()),
     investor_status: Joi.boolean().default(false),
     investor_promise: Joi.object({
       status: Joi.boolean().default(false),

@@ -25,8 +25,9 @@ const LandlordSchema = new mongoose.Schema({
   landlord_district: {type: String, require: true}, // อำเภอ
   landlord_province: {type: String, require: true}, // จังหวัด
   landlord_postcode: {type: String, require: true}, // รหัสไปรษณีย์
-  landlord_date_start: {type: Date, require: false, default: Date.now()}, // วันที่เริ่มสัญญา
-  landlord_date_end: {type: Date, required: false, default: Date.now()}, // วันที่หมดสัญญา
+  // landlord_date_start: {type: Date, require: false, default: Date.now()}, // วันที่เริ่มสัญญา
+  // landlord_date_end: {type: Date, required: false, default: Date.now()}, // วันที่หมดสัญญา
+  landlord_timestamp: {type: Date, required: false, default: Date.now()},
   landlord_status: {type: Boolean, required: false, default: false}, // สถานะการเปิดให้ใช้งาน
   landlord_promise: {
     status: {type: Boolean, required: false, default: false}, // สถานะการเซ็นสัญญาดิจิตอล
@@ -68,8 +69,9 @@ const validate = (data) => {
     landlord_district: Joi.string().required().label("กรุณากรอกอำเภอ"),
     landlord_province: Joi.string().required().label("กรุณากรอกจังหวัด"),
     landlord_postcode: Joi.string().required().label("กรุณากรอกรหัสไปรษณีย์"),
-    landlord_date_start: Joi.date().raw().default(Date.now()),
-    landlord_date_end: Joi.date().raw().default(Date.now()),
+    // landlord_date_start: Joi.date().raw().default(Date.now()),
+    // landlord_date_end: Joi.date().raw().default(Date.now()),
+    landlord_timestamp: Joi.date().raw().default(Date.now()),
     landlord_status: Joi.boolean().default(false),
     landlord_promise: Joi.object({
       status: Joi.boolean().default(false),
