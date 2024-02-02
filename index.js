@@ -35,6 +35,7 @@ app.use(prefix + "/platform", require("./routes/user/platform"));
 app.use(prefix + "/product", require("./routes/pos/product"));
 // Dealer
 app.use(prefix + "/dealer", require("./routes/pos/dealer"));
+app.use(prefix + "/brand", require("./routes/pos/brand"));
 // Image
 app.use(prefix + "/delete/image", require("./routes/image/delete"));
 app.use(prefix + "/collection/image", require("./routes/image/collection"));
