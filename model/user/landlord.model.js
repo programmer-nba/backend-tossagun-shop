@@ -37,7 +37,6 @@ const LandlordSchema = new mongoose.Schema({
       default: dayjs(Date.now()).format(),
     }, // วันที่เซ็นสัญญาดิจิตอล
   },
-  landlord_status_type: {type: Array, required: true},
 });
 
 LandlordSchema.methods.generateAuthToken = function () {

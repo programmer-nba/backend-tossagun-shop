@@ -15,19 +15,19 @@ const complexityOptions = {
 };
 
 const InvestorSchema = new mongoose.Schema({
-  investor_name: {type: String, require: true}, // ชื่อ - นามสกุล
-  investor_phone: {type: String, require: true}, // เบอร์โทรศัพท์
-  investor_iden: {type: String, require: true}, // เลขบัตรประจำตัวประชาชน
-  investor_email: {type: String, require: false}, // อีเมล
-  investor_password: {type: String, require: true}, // รหัสผ่าน
-  investor_address: {type: String, require: true}, // ที่อยู่
-  investor_subdistrict: {type: String, require: true}, // ตำบล
-  investor_district: {type: String, require: true}, // อำเภอ
-  investor_province: {type: String, require: true}, // จังหวัด
-  investor_postcode: {type: String, require: true}, // รหัสไปรษณีย์
+  investor_name: {type: String, required: true}, // ชื่อ - นามสกุล
+  investor_phone: {type: String, required: true}, // เบอร์โทรศัพท์
+  investor_iden: {type: String, required: true}, // เลขบัตรประจำตัวประชาชน
+  investor_email: {type: String, required: false}, // อีเมล
+  investor_password: {type: String, required: true}, // รหัสผ่าน
+  investor_address: {type: String, required: true}, // ที่อยู่
+  investor_subdistrict: {type: String, required: true}, // ตำบล
+  investor_district: {type: String, required: true}, // อำเภอ
+  investor_province: {type: String, required: true}, // จังหวัด
+  investor_postcode: {type: String, required: true}, // รหัสไปรษณีย์
   // investor_date_start: {type: Date, require: false, default: Date.now()}, // วันที่เริ่มสัญญา
   // investor_date_end: {type: Date, required: false, default: Date.now()}, // วันที่หมดสัญญา
-  invertor_timestamp: {type: Date, require: false, default: Date.now()}, //
+  invertor_timestamp: {type: Date, required: false, default: Date.now()}, //
   investor_status: {type: Boolean, required: false, default: false}, // สถานะการเปิดให้ใช้งาน
   investor_promise: {
     status: {type: Boolean, required: false, default: false}, // สถานะการเซ็นสัญญาดิจิตอล
@@ -37,7 +37,6 @@ const InvestorSchema = new mongoose.Schema({
       default: dayjs(Date.now()).format(),
     }, // วันที่เซ็นสัญญาดิจิตอล
   },
-  invertor_status_type: {type: Array, required: true},
 });
 
 InvestorSchema.methods.generateAuthToken = function () {

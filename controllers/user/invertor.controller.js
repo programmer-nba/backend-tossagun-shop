@@ -10,25 +10,23 @@ exports.create = async (req, res) => {
       return res
         .status(400)
         .send({message: error.details[0].message, status: false});
-    const invertor = await Investors.findOne({
+    const investor = await Investors.findOne({
       investor_iden: req.body.investor_iden,
     });
-    if (invertor)
+    if (investor) {
       return res.status(409).send({
         status: false,
         message: "มีชื่อผู้ใช้งานนี้ในระบบเเล้ว",
       });
-    const salt = await bcrypt.genSalt(Number(process.env.SALT));
-    const hashPassword = await bcrypt.hash(req.body.investor_password, salt);
-    await new Investors({
-      ...req.body,
-      investor_password: hashPassword,
-      investor_status_type: {
-        name: "รอการตรวจสอบ",
-        timestamp: dayjs(Date.now().format()),
-      },
-    }).save();
-    return res.status(201).send({message: "สร้างข้อมูลสำเร็จ", status: true});
+    } else {
+      const salt = await bcrypt.genSalt(Number(process.env.SALT));
+      const hashPassword = await bcrypt.hash(req.body.investor_password, salt);
+      await new Investors({
+        ...req.body,
+        investor_password: hashPassword,
+      }).save();
+      return res.status(200).send({message: "สร้างข้อมูลสำเร็จ", status: true});
+    }
     // const data_platform = {
     //   ref_tel: req.body.ref_tel,
     //   name: req.body.investor_name,
@@ -57,7 +55,7 @@ exports.create = async (req, res) => {
     //     .send({message: "มีบางอย่างผิดพลาด", status: false});
     // }
   } catch (error) {
-    res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
   }
 };
 
