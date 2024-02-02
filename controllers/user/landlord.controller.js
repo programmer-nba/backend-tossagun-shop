@@ -45,33 +45,42 @@ exports.create = async (req, res) => {
       });
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.landlord_password, salt);
-    const data_platform = {
-      ref_tel: req.body.ref_tel,
-      name: req.body.landlord_name,
-      tel: req.body.landlord_phone,
-      password: req.body.landlord_password,
-      address: req.body.landlord_address,
-      subdistrict: req.body.landlord_subdistrict,
-      district: req.body.landlord_district,
-      province: req.body.landlord_province,
-      postcode: req.body.landlord_postcode,
-    };
-    const response = await platform.Register(data_platform);
-    if (response) {
-      await new Landlords({
-        ...req.body,
-        landlord_password: hashPassword,
-        landlord_status_type: {
-          name: "รอการตรวจสอบ",
-          timestamp: dayjs(Date.now().format()),
-        },
-      }).save();
-      return res.status(201).send({message: "เพิ่มข้อมูลสำเร็จ", status: true});
-    } else {
-      return res
-        .status(401)
-        .send({message: "มีบางอย่างผิดพลาด", status: false});
-    }
+    await new Landlords({
+      ...req.body,
+      landlord_password: hashPassword,
+      landlord_status_type: {
+        name: "รอการตรวจสอบ",
+        timestamp: dayjs(Date.now().format()),
+      },
+    }).save();
+    return res.status(201).send({message: "เพิ่มข้อมูลสำเร็จ", status: true});
+    // const data_platform = {
+    //   ref_tel: req.body.ref_tel,
+    //   name: req.body.landlord_name,
+    //   tel: req.body.landlord_phone,
+    //   password: req.body.landlord_password,
+    //   address: req.body.landlord_address,
+    //   subdistrict: req.body.landlord_subdistrict,
+    //   district: req.body.landlord_district,
+    //   province: req.body.landlord_province,
+    //   postcode: req.body.landlord_postcode,
+    // };
+    // const response = await platform.Register(data_platform);
+    // if (response) {
+    //   await new Landlords({
+    //     ...req.body,
+    //     landlord_password: hashPassword,
+    //     landlord_status_type: {
+    //       name: "รอการตรวจสอบ",
+    //       timestamp: dayjs(Date.now().format()),
+    //     },
+    //   }).save();
+    //   return res.status(201).send({message: "เพิ่มข้อมูลสำเร็จ", status: true});
+    // } else {
+    //   return res
+    //     .status(401)
+    //     .send({message: "มีบางอย่างผิดพลาด", status: false});
+    // }
   } catch (err) {
     res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
   }
