@@ -30,11 +30,11 @@ const storage = multer.diskStorage({
 
 exports.create = async (req, res) => {
   try {
-    // const {error} = validate(req.body);
-    // if (error)
-    //   return res
-    //     .status(400)
-    //     .send({message: error.details[0].message, status: false});
+    const {error} = validate(req.body);
+    if (error)
+      return res
+        .status(400)
+        .send({message: error.details[0].message, status: false});
     const landlord = await Landlords.findOne({
       landlord_iden: req.body.landlord_iden,
     });
