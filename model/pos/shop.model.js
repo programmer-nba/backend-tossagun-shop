@@ -12,6 +12,7 @@ const ShopSchema = new mongoose.Schema({
     enum: ["One Stop Shop", "One Stop Service"],
     required: true,
   },
+  shop_branch_id: {type: Number, required: false},
   shop_credit: {type: Number, required: true},
   shop_address: {type: String, required: true}, //ที่อยู่
   shop_subdistrict: {type: String, required: true}, //ตำบล
@@ -52,7 +53,7 @@ const validate = (data) => {
     shop_tax_number: Joi.string().default("ไม่มี"), // เลขผู้เสียภาษี
     shop_tax_address: Joi.string().default("ไม่มี"), //
     shop_tax_phone: Joi.string().default("ไม่มี"),
-    
+
     shop_vat_name: Joi.string().default("ไม่มี"), // ชื่อผู้เสีย
     shop_date_start: Joi.date().raw().default(Date.now()),
   });
