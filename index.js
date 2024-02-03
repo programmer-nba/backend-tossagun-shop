@@ -33,12 +33,18 @@ app.use(prefix + "/shop", require("./routes/pos/shop"));
 app.use(prefix + "/platform", require("./routes/user/platform"));
 // Product
 app.use(prefix + "/product", require("./routes/pos/product"));
+app.use(prefix + "/check", require("./routes/pos/check"));
 // Dealer
 app.use(prefix + "/dealer", require("./routes/pos/dealer"));
 app.use(prefix + "/brand", require("./routes/pos/brand"));
 // Image
 app.use(prefix + "/delete/image", require("./routes/image/delete"));
 app.use(prefix + "/collection/image", require("./routes/image/collection"));
+// Preorder
+app.use(
+  prefix + "/preorder/tossagun",
+  require("./routes/pos/preorder/preorder.tossagun")
+);
 
 const port = process.env.PORT || 9999;
 

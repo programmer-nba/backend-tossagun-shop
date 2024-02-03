@@ -19,12 +19,10 @@ const ProductSchema = new mongoose.Schema({
   productTG_store: {type: String, required: false, default: "dealer"},
   productTG_date_start: {type: Date, required: false, default: Date.now()},
   productTG_alcohol_status: {type: Boolean, required: false, default: false},
-  productTG_unit_ref: [
-    {
-      barcode: {type: String, required: false, default: ""},
-      amount: {type: Number, required: false, default: 0},
-    },
-  ],
+  productTG_unit_ref: {
+    barcode: {type: String, required: false, default: ""},
+    amount: {type: Number, required: false, default: 0},
+  },
 });
 
 const ProductTG = mongoose.model("product_tossagun", ProductSchema);

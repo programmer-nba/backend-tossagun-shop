@@ -18,22 +18,22 @@ exports.findAll = async (req, res, next) => {
 exports.findOne = async (req, res) => {
   const id = req.params.id;
   try {
-    Shops.findById(id)
+    Shops.findOne({_id: id})
       .then((data) => {
         if (!data)
-          res
+          return res
             .status(404)
             .send({message: "ไม่สามารถหารายงานนี้ได้", status: false});
-        else res.send({data, status: true});
+        return res.send({data, status: true});
       })
       .catch((err) => {
-        res.status(500).send({
+        return res.status(500).send({
           message: "มีบางอย่างผิดพลาด",
           status: false,
         });
       });
   } catch (error) {
-    res.status(500).send({
+    return res.status(500).send({
       message: "มีบางอย่างผิดพลาด",
       status: false,
     });
