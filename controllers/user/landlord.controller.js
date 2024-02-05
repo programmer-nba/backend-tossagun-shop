@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const {Landlords, validate} = require("../../model/user/landlord.model");
 const {Lands, validateLand} = require("../../model/pos/land.model");
 const platform = require("../../lib/platform");
+const dayjs = require("dayjs");
 
 const multer = require("multer");
 const fs = require("fs");
@@ -38,47 +39,34 @@ exports.create = async (req, res) => {
     const landlord = await Landlords.findOne({
       landlord_iden: req.body.landlord_iden,
     });
-    if (landlord)
+    if (landlord) {
       return res.status(409).send({
         status: false,
         message: "มีชื่อผู้ใช้งานนี้ในระบบเเล้ว",
       });
-    const salt = await bcrypt.genSalt(Number(process.env.SALT));
-    const hashPassword = await bcrypt.hash(req.body.landlord_password, salt);
-    await new Landlords({
-      ...req.body,
-      landlord_password: hashPassword,
-    }).save();
-    return res.status(201).send({message: "เพิ่มข้อมูลสำเร็จ", status: true});
-    // const data_platform = {
-    //   ref_tel: req.body.ref_tel,
-    //   name: req.body.landlord_name,
-    //   tel: req.body.landlord_phone,
-    //   password: req.body.landlord_password,
-    //   address: req.body.landlord_address,
-    //   subdistrict: req.body.landlord_subdistrict,
-    //   district: req.body.landlord_district,
-    //   province: req.body.landlord_province,
-    //   postcode: req.body.landlord_postcode,
-    // };
-    // const response = await platform.Register(data_platform);
-    // if (response) {
-    //   await new Landlords({
-    //     ...req.body,
-    //     landlord_password: hashPassword,
-    //     landlord_status_type: {
-    //       name: "รอการตรวจสอบ",
-    //       timestamp: dayjs(Date.now().format()),
-    //     },
-    //   }).save();
-    //   return res.status(201).send({message: "เพิ่มข้อมูลสำเร็จ", status: true});
-    // } else {
-    //   return res
-    //     .status(401)
-    //     .send({message: "มีบางอย่างผิดพลาด", status: false});
-    // }
+    } else {
+      const promise = [];
+      const status = [];
+      const salt = await bcrypt.genSalt(Number(process.env.SALT));
+      const hashPassword = await bcrypt.hash(req.body.landlord_password, salt);
+      promise.push({
+        status: "ยังไม่ได้เซ็นสัญญา",
+        timestamp: dayjs(Date.now()).format(""),
+      });
+      status.push({
+        status: "รอการตรวจสอบ",
+        timestamp: dayjs(Date.now()).format(""),
+      });
+      await new Landlords({
+        ...req.body,
+        landlord_password: hashPassword,
+        landlord_promise: promise,
+        landlord_status_type: status,
+      }).save();
+      return res.status(201).send({message: "เพิ่มข้อมูลสำเร็จ", status: true});
+    }
   } catch (err) {
-    res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
   }
 };
 
@@ -223,5 +211,32 @@ exports.createLand = async (req, res) => {
         .send({message: error.details[0].message, status: false});
   } catch (err) {
     return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+  }
+};
+
+exports.confirm = async (req, res) => {
+  try {
+    const updateStatus = await Landlords.findOne({_id: req.params.id});
+    if (updateStatus) {
+      updateStatus.landlord_emp = req.body.landlord_emp;
+      updateStatus.landlord_status_type.push({
+        status: "ผ่านการตรวจสอบ",
+        timestamp: dayjs(Date.now()).format(""),
+      });
+      updateStatus.landlord_status = true;
+      updateStatus.save();
+      return res.status(200).send({
+        status: true,
+        message: "ยืนยันการตรวจสอบเจ้าของที่ดินสำเร็จ",
+        data: updateStatus,
+      });
+    } else {
+      return res.status(403).send({message: "เกิดข้อผิดพลาด"});
+    }
+  } catch (error) {
+    return res.status(500).send({
+      message: "มีบางอย่างผิดพลาด",
+      status: false,
+    });
   }
 };

@@ -30,13 +30,22 @@ const LandlordSchema = new mongoose.Schema({
   landlord_timestamp: {type: Date, required: false, default: Date.now()},
   landlord_status: {type: Boolean, required: false, default: false}, // สถานะการเปิดให้ใช้งาน
   landlord_promise: {
-    status: {type: Boolean, required: false, default: false}, // สถานะการเซ็นสัญญาดิจิตอล
-    timestamp: {
-      type: Date,
-      required: false,
-      default: dayjs(Date.now()).format(),
-    }, // วันที่เซ็นสัญญาดิจิตอล
+    type: [
+      {
+        status: {type: String, required: false},
+        timestamp: {type: String, required: false},
+      },
+    ],
   },
+  landlord_status_type: {
+    type: [
+      {
+        status: {type: String, required: false},
+        timestamp: {type: String, required: false},
+      },
+    ],
+  },
+  landlord_emp: {type: String, required: false, default: "ไม่มี"},
 });
 
 LandlordSchema.methods.generateAuthToken = function () {
@@ -73,10 +82,7 @@ const validate = (data) => {
     // landlord_date_end: Joi.date().raw().default(Date.now()),
     landlord_timestamp: Joi.date().raw().default(Date.now()),
     landlord_status: Joi.boolean().default(false),
-    landlord_promise: Joi.object({
-      status: Joi.boolean().default(false),
-      timestamp: Joi.date().default(dayjs(Date.now()).format()),
-    }),
+    landlord_emp: Joi.string().default("ไม่มี"),
   });
   return schema.validate(data);
 };

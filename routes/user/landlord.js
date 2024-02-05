@@ -10,7 +10,6 @@ router.get("/:id", authAdmin, landlords.findOne);
 router.delete("/:id", authAdmin, landlords.delete);
 router.put("/:id", authAdmin, landlords.update);
 
-// land - ที่ดิน
-router.post("/", auth);
+router.put("/confirm/:id", authAdmin, landlords.confirm);
 
 module.exports = router;

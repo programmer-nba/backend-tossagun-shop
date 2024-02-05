@@ -19,6 +19,7 @@ const AdminSchema = new mongoose.Schema({
   admin_password: {type: String, required: true}, //รหัส
   admin_position: {type: String, required: true},
   admin_date_start: {type: Date, required: false, default: Date.now()}, //เริ่ม
+  admin_emp: {type: String, required: false, default: "ไม่มี"},
 });
 
 AdminSchema.methods.generateAuthToken = function () {
@@ -43,6 +44,7 @@ const validate = (data) => {
       .label("admin_password"),
     admin_position: Joi.string().required().label("กรุณากรอกเลเวลผู้ใช้ด้วย"),
     admin_date_start: Joi.date().raw().default(Date.now()),
+    admin_emp: Joi.string().default("ไม่มี"),
   });
   return schema.validate(data);
 };

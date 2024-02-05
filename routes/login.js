@@ -28,7 +28,7 @@ router.post("/", async (req, res) => {
     });
     if (!admin) {
       // console.log("ไม่ใช่แอดมิน")
-      await checkLandLord(req, res);
+      await checkInvestor(req, res);
     } else {
       const validPasswordAdmin = await bcrypt.compare(
         req.body.password,
@@ -78,55 +78,6 @@ router.post("/history", auth, async (req, res) => {
   }
 });
 
-const checkLandLord = async (req, res) => {
-  try {
-    let landlord = await Landlords.findOne({
-      landlord_iden: req.body.username,
-    });
-    if (!landlord) {
-      await checkInvestor(req, res);
-      // console.log("ไม่ใช่เจ้าของที่");
-    } else {
-      const validPasswordPartner = await bcrypt.compare(
-        req.body.password,
-        landlord.landlord_password
-      );
-      if (!validPasswordPartner)
-        // รหัสไม่ตรง
-        return res.status(401).send({
-          message: "password is not find",
-          status: false,
-        });
-      let isShop = await Shops.findOne({
-        shop_landlord_id: landlord._id,
-        shop_status: true,
-      });
-      if (!isShop)
-        return res.status(401).send({
-          message: "ไม่มีสาขาที่ออนไลน์อยู่",
-          status: false,
-        });
-      const token = landlord.generateAuthToken();
-      const ResponesData = {
-        name: landlord.landlord_name,
-        username: landlord.landlord_iden,
-        phone: landlord.landlord_phone,
-        shop_id: isShop._id,
-        shop_number: isShop.shop_number,
-      };
-      return res.status(200).send({
-        token: token,
-        message: "เข้าสู่ระบบสำเร็จ",
-        result: ResponesData,
-        level: "landlord",
-        status: true,
-      });
-    }
-  } catch (error) {
-    return res.status(500).send({message: "Internal Server Error"});
-  }
-};
-
 const checkInvestor = async (req, res) => {
   try {
     let investor = await Investors.findOne({
@@ -170,6 +121,55 @@ const checkInvestor = async (req, res) => {
         message: "เข้าสู่ระบบสำเร็จ",
         result: ResponesData,
         level: "investor",
+        status: true,
+      });
+    }
+  } catch (error) {
+    return res.status(500).send({message: "Internal Server Error"});
+  }
+};
+
+const checkLandLord = async (req, res) => {
+  try {
+    let landlord = await Landlords.findOne({
+      landlord_iden: req.body.username,
+    });
+    if (!landlord) {
+      await checkInvestor(req, res);
+      // console.log("ไม่ใช่เจ้าของที่");
+    } else {
+      const validPasswordPartner = await bcrypt.compare(
+        req.body.password,
+        landlord.landlord_password
+      );
+      if (!validPasswordPartner)
+        // รหัสไม่ตรง
+        return res.status(401).send({
+          message: "password is not find",
+          status: false,
+        });
+      let isShop = await Shops.findOne({
+        shop_landlord_id: landlord._id,
+        shop_status: true,
+      });
+      if (!isShop)
+        return res.status(401).send({
+          message: "ไม่มีสาขาที่ออนไลน์อยู่",
+          status: false,
+        });
+      const token = landlord.generateAuthToken();
+      const ResponesData = {
+        name: landlord.landlord_name,
+        username: landlord.landlord_iden,
+        phone: landlord.landlord_phone,
+        shop_id: isShop._id,
+        shop_number: isShop.shop_number,
+      };
+      return res.status(200).send({
+        token: token,
+        message: "เข้าสู่ระบบสำเร็จ",
+        result: ResponesData,
+        level: "landlord",
         status: true,
       });
     }

@@ -27,10 +27,10 @@ const storage = multer.diskStorage({
 
 exports.create = async (req, res) => {
   try {
-    const shop = await Shops.find();
-    const countValue = shop.length + 1;
-    const shop_number = `TOSSAGUN${countValue.toString().padStart(5, "0")}`;
-    let upload = multer({storage: storage}).single("shop_logo");
+    // const shop = await Shops.find();
+    // const countValue = shop.length + 1;
+    // const shop_number = `TOSSAGUN${countValue.toString().padStart(5, "0")}`;
+    let upload = multer({storage: storage}).single("shop_logo", 20);
     upload(req, res, async function (err) {
       if (!req.file) {
         const {error} = validate(req.body);
@@ -38,7 +38,7 @@ exports.create = async (req, res) => {
           return res.status(401).send({message: error.details[0].message});
         await new Shops({
           ...req.body,
-          shop_number: shop_number,
+          // shop_number: shop_number,
         }).save();
         return res
           .status(200)

@@ -12,7 +12,12 @@ const ShopSchema = new mongoose.Schema({
     enum: ["One Stop Shop", "One Stop Service"],
     required: true,
   },
-  shop_branch_id: {type: Number, required: false},
+  shop_size: {
+    type: String,
+    enum: ["S", "M", "L", "XL"],
+    required: true,
+  },
+  shop_branch_id: {type: Number, required: false, default: ""},
   shop_credit: {type: Number, required: true},
   shop_address: {type: String, required: true}, //ที่อยู่
   shop_subdistrict: {type: String, required: true}, //ตำบล
@@ -28,6 +33,7 @@ const ShopSchema = new mongoose.Schema({
   shop_tax_address: {type: String, required: false, default: "ไม่มี"},
   shop_tax_phone: {type: String, required: false, default: "ไม่มี"},
   shop_date_start: {type: Date, required: false, default: Date.now()}, // เริ่ม
+  shop_emp: {type: String, required: false, default: "ไม่มี"},
 });
 
 const Shops = mongoose.model("shop", ShopSchema);
@@ -36,9 +42,12 @@ const validate = (data) => {
   const schema = Joi.object({
     shop_landlord_id: Joi.string().required().label("กรุณากรอกไอดีเจ้าของด้วย"),
     shop_investor_id: Joi.array().required().label("กรุณากรอกไอดีผู้ลงทุนด้วย"),
+    shop_number: Joi.string(),
     shop_logo: Joi.string().default(""),
+    shop_branch_id: Joi.string().default(""),
     shop_name: Joi.string().required().label("กรุณากรอกชื่อร้านด้วย"),
     shop_type: Joi.string().required().label("กรุณากรอกประเภทเจ้าของด้วย"),
+    shop_size: Joi.string().required().label("กรุณากรอกขนาดร้านด้วย"),
     shop_credit: Joi.number().required().label("กรุณากรอกเครดิตเริ่มต้นด้วย"),
     shop_address: Joi.string().required().label("กรุณากรอกที่อยู่ร้านด้วย"),
     shop_subdistrict: Joi.string().required().label("กรุณากรอกตำบลด้วย"),
@@ -53,9 +62,9 @@ const validate = (data) => {
     shop_tax_number: Joi.string().default("ไม่มี"), // เลขผู้เสียภาษี
     shop_tax_address: Joi.string().default("ไม่มี"), //
     shop_tax_phone: Joi.string().default("ไม่มี"),
-
     shop_vat_name: Joi.string().default("ไม่มี"), // ชื่อผู้เสีย
     shop_date_start: Joi.date().raw().default(Date.now()),
+    shop_emp: Joi.string().default("ไม่มี"),
   });
   return schema.validate(data);
 };

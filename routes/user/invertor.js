@@ -8,4 +8,6 @@ router.get("/:id", authAdmin, investors.findOne);
 router.delete("/:id", authAdmin, investors.delete);
 router.put("/:id", authAdmin, investors.update);
 
+router.put("/confirm/:id", authAdmin, investors.confirm);
+
 module.exports = router;

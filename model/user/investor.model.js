@@ -25,18 +25,28 @@ const InvestorSchema = new mongoose.Schema({
   investor_district: {type: String, required: true}, // อำเภอ
   investor_province: {type: String, required: true}, // จังหวัด
   investor_postcode: {type: String, required: true}, // รหัสไปรษณีย์
+  investor_credit: {type: Number, required: false, default: 0},
   // investor_date_start: {type: Date, require: false, default: Date.now()}, // วันที่เริ่มสัญญา
   // investor_date_end: {type: Date, required: false, default: Date.now()}, // วันที่หมดสัญญา
   invertor_timestamp: {type: Date, required: false, default: Date.now()}, //
   investor_status: {type: Boolean, required: false, default: false}, // สถานะการเปิดให้ใช้งาน
   investor_promise: {
-    status: {type: Boolean, required: false, default: false}, // สถานะการเซ็นสัญญาดิจิตอล
-    timestamp: {
-      type: Date,
-      required: false,
-      default: dayjs(Date.now()).format(),
-    }, // วันที่เซ็นสัญญาดิจิตอล
+    type: [
+      {
+        status: {type: String, required: false},
+        timestamp: {type: String, required: false},
+      },
+    ],
   },
+  investor_status_type: {
+    type: [
+      {
+        status: {type: String, required: false},
+        timestamp: {type: String, required: false},
+      },
+    ],
+  },
+  investor_emp: {type: String, required: false, default: "ไม่มี"},
 });
 
 InvestorSchema.methods.generateAuthToken = function () {
@@ -69,14 +79,12 @@ const validate = (data) => {
     investor_district: Joi.string().required().label("กรุณากรอกอำเภอ"),
     investor_province: Joi.string().required().label("กรุณากรอกจังหวัด"),
     investor_postcode: Joi.string().required().label("กรุณากรอกรหัสไปรษณีย์"),
+    investor_credit: Joi.number().default(0),
     // investor_date_start: Joi.date().raw().default(Date.now()),
     // investor_date_end: Joi.date().raw().default(Date.now()),
     investor_timestamp: Joi.date().raw().default(Date.now()),
     investor_status: Joi.boolean().default(false),
-    investor_promise: Joi.object({
-      status: Joi.boolean().default(false),
-      timestamp: Joi.date().default(dayjs(Date.now()).format()),
-    }),
+    investor_emp: Joi.string().default("ไม่มี"),
   });
   return schema.validate(data);
 };
