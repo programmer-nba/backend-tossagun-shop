@@ -5,7 +5,8 @@ const updateShop = require("../../controllers/pos/shop.controller/update.shop.co
 const auth = require("../../lib/auth");
 const authAdmin = require("../../lib/auth.admin");
 
-router.get("/landlord/:id", authAdmin, shops.findByLandlord);
+router.get("/landlord/:id", auth, shops.findByLandlord);
+router.get("/investor/:id", auth, shops.findByInvestor);
 router.post("/", authAdmin, createShop.create);
 
 router.get("/", authAdmin, shops.findAll);

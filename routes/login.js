@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const {Admins} = require("../model/user/admin.model");
-const {Landlords} = require("../model/user/landlord.model");
 const {Investors} = require("../model/user/investor.model");
+const {Landlords} = require("../model/user/landlord.model");
 const {LoginHistorys} = require("../model/login.history.model");
 const {Shops} = require("../model/pos/shop.model");
 const auth = require("../lib/auth");
@@ -59,35 +59,13 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.post("/history", auth, async (req, res) => {
-  try {
-    const login = await LoginHistorys.create({
-      ...req.body,
-      mac_address: MACAddress,
-    });
-    if (login) {
-      return res.status(201).send({status: true, message: "เพิ่มข้อมูลสำเร็จ"});
-    } else {
-      return res
-        .status(400)
-        .send({status: false, message: "เพิ่มข้อมูลไม่สำเร็จ"});
-    }
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
-  }
-});
-
 const checkInvestor = async (req, res) => {
   try {
     let investor = await Investors.findOne({
       investor_iden: req.body.username,
     });
     if (!investor) {
-      return res.status(401).send({
-        message: "username is not find",
-        status: false,
-      });
+      await checkLandLord(req, res);
     } else {
       const validPasswordPartner = await bcrypt.compare(
         req.body.password,
@@ -99,22 +77,22 @@ const checkInvestor = async (req, res) => {
           message: "password is not find",
           status: false,
         });
-      let isShop = await Shops.findOne({
-        shop_investor: investor._id,
-        shop_status: true,
-      });
-      if (!isShop)
-        return res.status(401).send({
-          message: "ไม่มีสาขาที่ออนไลน์อยู่",
-          status: false,
-        });
+      // let isShop = await Shops.findOne({
+      //   shop_investor: investor._id,
+      //   shop_status: true,
+      // });
+      // if (!isShop)
+      //   return res.status(401).send({
+      //     message: "ไม่มีสาขาที่ออนไลน์อยู่",
+      //     status: false,
+      //   });
       const token = investor.generateAuthToken();
       const ResponesData = {
         name: investor.investor_name,
         username: investor.investor_iden,
         phone: investor.investor_phone,
-        shop_id: isShop._id,
-        shop_number: isShop.shop_number,
+        // shop_id: isShop._id,
+        // shop_number: isShop.shop_number,
       };
       return res.status(200).send({
         token: token,
@@ -135,8 +113,10 @@ const checkLandLord = async (req, res) => {
       landlord_iden: req.body.username,
     });
     if (!landlord) {
-      await checkInvestor(req, res);
-      // console.log("ไม่ใช่เจ้าของที่");
+      return res.status(401).send({
+        message: "username is not find",
+        status: false,
+      });
     } else {
       const validPasswordPartner = await bcrypt.compare(
         req.body.password,
@@ -148,22 +128,22 @@ const checkLandLord = async (req, res) => {
           message: "password is not find",
           status: false,
         });
-      let isShop = await Shops.findOne({
-        shop_landlord_id: landlord._id,
-        shop_status: true,
-      });
-      if (!isShop)
-        return res.status(401).send({
-          message: "ไม่มีสาขาที่ออนไลน์อยู่",
-          status: false,
-        });
+      // let isShop = await Shops.findOne({
+      //   shop_landlord_id: landlord._id,
+      //   shop_status: true,
+      // });
+      // if (!isShop)
+      //   return res.status(401).send({
+      //     message: "ไม่มีสาขาที่ออนไลน์อยู่",
+      //     status: false,
+      //   });
       const token = landlord.generateAuthToken();
       const ResponesData = {
         name: landlord.landlord_name,
         username: landlord.landlord_iden,
         phone: landlord.landlord_phone,
-        shop_id: isShop._id,
-        shop_number: isShop.shop_number,
+        // shop_id: isShop._id,
+        // shop_number: isShop.shop_number,
       };
       return res.status(200).send({
         token: token,
@@ -177,5 +157,24 @@ const checkLandLord = async (req, res) => {
     return res.status(500).send({message: "Internal Server Error"});
   }
 };
+
+router.post("/history", auth, async (req, res) => {
+  try {
+    const login = await LoginHistorys.create({
+      ...req.body,
+      mac_address: MACAddress,
+    });
+    if (login) {
+      return res.status(201).send({status: true, message: "เพิ่มข้อมูลสำเร็จ"});
+    } else {
+      return res
+        .status(400)
+        .send({status: false, message: "เพิ่มข้อมูลไม่สำเร็จ"});
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+  }
+});
 
 module.exports = router;

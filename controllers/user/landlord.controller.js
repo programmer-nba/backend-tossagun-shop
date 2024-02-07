@@ -240,3 +240,28 @@ exports.confirm = async (req, res) => {
     });
   }
 };
+
+exports.contract = async (req, res) => {
+  try {
+    const updateContract = await Landlords.findOne({_id: req.params.id});
+    if (updateContract) {
+      updateContract.landlord_promise.push({
+        status: "เซ็นสัญญา",
+        timestamp: dayjs(Date.now()).format(""),
+      });
+      updateContract.save();
+      return res.status(200).send({
+        status: true,
+        message: "ยืนยันการเซ็นสัญญา",
+        data: updateContract,
+      });
+    } else {
+      return res.status(403).send({message: "เกิดข้อผิดพลาด"});
+    }
+  } catch (err) {
+    return res.status(500).send({
+      message: "มีบางอย่างผิดพลาด",
+      status: false,
+    });
+  }
+};

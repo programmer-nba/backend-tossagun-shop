@@ -66,6 +66,21 @@ exports.findByLandlord = async (req, res) => {
   }
 };
 
+exports.findByInvestor = async (req, res) => {
+  const id = req.params.id;
+  try {
+    Shops.find().then((data) => {
+      console.log(data);
+      console.log(id);
+    });
+  } catch {
+    return res.status(500).send({
+      message: "มีบางอย่างผิดพลาด",
+      status: false,
+    });
+  }
+};
+
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {

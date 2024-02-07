@@ -28,6 +28,7 @@ router.post("/", auth, async (req, res) => {
         return res.status(200).send({
           name: item.investor_name,
           username: item.investor_iden,
+          phone: item.investor_phone,
           level: "investor",
         });
       });

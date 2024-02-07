@@ -3,7 +3,14 @@ const Joi = require("joi");
 
 const ShopSchema = new mongoose.Schema({
   shop_landlord_id: {type: String, required: true}, // เจ้าของที่ดิน
-  shop_investor_id: {type: Array, required: true}, // คนลงทุน
+  shop_investor_id: {
+    type: [
+      {
+        investor_id: {type: String, required: true},
+        investor_price: {type: Number, required: false, default: 0},
+      },
+    ],
+  }, // คนลงทุน
   shop_number: {type: String, required: true},
   shop_logo: {type: String, required: false, default: ""}, // Logo
   shop_name: {type: String, required: true}, //ชื่อ
