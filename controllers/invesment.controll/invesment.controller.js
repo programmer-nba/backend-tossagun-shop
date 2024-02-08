@@ -1,8 +1,11 @@
-const {Invesments} = require("../../model/invesment/invesment.model");
+const {
+  InvesmentMoneys,
+} = require("../../model/invesment/invesment.money.model");
+const {InvesmentShops} = require("../../model/invesment/invesment.shop.model");
 
-exports.getAll = async (req, res) => {
+exports.getMoneyAll = async (req, res) => {
   try {
-    Invesments.find()
+    InvesmentMoneys.find()
       .then((data) => {
         return res.status(200).send({status: true, message: "success", data});
       })
@@ -17,9 +20,9 @@ exports.getAll = async (req, res) => {
   }
 };
 
-exports.getById = async (req, res) => {
+exports.getShopAll = async (req, res) => {
   try {
-    Invesments.findOne({_id: req.params.id})
+    InvesmentShops.find()
       .then((data) => {
         return res.status(200).send({status: true, message: "success", data});
       })
@@ -34,16 +37,66 @@ exports.getById = async (req, res) => {
   }
 };
 
-exports.getByInvestorId = async (req, res) => {
+exports.getMoneyById = async (req, res) => {
+  try {
+    InvesmentMoneys.findOne({_id: req.params.id})
+      .then((data) => {
+        return res.status(200).send({status: true, message: "success", data});
+      })
+      .catch((err) => {
+        return res
+          .status(500)
+          .send({message: err.message || "มีบางอย่างผิดพลาด"});
+      });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+  }
+};
+
+exports.getShopById = async (req, res) => {
+  try {
+    InvesmentShops.findOne({_id: req.params.id})
+      .then((data) => {
+        return res.status(200).send({status: true, message: "success", data});
+      })
+      .catch((err) => {
+        return res
+          .status(500)
+          .send({message: err.message || "มีบางอย่างผิดพลาด"});
+      });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+  }
+};
+
+exports.getMoneyByInvestorId = async (req, res) => {
   try {
     const id = req.params.investor_id;
-    const investor = await Invesments.find();
+    const investor = await InvesmentMoneys.find();
     const investors = investor.filter((el) => el.investor_id === id);
     if (!investors)
       return res.status(403).send({status: false, message: "ไม่สำเร็จ"});
     return res
       .status(200)
       .send({status: true, message: "ดึงข้อมูลสำเร็จ", data: investors});
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+  }
+};
+
+exports.getMoneyByLandlordId = async (req, res) => {
+  try {
+    const id = req.params.landlord_id;
+    const landlord = await InvesmentShops.find();
+    const landlords = landlord.filter((el) => el.landlord_id === id);
+    if (!landlords)
+      return res.status(403).send({status: false, message: "ไม่สำเร็จ"});
+    return res
+      .status(200)
+      .send({status: true, message: "ดึงข้อมูลสำเร็จ", data: landlords});
   } catch (err) {
     console.log(err);
     return res.status(500).send({message: "มีบางอย่างผิดพลาด"});

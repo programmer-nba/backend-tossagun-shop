@@ -55,6 +55,7 @@ LandlordSchema.methods.generateAuthToken = function () {
       name: this.landlord_name,
       phone: this.landlord_phone,
       row: "landlord",
+      status: this.landlord_status,
     },
     process.env.JWTPRIVATEKEY,
     {expiresIn: "1h"}

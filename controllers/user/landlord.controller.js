@@ -1,6 +1,5 @@
 const bcrypt = require("bcrypt");
 const {Landlords, validate} = require("../../model/user/landlord.model");
-const {Lands, validateLand} = require("../../model/pos/land.model");
 const platform = require("../../lib/platform");
 const dayjs = require("dayjs");
 

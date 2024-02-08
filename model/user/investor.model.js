@@ -56,6 +56,7 @@ InvestorSchema.methods.generateAuthToken = function () {
       name: this.investor_name,
       phone: this.investor_phone,
       row: "investor",
+      status: this.investor_status,
     },
     process.env.JWTPRIVATEKEY,
     {expiresIn: "1h"}

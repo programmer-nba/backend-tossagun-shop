@@ -25,9 +25,10 @@ app.use(prefix + "/me", require("./routes/me"));
 app.use(prefix + "/admin", require("./routes/user/admin"));
 // Landlord
 app.use(prefix + "/landlord", require("./routes/user/landlord"));
+app.use(prefix + "/landlord/invesment", require("./routes/landlord/shop"));
 // Invertor
 app.use(prefix + "/investor", require("./routes/user/invertor"));
-app.use(prefix + "/investor/investment", require("./routes/invesment/slip"));
+app.use(prefix + "/investor/invesment", require("./routes/invesment/slip"));
 // Shop
 app.use(prefix + "/shop", require("./routes/pos/shop"));
 app.use(prefix + "/employee", require("./routes/user/employee"));

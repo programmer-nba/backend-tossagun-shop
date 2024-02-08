@@ -3,14 +3,7 @@ const Joi = require("joi");
 
 const ShopSchema = new mongoose.Schema({
   shop_landlord_id: {type: String, required: true}, // เจ้าของที่ดิน
-  shop_investor_id: {
-    type: [
-      {
-        investor_id: {type: String, required: true},
-        investor_price: {type: Number, required: false, default: 0},
-      },
-    ],
-  }, // คนลงทุน
+  shop_investor: {type: Array, default: []},
   shop_number: {type: String, required: true},
   shop_logo: {type: String, required: false, default: ""}, // Logo
   shop_name: {type: String, required: true}, //ชื่อ
@@ -25,7 +18,7 @@ const ShopSchema = new mongoose.Schema({
     required: true,
   },
   shop_branch_id: {type: Number, required: false, default: ""},
-  shop_credit: {type: Number, required: true},
+  shop_credit: {type: Number, required: false, default: 0},
   shop_address: {type: String, required: true}, //ที่อยู่
   shop_subdistrict: {type: String, required: true}, //ตำบล
   shop_district: {type: String, required: true}, //อำเภอ
@@ -48,14 +41,14 @@ const Shops = mongoose.model("shop", ShopSchema);
 const validate = (data) => {
   const schema = Joi.object({
     shop_landlord_id: Joi.string().required().label("กรุณากรอกไอดีเจ้าของด้วย"),
-    shop_investor_id: Joi.array().required().label("กรุณากรอกไอดีผู้ลงทุนด้วย"),
+    shop_investor: Joi.array().default([]),
     shop_number: Joi.string(),
     shop_logo: Joi.string().default(""),
     shop_branch_id: Joi.string().default(""),
     shop_name: Joi.string().required().label("กรุณากรอกชื่อร้านด้วย"),
     shop_type: Joi.string().required().label("กรุณากรอกประเภทเจ้าของด้วย"),
     shop_size: Joi.string().required().label("กรุณากรอกขนาดร้านด้วย"),
-    shop_credit: Joi.number().required().label("กรุณากรอกเครดิตเริ่มต้นด้วย"),
+    shop_credit: Joi.number().default(0),
     shop_address: Joi.string().required().label("กรุณากรอกที่อยู่ร้านด้วย"),
     shop_subdistrict: Joi.string().required().label("กรุณากรอกตำบลด้วย"),
     shop_district: Joi.string().required().label("กรุณากรอกอำเภอด้วย"),

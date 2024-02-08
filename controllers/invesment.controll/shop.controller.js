@@ -1,8 +1,7 @@
 const {
-  InvesmentMoneys,
+  InvesmentShops,
   validate,
-} = require("../../model/invesment/invesment.money.model");
-const {Investors} = require("../../model/user/investor.model");
+} = require("../../model/invesment/invesment.shop.model");
 const dayjs = require("dayjs");
 const multer = require("multer");
 const fs = require("fs");
@@ -25,17 +24,16 @@ const drive = google.drive({
 
 const storage = multer.diskStorage({
   filename: function (req, file, cb) {
-    cb(null, Date.now() + "-");
+    cb(null, Date.now() + "-" + file.originalname);
+    // console.log(file.originalname);
   },
 });
 
-//สร้างรายการ
 exports.create = async (req, res) => {
   try {
-    let upload = multer({storage: storage}).single("slip_img");
-
+    let upload = multer({storage: storage}).array("invesment_detail", 20);
     upload(req, res, async function (err) {
-      if (!req.file) {
+      if (!req.files) {
         const {error} = validate(req.body);
         if (error)
           return res.status(400).send({message: error.details[0].message});
@@ -49,63 +47,58 @@ exports.create = async (req, res) => {
     });
 
     async function uploadFileCreate(req, res) {
-      const filePath = req.file.path;
-
-      let fileMetaData = {
-        name: req.file.originalname,
-        parents: [process.env.GOOGLE_DRIVE_INVESMENT],
-      };
-      let media = {
-        body: fs.createReadStream(filePath),
-      };
-      try {
-        const response = await drive.files.create({
-          resource: fileMetaData,
-          media: media,
-        });
-        generatePublicUrl(response.data.id);
-        console.log(req.body);
-        const {error} = validate(req.body);
-        const invoice = await invoiceNumber(req.body.timestamp);
-        console.log("invoice : " + invoice);
-        if (error)
-          return res.status(400).send({message: error.details[0].message});
-
-        // const partner = await Investors.findById(req.body.investor_id);
-        const data = {
-          ...req.body,
-          invoice: invoice,
-          slip_img: response.data.id,
-          status: {
-            status: "รอตรวจสอบ",
-            timestamp: dayjs(Date.now()).format(""),
-          },
-          timestamp: dayjs(Date.now()).format(""),
+      const filePath = [];
+      const amount = req.files.length;
+      console.log(req.files);
+      for (let i = 0; i < amount; i++) {
+        // filePath.push(req.files[i].path);
+        let fileMetaData = {
+          name: req.files[i].originalname,
+          parents: [process.env.GOOGLE_DRIVE_IMAGE_LAND],
         };
-        const invesment = await InvesmentMoneys.create(data);
-        //         const message = `
-        //   แจ้งเติมเงินเข้าระบบ :
-        //   เลขที่ทำรายการ : ${invoice}
-        //   ชื่อ : ${partner.partner_name}
-        //   จำนวน : ${req.body.amount
-        //     .toString()
-        //     .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}  บาท
-        //               `;
-        //         await line.linenotify(message);
-        return res.status(201).send({
-          message: "สร้างรายงานใหม่เเล้ว",
-          status: true,
-          data: invesment,
-        });
-      } catch (error) {
-        console.log(error);
-        return res
-          .status(500)
-          .send({message: "Internal Server Error", status: false});
+        let media = {
+          body: fs.createReadStream(req.files[i].path),
+        };
+        try {
+          const response = await drive.files.create({
+            resource: fileMetaData,
+            media: media,
+          });
+          generatePublicUrl(response.data.id);
+          filePath.push(response.data.id);
+        } catch (error) {
+          console.log(error);
+          return res
+            .status(500)
+            .send({message: "Internal Server Error", status: false});
+        }
       }
+      const {error} = validate(req.body);
+      const invoice = await invoiceNumber(req.body.timestamp);
+      if (error)
+        return res.status(400).send({message: error.details[0].message});
+      const data = {
+        ...req.body,
+        invoice: invoice,
+        invesment_detail: filePath,
+        status: {
+          status: "รอตรวจสอบ",
+          timestamp: dayjs(Date.now()).format(""),
+        },
+        timestamp: dayjs(Date.now()).format(""),
+      };
+      const invesment = await InvesmentShops.create(data);
+      return res.status(201).send({
+        message: "สร้างรายงานใหม่เเล้ว",
+        status: true,
+        data: invesment,
+      });
     }
   } catch (error) {
-    res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    console.log(error);
+    return res
+      .status(500)
+      .send({message: "Internal Server Error", status: false});
   }
 };
 
@@ -113,17 +106,13 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const id = req.params.id;
-    const updateStatus = await InvesmentMoneys.findOne({_id: id});
-    const investor = await Investors.findOne({_id: updateStatus.investor_id});
-    if (updateStatus && investor) {
-      const credit = investor.investor_credit + updateStatus.amount;
-      investor.investor_credit = credit;
+    const updateStatus = await InvesmentShops.findOne({_id: id});
+    if (updateStatus) {
       updateStatus.employee = req.body.employee;
       updateStatus.status.push({
         status: "อยู่ระหว่างดำเนินการเปิดร้าน",
         timestamp: dayjs(Date.now()).format(""),
       });
-      investor.save();
       updateStatus.save();
       return res.status(200).send({
         status: true,
@@ -187,7 +176,7 @@ exports.update = async (req, res) => {
 exports.cancel = async (req, res) => {
   try {
     const id = req.params.id;
-    const updateStatus = await InvesmentMoneys.findOne({_id: id});
+    const updateStatus = await InvesmentShops.findOne({_id: id});
     if (updateStatus) {
       updateStatus.employee = req.body.employee;
       updateStatus.status.push({
@@ -197,7 +186,7 @@ exports.cancel = async (req, res) => {
       updateStatus.save();
       return res.status(200).send({
         status: true,
-        message: "ยกเลิกการลงทุนสำเร็จ",
+        message: "ยืนยันการตรวจสอบการลงทุนสำเร็จ",
         data: updateStatus,
       });
     } else {
@@ -208,6 +197,29 @@ exports.cancel = async (req, res) => {
     return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
   }
 };
+
+//ค้นหาและสร้างเลข invoice
+async function invoiceNumber(date) {
+  const order = await InvesmentShops.find();
+  let invoice_number = null;
+  if (order.length !== 0) {
+    let data = "";
+    let num = 0;
+    let check = null;
+    do {
+      num = num + 1;
+      data = `${dayjs(date).format("YYYYMM")}`.padEnd(13, "0") + num;
+      check = await InvesmentShops.find({invoice: data});
+      if (check.length === 0) {
+        invoice_number =
+          `${dayjs(date).format("YYYYMM")}`.padEnd(13, "0") + num;
+      }
+    } while (check.length !== 0);
+  } else {
+    invoice_number = `${dayjs(date).format("YYYYMM")}`.padEnd(13, "0") + "1";
+  }
+  return invoice_number;
+}
 
 async function generatePublicUrl(res) {
   try {
@@ -229,27 +241,25 @@ async function generatePublicUrl(res) {
   }
 }
 
-//ค้นหาและสร้างเลข invoice
-async function invoiceNumber(date) {
-  const order = await InvesmentMoneys.find();
-  let invoice_number = null;
-  if (order.length !== 0) {
-    let data = "";
-    let num = 0;
-    let check = null;
-    do {
-      num = num + 1;
-      data = `${dayjs(date).format("YYYYMM")}`.padEnd(13, "0") + num;
-      check = await InvesmentMoneys.find({invoice: data});
-      console.log(check);
-      if (check.length === 0) {
-        invoice_number =
-          `${dayjs(date).format("YYYYMM")}`.padEnd(13, "0") + num;
-      }
-    } while (check.length !== 0);
-  } else {
-    invoice_number = `${dayjs(date).format("YYYYMM")}`.padEnd(13, "0") + "1";
+async function uploadFileCreate(req, res, {i, reqFiles}) {
+  const filePath = req[i].path;
+  let fileMetaData = {
+    name: req.originalname,
+    parents: [process.env.GOOGLE_DRIVE_IMAGE_LAND],
+  };
+  let media = {
+    body: fs.createReadStream(filePath),
+  };
+  try {
+    const response = await drive.files.create({
+      resource: fileMetaData,
+      media: media,
+    });
+
+    generatePublicUrl(response.data.id);
+    reqFiles.push(response.data.id);
+    console.log(response.data.id);
+  } catch (error) {
+    res.status(500).send({message: "Internal Server Error"});
   }
-  console.log(invoice_number);
-  return invoice_number;
 }
