@@ -69,10 +69,15 @@ exports.findByLandlord = async (req, res) => {
 exports.findByInvestor = async (req, res) => {
   const id = req.params.id;
   try {
-    Shops.find().then((data) => {
-      console.log(data);
-      console.log(id);
-    });
+    const shop = await Shops.find();
+    const shops = shop.filter((el) => el.shop_investor[0].invester_id === id);
+    if (!shops)
+      return res
+        .status(403)
+        .send({status: false, message: "ดึงข้อมูลไม่สำเร็จ"});
+    return res
+      .status(200)
+      .send({status: true, message: "ดึงข้อมูลสำเร็จ", data: shops});
   } catch {
     return res.status(500).send({
       message: "มีบางอย่างผิดพลาด",
