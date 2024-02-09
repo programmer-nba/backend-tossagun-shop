@@ -62,7 +62,7 @@ router.post("/", async (req, res) => {
 const checkInvestor = async (req, res) => {
   try {
     let investor = await Investors.findOne({
-      investor_iden: req.body.username,
+      investor_username: req.body.username,
     });
     if (!investor) {
       await checkLandLord(req, res);
@@ -110,7 +110,7 @@ const checkInvestor = async (req, res) => {
 const checkLandLord = async (req, res) => {
   try {
     let landlord = await Landlords.findOne({
-      landlord_iden: req.body.username,
+      landlord_username: req.body.username,
     });
     if (!landlord) {
       return res.status(401).send({

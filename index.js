@@ -34,6 +34,8 @@ app.use(prefix + "/shop", require("./routes/pos/shop"));
 app.use(prefix + "/employee", require("./routes/user/employee"));
 // Platform
 app.use(prefix + "/platform", require("./routes/user/platform"));
+// Contract สัญญา
+app.use(prefix + "/contract", require("./routes/contract/index"));
 // Product
 app.use(prefix + "/product", require("./routes/pos/product"));
 app.use(prefix + "/check", require("./routes/pos/check"));

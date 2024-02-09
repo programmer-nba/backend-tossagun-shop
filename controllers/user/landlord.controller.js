@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const {Landlords, validate} = require("../../model/user/landlord.model");
-const platform = require("../../lib/platform");
+const platform = require("../../function/platform");
 const dayjs = require("dayjs");
 
 exports.create = async (req, res) => {
