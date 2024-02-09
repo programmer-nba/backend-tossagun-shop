@@ -17,7 +17,7 @@ const LandlordSchema = new mongoose.Schema({
   landlord_name: {type: String, require: true}, // ชื่อ - นามสกุล
   landlord_phone: {type: String, require: true}, // เบอร์โทรศัพท์
   landlord_iden: {type: String, require: true}, // เลขบัตรประจำตัวประชาชน
-  landlord_email: {type: String, require: true}, // อีเมล
+  landlord_email: {type: String, require: false}, // อีเมล
   landlord_username: {type: String, require: true}, // ไอดีเข้าใช้ระบบ
   landlord_password: {type: String, require: true}, // รหัสผ่าน
   landlord_address: {type: String, require: true}, // ที่อยู่
@@ -70,7 +70,7 @@ const validate = (data) => {
     landlord_name: Joi.string().required().label("กรุณากรอกชื่อ"),
     landlord_phone: Joi.string().required().label("กรุณากรอกเบอร์โทรศัพท์"),
     landlord_iden: Joi.string().required().label("กรุณากรอกเลขบัตรประจำตัว"),
-    landlord_email: Joi.string().default(""),
+    landlord_email: Joi.string().default("ไม่มี"),
     landlord_password: passwordComplexity(complexityOptions)
       .required()
       .label("กรุณากรอกพาสเวิร์ด"),

@@ -17,7 +17,7 @@ const InvestorSchema = new mongoose.Schema({
   investor_name: {type: String, required: true}, // ชื่อ - นามสกุล
   investor_phone: {type: String, required: true}, // เบอร์โทรศัพท์
   investor_iden: {type: String, required: true}, // เลขบัตรประจำตัวประชาชน
-  investor_email: {type: String, required: true}, // อีเมล
+  investor_email: {type: String, required: false}, // อีเมล
   investor_username: {type: String, required: true}, // ไอดีเข้าใช้ระบบ
   investor_password: {type: String, required: true}, // รหัสผ่าน
   investor_address: {type: String, required: true}, // ที่อยู่
@@ -71,7 +71,7 @@ const validate = (data) => {
     investor_name: Joi.string().required().label("กรุณากรอกชื่อ"),
     investor_phone: Joi.string().required().label("กรุณากรอกเบอร์โทรศัพท์"),
     investor_iden: Joi.string().required().label("กรุณากรอกเลขบัตรประจำตัว"),
-    investor_email: Joi.string().default(""),
+    investor_email: Joi.string().default("ไม่มี"),
     investor_password: passwordComplexity(complexityOptions)
       .required()
       .label("กรุณากรอกพาสเวิร์ด"),
