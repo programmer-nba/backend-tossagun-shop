@@ -14,17 +14,17 @@ const complexityOptions = {
 };
 
 const LandlordSchema = new mongoose.Schema({
-  landlord_name: {type: String, require: true}, // ชื่อ - นามสกุล
-  landlord_phone: {type: String, require: true}, // เบอร์โทรศัพท์
-  landlord_iden: {type: String, require: true}, // เลขบัตรประจำตัวประชาชน
-  landlord_email: {type: String, require: false}, // อีเมล
-  landlord_username: {type: String, require: true}, // ไอดีเข้าใช้ระบบ
-  landlord_password: {type: String, require: true}, // รหัสผ่าน
-  landlord_address: {type: String, require: true}, // ที่อยู่
-  landlord_subdistrict: {type: String, require: true}, // ตำบล
-  landlord_district: {type: String, require: true}, // อำเภอ
-  landlord_province: {type: String, require: true}, // จังหวัด
-  landlord_postcode: {type: String, require: true}, // รหัสไปรษณีย์
+  landlord_name: {type: String, required: true}, // ชื่อ - นามสกุล
+  landlord_phone: {type: String, required: true}, // เบอร์โทรศัพท์
+  landlord_iden: {type: String, required: true}, // เลขบัตรประจำตัวประชาชน
+  landlord_email: {type: String, required: false, default: "ไม่มี"}, // อีเมล
+  landlord_username: {type: String, required: true}, // ไอดีเข้าใช้ระบบ
+  landlord_password: {type: String, required: true}, // รหัสผ่าน
+  landlord_address: {type: String, required: true}, // ที่อยู่
+  landlord_subdistrict: {type: String, required: true}, // ตำบล
+  landlord_district: {type: String, required: true}, // อำเภอ
+  landlord_province: {type: String, required: true}, // จังหวัด
+  landlord_postcode: {type: String, required: true}, // รหัสไปรษณีย์
   // landlord_date_start: {type: Date, require: false, default: Date.now()}, // วันที่เริ่มสัญญา
   // landlord_date_end: {type: Date, required: false, default: Date.now()}, // วันที่หมดสัญญา
   landlord_timestamp: {type: Date, required: false, default: Date.now()},
@@ -71,6 +71,7 @@ const validate = (data) => {
     landlord_phone: Joi.string().required().label("กรุณากรอกเบอร์โทรศัพท์"),
     landlord_iden: Joi.string().required().label("กรุณากรอกเลขบัตรประจำตัว"),
     landlord_email: Joi.string().default("ไม่มี"),
+    landlord_username: Joi.string().required().label("กรุณากรอกไอดีผู้ใช้งาน"),
     landlord_password: passwordComplexity(complexityOptions)
       .required()
       .label("กรุณากรอกพาสเวิร์ด"),
