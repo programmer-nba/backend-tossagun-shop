@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
-const dayjs = require("dayjs");
 
 const complexityOptions = {
   min: 6,
@@ -18,7 +17,8 @@ const LandlordSchema = new mongoose.Schema({
   landlord_name: {type: String, require: true}, // ชื่อ - นามสกุล
   landlord_phone: {type: String, require: true}, // เบอร์โทรศัพท์
   landlord_iden: {type: String, require: true}, // เลขบัตรประจำตัวประชาชน
-  landlord_email: {type: String, require: false}, // อีเมล
+  landlord_email: {type: String, require: true}, // อีเมล
+  landlord_username: {type: String, require: true}, // ไอดีเข้าใช้ระบบ
   landlord_password: {type: String, require: true}, // รหัสผ่าน
   landlord_address: {type: String, require: true}, // ที่อยู่
   landlord_subdistrict: {type: String, require: true}, // ตำบล

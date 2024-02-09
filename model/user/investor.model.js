@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
-const dayjs = require("dayjs");
 
 const complexityOptions = {
   min: 6,
@@ -18,7 +17,8 @@ const InvestorSchema = new mongoose.Schema({
   investor_name: {type: String, required: true}, // ชื่อ - นามสกุล
   investor_phone: {type: String, required: true}, // เบอร์โทรศัพท์
   investor_iden: {type: String, required: true}, // เลขบัตรประจำตัวประชาชน
-  investor_email: {type: String, required: false}, // อีเมล
+  investor_email: {type: String, required: true}, // อีเมล
+  investor_username: {type: String, required: true}, // ไอดีเข้าใช้ระบบ
   investor_password: {type: String, required: true}, // รหัสผ่าน
   investor_address: {type: String, required: true}, // ที่อยู่
   investor_subdistrict: {type: String, required: true}, // ตำบล
