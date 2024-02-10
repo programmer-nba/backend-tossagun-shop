@@ -23,6 +23,7 @@ const ProductSchema = new mongoose.Schema({
     barcode: {type: String, required: false, default: ""},
     amount: {type: Number, required: false, default: 0},
   },
+  productTG_emp: {type: String, required: false, default: "ไม่มี"},
 });
 
 const ProductTG = mongoose.model("product_tossagun", ProductSchema);
@@ -50,6 +51,7 @@ const validate = (data) => {
       barcode: Joi.string().default(""),
       amount: Joi.number().default(0),
     }),
+    productTG_emp: Joi.string().default("ไม่มี"),
   });
   return schema.validate(data);
 };

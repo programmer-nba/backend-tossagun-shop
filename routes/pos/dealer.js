@@ -6,7 +6,7 @@ const auth = require("../../lib/auth");
 const authAdmin = require("../../lib/auth.admin");
 
 // เพิ่ม Dealer โดย Admin
-router.post("/", createDealer.create);
+router.post("/", authAdmin, createDealer.create);
 router.get("/", auth, dealer.findAll);
 router.get("/:id", auth, dealer.findOne);
 router.delete("/:id", auth, dealer.delete);

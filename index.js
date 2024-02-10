@@ -39,6 +39,7 @@ app.use(prefix + "/contract", require("./routes/contract/index"));
 // Product
 app.use(prefix + "/product", require("./routes/pos/product"));
 app.use(prefix + "/check", require("./routes/pos/check"));
+app.use(prefix + "/percent-profit", require("./routes/pos/percent.profit"));
 // Dealer
 app.use(prefix + "/dealer", require("./routes/pos/dealer"));
 app.use(prefix + "/brand", require("./routes/pos/brand"));
