@@ -2,6 +2,7 @@ const router = require("express").Router();
 const {Admins} = require("../model/user/admin.model");
 const {Investors} = require("../model/user/investor.model");
 const {Landlords} = require("../model/user/landlord.model");
+const {Employees} = require("../model/user/employee.model");
 require("dotenv").config();
 const auth = require("../lib/auth");
 
@@ -39,6 +40,17 @@ router.post("/", auth, async (req, res) => {
           name: item.landlord_name,
           username: item.landlord_iden,
           level: "landlord",
+        });
+      });
+    } else if (decoded && decoded.row === "employee") {
+      const id = decoded._id;
+      Employees.findOne({_id: id}).then((item) => {
+        return res.status(200).send({
+          name: item.employee_name,
+          username: item.employee_username,
+          level: "employee",
+          shop_id: item.employee_shop_id,
+          position: item.employee_position,
         });
       });
     }

@@ -10,9 +10,9 @@ router.get("/investor/:id", shops.findByInvestor);
 router.post("/create", authAdmin, createShop.create);
 
 router.get("/", authAdmin, shops.findAll);
-router.get("/:id", authAdmin, shops.findOne);
+router.get("/:id", auth, shops.findOne);
 
 router.delete("/:id", authAdmin, shops.delete);
-router.put("/:id", authAdmin, updateShop.update);
+router.put("/:id", auth, updateShop.update);
 
 module.exports = router;

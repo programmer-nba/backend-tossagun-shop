@@ -86,3 +86,19 @@ exports.delete = async (req, res) => {
     });
   }
 };
+
+exports.findByCredit = async (req, res) => {
+  try {
+    const product = await ProductTG.find({productTG_status_type: "เครดิต"});
+    if (product) {
+      return res.status(200).send({status: true, data: product});
+    } else {
+      return res
+        .status(400)
+        .send({status: false, message: "ดึงข้อมูลไม่สำเร็จ"});
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+  }
+};

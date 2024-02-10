@@ -3,6 +3,7 @@ const {Admins} = require("../model/user/admin.model");
 const {Investors} = require("../model/user/investor.model");
 const {Landlords} = require("../model/user/landlord.model");
 const {LoginHistorys} = require("../model/login.history.model");
+const {Employees} = require("../model/user/employee.model");
 const {Shops} = require("../model/pos/shop.model");
 const auth = require("../lib/auth");
 const bcrypt = require("bcrypt");
@@ -113,10 +114,11 @@ const checkLandLord = async (req, res) => {
       landlord_username: req.body.username,
     });
     if (!landlord) {
-      return res.status(401).send({
-        message: "username is not find",
-        status: false,
-      });
+      // return res.status(401).send({
+      //   message: "username is not find",
+      //   status: false,
+      // });
+      await checkEmployee(req, res);
     } else {
       const validPasswordPartner = await bcrypt.compare(
         req.body.password,
@@ -144,6 +146,57 @@ const checkLandLord = async (req, res) => {
         phone: landlord.landlord_phone,
         // shop_id: isShop._id,
         // shop_number: isShop.shop_number,
+      };
+      return res.status(200).send({
+        token: token,
+        message: "เข้าสู่ระบบสำเร็จ",
+        result: ResponesData,
+        level: "landlord",
+        status: true,
+      });
+    }
+  } catch (error) {
+    return res.status(500).send({message: "Internal Server Error"});
+  }
+};
+
+const checkEmployee = async (req, res) => {
+  try {
+    let employee = await Employees.findOne({
+      employee_username: req.body.username,
+    });
+    if (!employee) {
+      return res.status(401).send({
+        message: "username is not find",
+        status: false,
+      });
+    } else {
+      const validPasswordEmployee = await bcrypt.compare(
+        req.body.password,
+        employee.employee_password
+      );
+      if (!validPasswordEmployee)
+        // รหัสไม่ตรง
+        return res.status(401).send({
+          message: "password is not find",
+          status: false,
+        });
+      let isShop = await Shops.findOne({
+        _id: employee.employee_shop_id,
+        shop_status: true,
+      });
+      if (!isShop)
+        return res.status(401).send({
+          message: "ไม่มีสาขาที่ออนไลน์อยู่",
+          status: false,
+        });
+      const token = employee.generateAuthToken();
+      const ResponesData = {
+        name: employee.employee_name,
+        username: employee.employee_iden,
+        phone: employee.employee_phone,
+        shop_id: isShop._id,
+        shop_number: isShop.shop_number,
       };
       return res.status(200).send({
         token: token,

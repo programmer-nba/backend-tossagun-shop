@@ -38,6 +38,7 @@ app.use(prefix + "/platform", require("./routes/user/platform"));
 app.use(prefix + "/contract", require("./routes/contract/index"));
 // Product
 app.use(prefix + "/product", require("./routes/pos/product"));
+app.use(prefix + "/product/tossagun", require("./routes/pos/product.tossagun"));
 app.use(prefix + "/check", require("./routes/pos/check"));
 app.use(prefix + "/percent-profit", require("./routes/pos/percent.profit"));
 // Dealer
@@ -51,6 +52,7 @@ app.use(
   prefix + "/preorder/tossagun",
   require("./routes/pos/preorder/preorder.tossagun")
 );
+app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 
 const port = process.env.PORT || 9999;
 

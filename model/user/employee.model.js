@@ -32,6 +32,7 @@ EmployeeSchema.methods.generateAuthToken = function () {
       shop_id: this.employee_shop_id,
       phone: this.employee_phone,
       row: "employee",
+      status: this.employee_status,
     },
     process.env.JWTPRIVATEKEY,
     {
