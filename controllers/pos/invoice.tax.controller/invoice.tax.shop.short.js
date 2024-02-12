@@ -6,7 +6,6 @@ const {
 
 exports.create = async (req, res) => {
   console.log(req.body);
-
   try {
     PreOrderTossaguns.find({
       poshop_shop_id: req.body.shop_id,

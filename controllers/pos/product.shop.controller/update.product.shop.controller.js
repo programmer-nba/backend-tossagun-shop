@@ -1,6 +1,9 @@
 const multer = require("multer");
 const fs = require("fs");
-const {ProductTG, validate} = require("../../../model/pos/product/product.tossagun.model");
+const {
+  ProductShops,
+  validate,
+} = require("../../../model/pos/product/product.shop.model");
 const {google} = require("googleapis");
 const CLIENT_ID = process.env.GOOGLE_DRIVE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
@@ -25,8 +28,9 @@ const storage = multer.diskStorage({
 
 exports.update = async (req, res) => {
   try {
-    let upload = multer({storage: storage}).single("productTG_image");
+    let upload = multer({storage: storage}).single("productShop_image");
     upload(req, res, async function (err) {
+      console.log(req.file);
       if (!req.file) {
         if (!req.body) {
           return res.status(400).send({
@@ -34,7 +38,7 @@ exports.update = async (req, res) => {
           });
         }
         const id = req.params.id;
-        ProductTG.findByIdAndUpdate(id, req.body, {
+        ProductShops.findByIdAndUpdate(id, req.body, {
           useFindAndModify: false,
         })
           .then((data) => {
@@ -67,7 +71,6 @@ exports.update = async (req, res) => {
     res.status(500).send({message: "Internal Server Error"});
   }
 };
-
 async function uploadFile(req, res) {
   const filePath = req.file.path;
   let fileMetaData = {
@@ -84,9 +87,9 @@ async function uploadFile(req, res) {
     });
     generatePublicUrl(response.data.id);
     const id = req.params.id;
-    ProductTG.findByIdAndUpdate(
+    ProductShops.findByIdAndUpdate(
       id,
-      {...req.body, productTG_image: response.data.id},
+      {...req.body, productShop_image: response.data.id},
       {useFindAndModify: false}
     )
       .then((data) => {

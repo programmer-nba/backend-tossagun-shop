@@ -1,8 +1,11 @@
-const {Brand, validate} = require("../../../model/pos/product/brand.model");
+const {
+  ProductShops,
+  validate,
+} = require("../../../model/pos/product/product.shop.model");
 
 exports.findAll = async (req, res, next) => {
   try {
-    Brand.find()
+    ProductShops.find()
       .then(async (data) => {
         res.status(201).send({data, message: "success", status: true});
       })
@@ -18,7 +21,7 @@ exports.findAll = async (req, res, next) => {
 exports.findOne = async (req, res) => {
   const id = req.params.id;
   try {
-    Brand.findById(id)
+    ProductShops.findById(id)
       .then((data) => {
         if (!data)
           res
@@ -43,7 +46,7 @@ exports.findOne = async (req, res) => {
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {
-    Brand.findByIdAndDelete(id, {useFindAndModify: false})
+    ProductShops.findByIdAndDelete(id, {useFindAndModify: false})
       .then((data) => {
         if (!data) {
           res.status(404).send({
@@ -71,19 +74,47 @@ exports.delete = async (req, res) => {
   }
 };
 
-exports.findByDealer = async (req, res, next) => {
+exports.findByShopId = async (req, res) => {
   const id = req.params.id;
   try {
-    Brand.find({brand_dealer_id: id})
-      .then(async (data) => {
-        res.status(201).send({data, message: "success", status: true});
+    ProductShops.find({productShop_id: id})
+      .then((data) => {
+        if (!data)
+          res
+            .status(404)
+            .send({message: "ไม่สามารถหารายงานนี้ได้", status: false});
+        else res.send({data, status: true});
       })
       .catch((err) => {
         res.status(500).send({
-          message: err.message || "มีบางอย่างผิดพลาด",
+          message: "มีบางอย่างผิดพลาด",
+          status: false,
         });
       });
   } catch (error) {
-    res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    res.status(500).send({
+      message: "มีบางอย่างผิดพลาด",
+      status: false,
+    });
+  }
+};
+
+exports.getByBarcode = async (req, res) => {
+  try {
+    const shop_id = req.params.shop_id;
+    const barcode = req.params.barcode;
+    const product = await ProductShops.find({
+      productShop_id: shop_id,
+      productShop_barcode: barcode,
+    });
+    if (product) {
+      return res.status(200).send({status: true, data: product});
+    } else {
+      return res
+        .status(400)
+        .send({status: false, message: "ดึงข้อมูลไม่สำเร็จ"});
+    }
+  } catch (err) {
+    res.status(500).send({message: "มีบางอย่างผิดพลาด"});
   }
 };

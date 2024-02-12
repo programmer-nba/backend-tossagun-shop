@@ -1,6 +1,9 @@
 const multer = require("multer");
 const fs = require("fs");
-const {ProductTG, validate} = require("../../../model/pos/product/product.tossagun.model");
+const {
+  ProductShops,
+  validate,
+} = require("../../../model/pos/product/product.shop.model");
 const {google} = require("googleapis");
 const CLIENT_ID = process.env.GOOGLE_DRIVE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
@@ -26,16 +29,18 @@ const storage = multer.diskStorage({
 
 exports.create = async (req, res) => {
   try {
-    let upload = multer({storage: storage}).single("productTG_image");
+    let upload = multer({storage: storage}).single("productShop_image");
     upload(req, res, async function (err) {
       if (!req.file) {
         const {error} = validate(req.body);
         if (error)
           return res.status(400).send({message: error.details[0].message});
-        await new ProductTG({
+        const product = await new ProductShops({
           ...req.body,
         }).save();
-        return res.status(201).send({message: "สร้างรายงานใหม่เเล้ว", status: true});
+        res
+          .status(201)
+          .send({message: "สร้างรายงานใหม่เเล้ว", status: true, data: product});
       } else if (err instanceof multer.MulterError) {
         return res.send(err);
       } else if (err) {
@@ -46,16 +51,6 @@ exports.create = async (req, res) => {
     });
     async function uploadFileCreate(req, res) {
       const filePath = req.file.path;
-
-      const barcode = await ProductTG.findOne({
-        productTG_barcode: req.body.productTG_barcode,
-      });
-      if (barcode)
-        return res.status(409).send({
-          status: false,
-          message: "มีรหัส Barcode นี้ในระบบเเล้ว",
-        });
-
       let fileMetaData = {
         name: req.file.originalname,
         parents: [process.env.GOOGLE_DRIVE_IMAGE_PRODUCT],
@@ -69,20 +64,21 @@ exports.create = async (req, res) => {
           media: media,
         });
         generatePublicUrl(response.data.id);
+        console.log(req.body);
         const {error} = validate(req.body);
         if (error)
           return res.status(400).send({message: error.details[0].message});
-        await new ProductTG({
+        await new ProductShops({
           ...req.body,
-          productTG_image: response.data.id,
+          productShop_image: response.data.id,
         }).save();
-        return res.status(201).send({message: "สร้างรายงานใหม่เเล้ว", status: true});
+        res.status(201).send({message: "สร้างรายงานใหม่เเล้ว", status: true});
       } catch (error) {
-        return res.status(500).send({message: "Internal Server Error", status: false});
+        res.status(500).send({message: "Internal Server Error", status: false});
       }
     }
   } catch (error) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
   }
 };
 

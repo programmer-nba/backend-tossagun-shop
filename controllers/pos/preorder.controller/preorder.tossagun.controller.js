@@ -91,6 +91,26 @@ exports.findOne = async (req, res) => {
   }
 };
 
+exports.findShopId = async (req, res) => {
+  const shop_id = req.params.id;
+  try {
+    const preorder = await PreOrderTossaguns.find();
+    const preorder_shop = preorder.filter((el) => el.ponba_shop_id === shop_id);
+    if (!preorder_shop)
+      return res
+        .status(404)
+        .send({message: "ไม่สามารถหารายการนี้ได้", status: false});
+    return res
+      .status(200)
+      .send({status: true, message: "ดึงข้อมูลสำเร็จ", data: preorder_shop});
+  } catch (err) {
+    return res.status(500).send({
+      message: "มีบางอย่างผิดพลาด",
+      status: false,
+    });
+  }
+};
+
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {

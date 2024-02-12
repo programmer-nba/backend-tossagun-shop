@@ -1,4 +1,4 @@
-const {Categorys, validate} = require("../../../model/pos/category.model");
+const {Categorys, validate} = require("../../../model/pos/product/category.model");
 
 exports.create = async (req, res) => {
   try {

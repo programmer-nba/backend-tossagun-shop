@@ -1,6 +1,6 @@
 const multer = require("multer");
 const fs = require("fs");
-const {Brand, validate} = require("../../../model/pos/brand.model");
+const {Brand, validate} = require("../../../model/pos/product/brand.model");
 const {google} = require("googleapis");
 const CLIENT_ID = process.env.GOOGLE_DRIVE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_DRIVE_CLIENT_SECRET;

@@ -1,4 +1,4 @@
-const {ProductTG, validate} = require("../../../model/pos/product.model");
+const {ProductTG, validate} = require("../../../model/pos/product/product.tossagun.model");
 
 exports.findAll = async (req, res) => {
   try {

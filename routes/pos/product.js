@@ -8,7 +8,7 @@ const auth = require("../../lib/auth");
 const authAdmin = require("../../lib/auth.admin");
 
 router.post("/", authAdmin, createProduct.create);
-router.get("/", auth, products.findAll);
+router.get("/", authAdmin, products.findAll);
 router.get("/:id", auth, products.findOne);
 router.get("/barcode/:barcode", auth, products.getByBarcode);
 router.put("/:id", auth, updateProduct.update);

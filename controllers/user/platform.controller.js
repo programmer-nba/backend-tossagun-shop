@@ -5,7 +5,11 @@ exports.checkMember = async (req, res) => {
     const token = await platform.GetToken();
     const tel = req.params.tel;
     const response = await platform.GetMember(tel, token.token);
-    return res.status(200).send(response.data);
+    if (response.status === true) {
+      return res.status(200).send(response.data);
+    } else {
+      return res.status(201).send(response.data);
+    }
   } catch (err) {
     return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
   }

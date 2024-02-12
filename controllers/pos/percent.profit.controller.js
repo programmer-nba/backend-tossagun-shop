@@ -1,4 +1,4 @@
-const {Percents, validate} = require("../../model/pos/percent.model");
+const {Percents, validate} = require("../../model/pos/commission/percent.model");
 
 exports.create = async (req, res) => {
   try {
