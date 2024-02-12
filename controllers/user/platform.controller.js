@@ -44,3 +44,18 @@ exports.register = async (req, res) => {
     return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
   }
 };
+
+exports.getTeammember = async (req, res) => {
+  try {
+    const token = await platform.GetToken();
+    const tel = req.params.tel;
+    const response = await platform.GetTeamMember(tel, token.token);
+    if (response.status === true) {
+      return res.status(200).send(response.data);
+    } else {
+      return res.status(201).send(response.data);
+    }
+  } catch (err) {
+    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+  }
+};

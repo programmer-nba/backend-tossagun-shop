@@ -44,4 +44,14 @@ async function GetToken() {
   return response.data;
 }
 
-module.exports = {GetMember, Register, GetToken};
+async function GetTeamMember(packageData, token) {
+  const config = {
+    method: "get",
+    headers: {"auth-token": `Bearer ${token}`},
+    url: `${process.env.TOSSAGUN_PLATFORM}/Shop/memberTeam/${packageData}`,
+  };
+  const response = await axios(config);
+  return response.data;
+}
+
+module.exports = {GetMember, Register, GetToken, GetTeamMember};
