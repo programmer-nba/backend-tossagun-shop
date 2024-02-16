@@ -1,13 +1,13 @@
 const dayjs = require("dayjs");
 const {
-  PreOrderTossaguns,
+  PreOrderShop,
   validate,
-} = require("../../../model/pos/preorder/preorder.tossagun.model");
+} = require("../../../model/pos/preorder/preorder.shop.model");
 
 exports.create = async (req, res) => {
   console.log(req.body);
   try {
-    PreOrderTossaguns.find({
+    PreOrderShop.find({
       poshop_shop_id: req.body.shop_id,
     }).then((value) => {
       console.log(value);
@@ -23,39 +23,40 @@ exports.create = async (req, res) => {
         if (findDate.length < 9) {
           res.send({
             status: true,
-            invoice_short: `SS${dayjs(req.body.date).format("YYYYMM")}0000${
-              findDate.length + 1
-            }`,
-          });
-        } else if (findDate.length < 99) {
-          res.send({
-            status: true,
-            invoice_short: `SS${dayjs(req.body.date).format("YYYYMM")}000${
-              findDate.length + 1
-            }`,
-          });
-        } else if (findDate.length < 999) {
-          res.send({
-            status: true,
-            invoice_short: `SS${dayjs(req.body.date).format("YYYYMM")}00${
-              findDate.length + 1
-            }`,
-          });
-        } else if (findDate.length < 9999) {
-          res.send({
-            status: true,
-            invoice_short: `SS${dayjs(req.body.date).format("YYYYMM")}0${
-              findDate.length + 1
-            }`,
-          });
-        } else if (findDate.length < 99999) {
-          res.send({
-            status: true,
-            invoice_short: `SS${dayjs(req.body.date).format("YYYYMM")}${
-              findDate.length + 1
-            }`,
+            invoice_short: `TSG${req.body.shop_number}${dayjs(
+              req.body.date
+            ).format("YYYYMM")}000${findDate.length + 1}`,
           });
         }
+        // } else if (findDate.length < 99) {
+        //   res.send({
+        //     status: true,
+        //     invoice_short: `SS${dayjs(req.body.date).format("YYYYMM")}000${
+        //       findDate.length + 1
+        //     }`,
+        //   });
+        // } else if (findDate.length < 999) {
+        //   res.send({
+        //     status: true,
+        //     invoice_short: `SS${dayjs(req.body.date).format("YYYYMM")}00${
+        //       findDate.length + 1
+        //     }`,
+        //   });
+        // } else if (findDate.length < 9999) {
+        //   res.send({
+        //     status: true,
+        //     invoice_short: `SS${dayjs(req.body.date).format("YYYYMM")}0${
+        //       findDate.length + 1
+        //     }`,
+        //   });
+        // } else if (findDate.length < 99999) {
+        //   res.send({
+        //     status: true,
+        //     invoice_short: `SS${dayjs(req.body.date).format("YYYYMM")}${
+        //       findDate.length + 1
+        //     }`,
+        //   });
+        // }
       }
     });
   } catch (error) {

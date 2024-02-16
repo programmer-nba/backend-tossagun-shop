@@ -6,7 +6,8 @@ const ShopSchema = new mongoose.Schema({
   shop_investor: {type: Array, default: []},
   shop_number: {type: String, required: true},
   shop_logo: {type: String, required: false, default: ""}, // Logo
-  shop_name: {type: String, required: true}, //ชื่อ
+  shop_name_main: {type: String, required: true}, //ชื่อ
+  shop_name_second: {type: String, required: false},
   shop_type: {
     type: String,
     enum: ["One Stop Shop", "One Stop Service"],
@@ -45,7 +46,8 @@ const validate = (data) => {
     shop_number: Joi.string(),
     shop_logo: Joi.string().default(""),
     shop_branch_id: Joi.string().default(""),
-    shop_name: Joi.string().required().label("กรุณากรอกชื่อร้านด้วย"),
+    shop_name_main: Joi.string().required().label("กรุณากรอกชื่อร้านด้วย"),
+    shop_name_second: Joi.string().default(""),
     shop_type: Joi.string().required().label("กรุณากรอกประเภทเจ้าของด้วย"),
     shop_size: Joi.string().required().label("กรุณากรอกขนาดร้านด้วย"),
     shop_credit: Joi.number().default(0),

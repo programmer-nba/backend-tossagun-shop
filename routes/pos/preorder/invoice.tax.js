@@ -7,7 +7,7 @@ const invoiceShopNumber = require("../../../controllers/pos/invoice.tax.controll
 const auth = require("../../../lib/auth");
 
 router.post("/shop/number", auth, invoiceShopNumber.create);
-router.post("/shop/short", auth, invoiceShopShort.create);
+router.post("/shop/short", invoiceShopShort.create);
 router.post("/shop/full", auth, invoiceShopFull.create);
 router.post("/tossagun/preorder", auth, invoicePreOrderTossagun.create);
 router.post("/return/product", auth, invoiceReturnProduct.create);

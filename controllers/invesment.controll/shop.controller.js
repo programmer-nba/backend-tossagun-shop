@@ -5,7 +5,7 @@ const {
 const dayjs = require("dayjs");
 const multer = require("multer");
 const fs = require("fs");
-const {google} = require("googleapis");
+const { google } = require("googleapis");
 const CLIENT_ID = process.env.GOOGLE_DRIVE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
 const REDIRECT_URI = process.env.GOOGLE_DRIVE_REDIRECT_URI;
@@ -16,7 +16,7 @@ const oauth2Client = new google.auth.OAuth2(
   CLIENT_SECRET,
   REDIRECT_URI
 );
-oauth2Client.setCredentials({refresh_token: REFRESH_TOKEN});
+oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 const drive = google.drive({
   version: "v3",
   auth: oauth2Client,
@@ -31,12 +31,13 @@ const storage = multer.diskStorage({
 
 exports.create = async (req, res) => {
   try {
-    let upload = multer({storage: storage}).array("invesment_detail", 20);
+    let upload = multer({ storage: storage }).array("invesment_detail", 20);
     upload(req, res, async function (err) {
       if (!req.files) {
-        const {error} = validate(req.body);
+        // console.log("test", req)
+        const { error } = validate(req.body);
         if (error)
-          return res.status(400).send({message: error.details[0].message});
+          return res.status(400).send({ message: error.details[0].message });
       } else if (err instanceof multer.MulterError) {
         return res.send(err);
       } else if (err) {
@@ -49,7 +50,6 @@ exports.create = async (req, res) => {
     async function uploadFileCreate(req, res) {
       const filePath = [];
       const amount = req.files.length;
-      console.log(req.files);
       for (let i = 0; i < amount; i++) {
         // filePath.push(req.files[i].path);
         let fileMetaData = {
@@ -70,13 +70,13 @@ exports.create = async (req, res) => {
           console.log(error);
           return res
             .status(500)
-            .send({message: "Internal Server Error", status: false});
+            .send({ message: "Internal Server Error", status: false });
         }
       }
-      const {error} = validate(req.body);
+      const { error } = validate(req.body);
       const invoice = await invoiceNumber(req.body.timestamp);
       if (error)
-        return res.status(400).send({message: error.details[0].message});
+        return res.status(400).send({ message: error.details[0].message });
       const data = {
         ...req.body,
         invoice: invoice,
@@ -98,7 +98,7 @@ exports.create = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .send({message: "Internal Server Error", status: false});
+      .send({ message: "Internal Server Error", status: false });
   }
 };
 
@@ -106,7 +106,7 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const id = req.params.id;
-    const updateStatus = await InvesmentShops.findOne({_id: id});
+    const updateStatus = await InvesmentShops.findOne({ _id: id });
     if (updateStatus) {
       updateStatus.employee = req.body.employee;
       updateStatus.status.push({
@@ -120,7 +120,7 @@ exports.update = async (req, res) => {
         data: updateStatus,
       });
     } else {
-      return res.status(403).send({message: "เกิดข้อผิดพลาด"});
+      return res.status(403).send({ message: "เกิดข้อผิดพลาด" });
     }
     // if (
     //   !(
@@ -168,7 +168,7 @@ exports.update = async (req, res) => {
     // }
   } catch (err) {
     console.log(err);
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
   }
 };
 
@@ -176,7 +176,7 @@ exports.update = async (req, res) => {
 exports.cancel = async (req, res) => {
   try {
     const id = req.params.id;
-    const updateStatus = await InvesmentShops.findOne({_id: id});
+    const updateStatus = await InvesmentShops.findOne({ _id: id });
     if (updateStatus) {
       updateStatus.employee = req.body.employee;
       updateStatus.status.push({
@@ -190,11 +190,11 @@ exports.cancel = async (req, res) => {
         data: updateStatus,
       });
     } else {
-      return res.status(403).send({message: "เกิดข้อผิดพลาด"});
+      return res.status(403).send({ message: "เกิดข้อผิดพลาด" });
     }
   } catch (err) {
     console.log(err);
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
   }
 };
 
@@ -209,7 +209,7 @@ async function invoiceNumber(date) {
     do {
       num = num + 1;
       data = `${dayjs(date).format("YYYYMM")}`.padEnd(13, "0") + num;
-      check = await InvesmentShops.find({invoice: data});
+      check = await InvesmentShops.find({ invoice: data });
       if (check.length === 0) {
         invoice_number =
           `${dayjs(date).format("YYYYMM")}`.padEnd(13, "0") + num;
@@ -241,7 +241,7 @@ async function generatePublicUrl(res) {
   }
 }
 
-async function uploadFileCreate(req, res, {i, reqFiles}) {
+async function uploadFileCreate(req, res, { i, reqFiles }) {
   const filePath = req[i].path;
   let fileMetaData = {
     name: req.originalname,
@@ -260,6 +260,22 @@ async function uploadFileCreate(req, res, {i, reqFiles}) {
     reqFiles.push(response.data.id);
     console.log(response.data.id);
   } catch (error) {
-    res.status(500).send({message: "Internal Server Error"});
+    res.status(500).send({ message: "Internal Server Error" });
   }
 }
+
+exports.getMoneyByLandlordId = async (req, res) => {
+  try {
+    const id = req.params.landlord_id;
+    const landlord = await InvesmentShops.find();
+    const landlords = landlord.filter((el) => el.landlord_id === id);
+    if (!landlords)
+      return res.status(403).send({ status: false, message: "ไม่สำเร็จ" });
+    return res
+      .status(200)
+      .send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: landlords });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
+  }
+};

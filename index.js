@@ -37,7 +37,7 @@ app.use(prefix + "/platform", require("./routes/user/platform"));
 // Contract สัญญา
 app.use(prefix + "/contract", require("./routes/contract/index"));
 // Product
-app.use(prefix + "/product", require("./routes/pos/product"));
+app.use(prefix + "/product", require("./routes/pos/product/product"));
 app.use(
   prefix + "/product/tossagun",
   require("./routes/pos/product/product.tossagun")
@@ -59,6 +59,10 @@ app.use(
 app.use(
   prefix + "/preorder/shop",
   require("./routes/pos/preorder/preorder.shop")
+);
+app.use(
+  prefix + "/preorder/shop-full",
+  require("./routes/pos/preorder/preorder.shop.full")
 );
 app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 // Order Product

@@ -8,7 +8,7 @@ router.get("/all", authAdmin, invesments.getShopAll);
 router.get("/:id", auth, invesments.getShopById);
 router.get("/landlordId/:landlord_id", auth, invesments.getMoneyByLandlordId);
 
-router.post("/", auth, shop.create);
+router.post("/", shop.create);
 router.put("/confirm/:id", authAdmin, shop.update);
 router.put("/cancel/:id", authAdmin, shop.cancel);
 

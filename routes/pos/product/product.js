@@ -1,11 +1,11 @@
 const router = require("express").Router();
-const products = require("../../controllers/pos/product.tossagun.controller/product.controller");
-const createProduct = require("../../controllers/pos/product.tossagun.controller/create.product.controller");
-const updateProduct = require("../../controllers/pos/product.tossagun.controller/update.product.controller");
-const category = require("../../controllers/pos/product.tossagun.controller/category.product.controller");
-const type = require("../../controllers/pos/product.tossagun.controller/type.product.controller");
-const auth = require("../../lib/auth");
-const authAdmin = require("../../lib/auth.admin");
+const products = require("../../../controllers/pos/product.tossagun.controller/product.controller");
+const createProduct = require("../../../controllers/pos/product.tossagun.controller/create.product.controller");
+const updateProduct = require("../../../controllers/pos/product.tossagun.controller/update.product.controller");
+const category = require("../../../controllers/pos/product.tossagun.controller/category.product.controller");
+const type = require("../../../controllers/pos/product.tossagun.controller/type.product.controller");
+const auth = require("../../../lib/auth");
+const authAdmin = require("../../../lib/auth.admin");
 
 router.post("/", authAdmin, createProduct.create);
 router.get("/", authAdmin, products.findAll);

@@ -2,7 +2,7 @@ const dayjs = require("dayjs");
 const {
   PreOrderShopFull,
   validate,
-} = require("../../../model/pos/preorder/preorder.tossagun.full.model");
+} = require("../../../model/pos/preorder/preorder.shop.full.model");
 
 exports.create = async (req, res) => {
   console.log(req.body);

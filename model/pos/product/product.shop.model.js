@@ -9,6 +9,7 @@ const ProductShopSchema = new mongoose.Schema({
   productShop_type: {type: Boolean, required: false, default: false},
   productShop_tossagun_id: {type: String, required: false, default: "ไม่มี"},
   productShop_vat_status: {type: Boolean, required: false, default: true},
+  productShop_emp: {type: String, required: false, default: "ไม่มี"},
   // --------------------------------
 });
 
@@ -23,6 +24,7 @@ const validate = (data) => {
     productShop_type: Joi.boolean().default(false),
     productShop_tossagun_id: Joi.string().default("ไม่มี"),
     productShop_vat_status: Joi.boolean().default(true), // เพิม
+    productShop_emp: Joi.string().default("ไม่มี"),
   });
   return schema.validate(data);
 };
