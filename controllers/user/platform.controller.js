@@ -11,7 +11,7 @@ exports.checkMember = async (req, res) => {
       return res.status(201).send(response.data);
     }
   } catch (err) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
 
@@ -20,7 +20,7 @@ exports.getToken = async (req, res) => {
     const response = await platform.GetToken();
     return res.status(200).send(response);
   } catch (err) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
 
@@ -41,7 +41,7 @@ exports.register = async (req, res) => {
     const response = await platform.Register(data, token.token);
     return res.status(200).send(response);
   } catch (err) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
 
@@ -56,6 +56,19 @@ exports.getTeammember = async (req, res) => {
       return res.status(201).send(response.data);
     }
   } catch (err) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
+
+exports.getMember = async (req, res) => {
+  try {
+    const response = await platform.GetMemberAll();
+    if (response.status === true) {
+      return res.status(200).send(response.data)
+    } else {
+      return res.status(201).send(response.data)
+    }
+  } catch (err) {
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
+  }
+}
