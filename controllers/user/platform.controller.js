@@ -60,7 +60,7 @@ exports.getTeammember = async (req, res) => {
   }
 };
 
-exports.getMember = async (req, res) => {
+exports.getMemberAll = async (req, res) => {
   try {
     const response = await platform.GetMemberAll();
     if (response.status === true) {
