@@ -2,7 +2,7 @@ const router = require("express").Router();
 const admins = require("../../controllers/user/admin.controller");
 const authAdmin = require("../../lib/auth.admin");
 
-router.post("/", admins.create);
+router.post("/", authAdmin, admins.create);
 
 router.get("/", authAdmin, admins.findAll);
 router.get("/:id", authAdmin, admins.findOne);
