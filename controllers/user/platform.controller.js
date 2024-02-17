@@ -8,7 +8,7 @@ exports.checkMember = async (req, res) => {
     if (response.status === true) {
       return res.status(200).send(response.data);
     } else {
-      return res.status(201).send(response.data);
+      return res.status(201).send(response);
     }
   } catch (err) {
     return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
