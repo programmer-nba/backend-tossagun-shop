@@ -68,6 +68,7 @@ async function GetMemberAll() {
     .catch((err) => {
       response = err.response.data;
     });
+  console.log(response)
   return response;
 }
 
