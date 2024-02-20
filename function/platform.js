@@ -44,11 +44,11 @@ async function GetToken() {
   return response.data;
 }
 
-async function GetTeamMember(packageData, token) {
+async function GetTeamMember(tel, token) {
   const config = {
     method: "get",
     headers: { "auth-token": `Bearer ${token}` },
-    url: `${process.env.TOSSAGUN_PLATFORM}/Shop/memberTeam/${packageData}`,
+    url: `${process.env.TOSSAGUN_PLATFORM}/Shop/memberTeam/${tel}`,
   };
   const response = await axios(config);
   return response.data;
@@ -72,4 +72,23 @@ async function GetMemberAll() {
   return response;
 }
 
-module.exports = { GetMember, Register, GetToken, GetTeamMember, GetMemberAll };
+async function Commission(packageData, token) {
+  const config = {
+    method: "put",
+    headers: { "auth-token": `Bearer ${token}` },
+    url: `${process.env.TOSSAGUN_PLATFORM}/Shop/update`,
+    data: packageData,
+  };
+  let response;
+  await axios(config)
+    .then((res) => {
+      response = res.data;
+    })
+    .catch((err) => {
+      response = err.response.data;
+    });
+  console.log(response)
+  return response;
+}
+
+module.exports = { GetMember, Register, GetToken, GetTeamMember, GetMemberAll, Commission };
