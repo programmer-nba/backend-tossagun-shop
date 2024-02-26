@@ -7,8 +7,8 @@ const cors = require("cors");
 const connection = require("./config/db");
 connection();
 
-app.use(bodyParser.json({limit: "50mb", type: "application/json"}));
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json({ limit: "50mb", type: "application/json" }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.json());
 app.use(cors());
@@ -67,6 +67,9 @@ app.use(
 app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 // Order Product
 app.use(prefix + "/order", require("./routes/pos/order/order.product"));
+
+// express ระบบขนส่ง
+app.use(prefix + "/express/product", require("./routes/express/product.express"));
 
 const port = process.env.PORT || 9999;
 

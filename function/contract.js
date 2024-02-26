@@ -1,33 +1,14 @@
 const axios = require("axios");
 
-async function GetContract() {
-  const config = {
-    method: "get",
-    headers: {},
-    url: `${process.env.TOSSAGUN_CONTRACT}/HaveplaceNocapital/GetAllContractByCode`,
-  };
-  const response = await axios(config);
-  return response.data;
-}
-
-async function createContract(packageData) {
+async function GetContractPDPA(packageData) {
   const config = {
     method: "post",
     headers: {},
-    url: `${process.env.TOSSAGUN_CONTRACT}/HaveplaceNocapital/createCode`,
+    url: `${process.env.TOSSAGUN_CONTRACT}/base-contract/code`,
     data: packageData,
   };
   const response = await axios(config);
   return response.data;
 }
 
-async function getByPartnerId(packageId) {
-  const config = {
-    method: "get",
-    headers: {},
-    url: `${process.env.TOSSAGUN_CONTRACT}/partner/getContract/${packageId}`,
-  };
-  const response = await axios(config);
-  return response.data;
-}
-module.exports = {GetContract, createContract, getByPartnerId};
+module.exports = { GetContractPDPA };

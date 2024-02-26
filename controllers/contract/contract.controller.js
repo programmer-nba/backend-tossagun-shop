@@ -1,39 +1,17 @@
 const contract = require("../../function/contract");
 
-exports.getContractAll = async (req, res) => {
-  try {
-    const response = await contract.GetContract();
-    return res.status(200).send(response);
-  } catch (err) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
-  }
-};
-
-exports.createContract = async (req, res) => {
+exports.getContractPDPA = async (req, res) => {
   try {
     const data = {
-      name: req.body.contract_code,
-      partner_id: req.body.contract_name,
-      start_date: req.body.contract_timestamp,
-      partner_signature: [
-        {
-          name: req.body.contract_name,
-        },
-      ],
+      code: "PDPA"
     };
-    const response = await contract.createContract(data);
-    return res.status(200).send(response);
+    const response = await contract.GetContractPDPA(data);
+    if (response.status === true) {
+      return res.status(200).send(response.data);
+    } else {
+      return res.status(201).send(response.data);
+    }
   } catch (err) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({ message: err.message });
   }
-};
-
-exports.getContractByPartnerId = async (req, res) => {
-  try {
-    const partner_id = req.params.partner_id;
-    const response = await contract.getByPartnerId(partner_id);
-    return res.status(200).send(response);
-  } catch (err) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
-  }
-};
+}
