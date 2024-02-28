@@ -287,6 +287,14 @@ exports.createCommission = async (req, res) => {
   }
 };
 
+exports.cutoff = async (req, res) => {
+  try {
+
+  } catch (err) {
+    res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
+  }
+}
+
 //ค้นหาและสร้างเลข invoice
 async function invoiceNumber(shop_id, date) {
   const shop = await Shops.findById(shop_id);

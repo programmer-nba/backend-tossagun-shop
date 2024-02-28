@@ -29,6 +29,8 @@ app.use(prefix + "/landlord/invesment", require("./routes/landlord/shop"));
 // Invertor
 app.use(prefix + "/investor", require("./routes/user/invertor"));
 app.use(prefix + "/investor/invesment", require("./routes/invesment/slip"));
+// Outlay
+app.use(prefix + "/outlay", require("./routes/user/ouylay"));
 // Shop
 app.use(prefix + "/shop", require("./routes/pos/shop"));
 app.use(prefix + "/employee", require("./routes/user/employee"));
@@ -67,6 +69,7 @@ app.use(
 app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 // Order Product
 app.use(prefix + "/order", require("./routes/pos/order/order.product"));
+app.use(prefix + "/callback", require("./routes/pos/callback"));
 
 // express ระบบขนส่ง
 app.use(prefix + "/express/product", require("./routes/express/product.express"));
