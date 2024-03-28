@@ -71,13 +71,13 @@ app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 app.use(prefix + "/order", require("./routes/pos/order/order.product"));
 app.use(prefix + "/callback", require("./routes/pos/callback"));
 
-// express ระบบขนส่ง
-app.use(prefix + "/express/product", require("./routes/express/product.express"));
-
 // Delete Image
 app.use(prefix + "/delete/image", require("./routes/deleteimage"));
 // Tossagun Service
 app.use(prefix + "/service/artwork", require("./routes/service/artwork"));
+
+// express ระบบขนส่ง
+app.use(prefix + "/express/product", require("./routes/express/product.express"));
 
 const port = process.env.PORT || 9999;
 
