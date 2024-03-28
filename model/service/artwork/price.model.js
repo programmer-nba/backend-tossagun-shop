@@ -11,7 +11,7 @@ const PriceArtworkShema = new mongoose.Schema({
     unit_pack: { type: Number, required: true },
 });
 
-const PriceArtworks = mongoose.model("price_artwork", PriceArtworkShema);
+const PriceArtworks = mongoose.model("artwork_price", PriceArtworkShema);
 
 const validate = (data) => {
     const Schema = Joi.object({

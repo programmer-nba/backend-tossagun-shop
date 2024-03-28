@@ -5,6 +5,6 @@ const CategoryArtworkSchema = new mongoose.Schema({
     image: { type: String, required: false },
 });
 
-const CategoryArtworks = mongoose.model("category_artwork", CategoryArtworkSchema);
+const CategoryArtworks = mongoose.model("artwork_category", CategoryArtworkSchema);
 
 module.exports = { CategoryArtworks }

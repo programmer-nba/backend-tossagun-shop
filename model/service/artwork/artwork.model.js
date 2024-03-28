@@ -13,6 +13,6 @@ const ArtworkShema = new mongoose.Schema({
     image: { type: String, required: false },
 });
 
-const ProductArtworks = mongoose.model("product_artwork", ArtworkShema);
+const ProductArtworks = mongoose.model("artwork_product", ArtworkShema);
 
 module.exports = { ProductArtworks };
