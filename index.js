@@ -75,6 +75,7 @@ app.use(prefix + "/callback", require("./routes/pos/callback"));
 app.use(prefix + "/delete/image", require("./routes/deleteimage"));
 // Tossagun Service
 app.use(prefix + "/service/artwork", require("./routes/service/artwork"));
+app.use(prefix + "/service/media", require("./routes/service/media"));
 
 // express ระบบขนส่ง
 app.use(prefix + "/express/product", require("./routes/express/product.express"));
