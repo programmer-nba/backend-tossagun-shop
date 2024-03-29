@@ -4,15 +4,18 @@ const Joi = require("joi");
 const PriceArtworkShema = new mongoose.Schema({
     product_id: { type: String, required: true },
     shop: {
-        profit: { type: Number, required: true },
+        profit_TG: { type: Number, required: true },
+        profit_shop: { type: Number, required: true },
         platform: { type: Number, required: true },
     },
     service: {
-        profit: { type: Number, required: true },
+        profit_TG: { type: Number, required: true },
+        profit_shop: { type: Number, required: true },
         platform: { type: Number, required: true },
     },
     platform: {
-        profit: { type: Number, required: true },
+        profit_TG: { type: Number, required: true },
+        profit_shop: { type: Number, required: true },
         platform: { type: Number, required: true },
     },
     price: { type: Number, required: true },
@@ -28,15 +31,18 @@ const validate = (data) => {
     const Schema = Joi.object({
         product_id: Joi.string().required().label("กรอกไอดี Product Artwork"),
         shop: Joi.object({
-            profit: Joi.number().required().label("โปรดกรอกกำไร"),
+            profit_TG: Joi.number().required().label("โปรดกรอกกำไรบริษัท"),
+            profit_shop: Joi.number().required().label("โปรดกรอกกำไรร้าน"),
             platform: Joi.number().required().label("โปรดก่อนส่วนแบ่งแพลตฟอร์ม"),
         }),
         service: Joi.object({
-            profit: Joi.number().required().label("โปรดกรอกกำไร"),
+            profit_TG: Joi.number().required().label("โปรดกรอกกำไรบริษัท"),
+            profit_shop: Joi.number().required().label("โปรดกรอกกำไรร้าน"),
             platform: Joi.number().required().label("โปรดก่อนส่วนแบ่งแพลตฟอร์ม"),
         }),
         platform: Joi.object({
-            profit: Joi.number().required().label("โปรดกรอกกำไร"),
+            profit_TG: Joi.number().required().label("โปรดกรอกกำไรบริษัท"),
+            profit_shop: Joi.number().required().label("โปรดกรอกกำไรร้าน"),
             platform: Joi.number().required().label("โปรดก่อนส่วนแบ่งแพลตฟอร์ม"),
         }),
         price: Joi.number().required().label("โปรดกรอกราคา"),
