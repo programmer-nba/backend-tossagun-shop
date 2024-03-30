@@ -5,7 +5,7 @@ const auth = require("../../lib/auth");
 
 router.post("/", authAdmin, media.create);
 router.get("/", auth, media.getMediaAll);
-router.get("/:id", media.getMediaById);
+router.get("/:id", auth, media.getMediaById);
 router.put("/:id", authAdmin, media.updateMedia);
 router.delete("/:id", authAdmin, media.deleteMedia);
 

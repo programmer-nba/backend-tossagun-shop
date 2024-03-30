@@ -11,6 +11,7 @@ const ArtworkShema = new mongoose.Schema({
     },
     description: { type: String, required: false },
     image: { type: String, required: false },
+    emp: { type: String, required: false, default: "" },
 });
 
 const ProductArtworks = mongoose.model("artwork_product", ArtworkShema);

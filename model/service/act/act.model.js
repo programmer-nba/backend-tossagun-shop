@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
 
-const PriceArtworkShema = new mongoose.Schema({
-    product_id: { type: String, required: true },
+const ActSchema = new mongoose.Schema({
+    image: { type: String, required: false, default: "" },
+    name: { type: String, required: true },
+    detail: { type: String, required: false, default: "" },
+    type: { type: String, enum: ['ส่วนบุคคล', 'ส่วนรับจ้าง'], required: true },
     shop: {
         profit_TG: { type: Number, required: true },
         profit_shop: { type: Number, required: true },
@@ -20,40 +23,42 @@ const PriceArtworkShema = new mongoose.Schema({
     },
     price: { type: Number, required: true },
     cost: { type: Number, required: true },
-    freight: { type: Number, required: true },
-    unit: { type: Number, required: true },
-    unit_pack: { type: Number, required: true },
+    freight: { type: Number, required: false, default: 0 },
+    status: { type: Boolean, required: false, default: true },
     emp: { type: String, required: false, default: "" },
 });
 
-const PriceArtworks = mongoose.model("artwork_price", PriceArtworkShema);
+const ProductActs = mongoose.model("act_product", ActSchema);
 
 const validate = (data) => {
     const Schema = Joi.object({
-        product_id: Joi.string().required().label("กรอกไอดี Product Artwork"),
+        image: Joi.string().default(""),
+        name: Joi.string().required().label("โปรดกรอกชื่อแพ็คเกจ"),
+        detail: Joi.string().label("โปรดกรอกรายละเอียด"),
+        type: Joi.string().required().label("โปรดกรอกประเภทของแพ็คเกจ"),
         shop: Joi.object({
             profit_TG: Joi.number().required().label("โปรดกรอกกำไรบริษัท"),
-            profit_shop: Joi.number().required().label("โปรดกรอกกำไรร้าน"),
+            profit_shop: Joi.number().required().label("โปรดกรอกกำไรร้านค้า"),
             platform: Joi.number().required().label("โปรดก่อนส่วนแบ่งแพลตฟอร์ม"),
         }),
         service: Joi.object({
             profit_TG: Joi.number().required().label("โปรดกรอกกำไรบริษัท"),
-            profit_shop: Joi.number().required().label("โปรดกรอกกำไรร้าน"),
+            profit_shop: Joi.number().required().label("โปรดกรอกกำไรร้านค้า"),
             platform: Joi.number().required().label("โปรดก่อนส่วนแบ่งแพลตฟอร์ม"),
         }),
         platform: Joi.object({
             profit_TG: Joi.number().required().label("โปรดกรอกกำไรบริษัท"),
-            profit_shop: Joi.number().required().label("โปรดกรอกกำไรร้าน"),
+            profit_shop: Joi.number().required().label("โปรดกรอกกำไรร้านค้า"),
             platform: Joi.number().required().label("โปรดก่อนส่วนแบ่งแพลตฟอร์ม"),
         }),
         price: Joi.number().required().label("โปรดกรอกราคา"),
         cost: Joi.number().required().label("โปรดกรอกต้นทุน"),
-        freight: Joi.number().required().label("กรอกค่าขนส่ง"),
-        unit: Joi.number().required().label("กรอกจำนวนที่ขาย"),
-        unit_pack: Joi.number().required().label("กรอกจำนวนแพ็ค"),
+        freight: Joi.number().default(0),
+        status: Joi.boolean().default(true),
         emp: Joi.string().default(""),
     })
     return Schema.validate(data);
 }
 
-module.exports = { PriceArtworks, validate };
+
+module.exports = { ProductActs, validate };

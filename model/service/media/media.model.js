@@ -4,7 +4,7 @@ const Joi = require('joi');
 const MediaShema = new mongoose.Schema({
     image: { type: String, required: false, default: "" },
     name: { type: String, required: true },
-    detail: { type: String, required: true },
+    detail: { type: String, required: false, default: "" },
     shop: {
         profit_TG: { type: Number, required: true },
         profit_shop: { type: Number, required: true },
@@ -23,6 +23,8 @@ const MediaShema = new mongoose.Schema({
     price: { type: Number, required: true },
     cost: { type: Number, required: true },
     freight: { type: Number, required: false, default: 0 },
+    status: { type: Boolean, required: false, default: true },
+    emp: { type: String, required: false, default: "" },
 })
 
 const ProductMedias = mongoose.model("media_product", MediaShema)
@@ -50,6 +52,8 @@ const validate = (data) => {
         price: Joi.number().required().label("โปรดกรอกราคา"),
         cost: Joi.number().required().label("โปรดกรอกต้นทุน"),
         freight: Joi.number().default(0),
+        status: Joi.boolean().default(true),
+        emp: Joi.string().default(""),
     })
     return Schema.validate(data);
 }

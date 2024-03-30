@@ -1,6 +1,6 @@
-const { ProductMedias, validate } = require("../../../model/service/media/media.model")
-const multer = require("multer");
-const fs = require("fs");
+const { ProductActs, validate } = require("../../../model/service/act/act.model");
+const multer = require('multer')
+const fs = require('fs')
 const { google } = require("googleapis");
 const CLIENT_ID = process.env.GOOGLE_DRIVE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
@@ -38,7 +38,7 @@ module.exports.create = async (req, res) => {
                         .status(400)
                         .send({ message: error.details[0].message, status: false });
                 }
-                await new ProductMedias({
+                await new ProductActs({
                     ...req.body,
                 }).save();
                 return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
@@ -56,7 +56,7 @@ module.exports.create = async (req, res) => {
 
             let fileMetaData = {
                 name: req.file.originalname,
-                parents: [process.env.GOOELE_DRIVE_MEDIA_PRODUCT],
+                parents: [process.env.GOOELE_DRIVE_ACT_PRODUCT],
             };
             let media = {
                 body: fs.createReadStream(filePath),
@@ -67,7 +67,7 @@ module.exports.create = async (req, res) => {
                     media: media,
                 });
                 generatePublicUrl(response.data.id);
-                await new ProductMedias({
+                await new ProductActs({
                     ...req.body,
                     image: response.data.id,
                 }).save();
@@ -85,10 +85,10 @@ module.exports.create = async (req, res) => {
 // Get All Media
 module.exports.getMediaAll = async (req, res) => {
     try {
-        const media = await ProductMedias.find();
-        if (!media)
+        const act = await ProductActs.find();
+        if (!act)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
-        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: media });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: act });
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", error: "server side error" });
@@ -98,22 +98,21 @@ module.exports.getMediaAll = async (req, res) => {
 // Get Media by id
 module.exports.getMediaById = async (req, res) => {
     try {
-        const media = await ProductMedias.findById(req.params.id);
-        if (!media)
+        const act = await ProductActs.findById(req.params.id);
+        if (!act)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
-        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: media });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: act });
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", error: "server side error" });
     }
 };
 
-
 // Delete Media
 module.exports.deleteMedia = async (req, res) => {
     try {
         const id = req.params.id;
-        ProductMedias.findByIdAndDelete(id, { useFindAndModify: false }).then((data) => {
+        ProductActs.findByIdAndDelete(id, { useFindAndModify: false }).then((data) => {
             if (!data) {
                 return res.status(404).send({ message: `ไม่สามารถลบรายงานนี้ได้`, status: false, });
             } else {
@@ -136,7 +135,7 @@ module.exports.updateMedia = async (req, res) => {
             console.log(req.file);
             if (!req.file) {
                 const id = req.params.id;
-                ProductMedias.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
+                ProductActs.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
                     if (!data) {
                         res.status(404).send({
                             message: `ไม่สามารถเเก้ไขรายงานนี้ได้`,
@@ -171,7 +170,7 @@ async function uploadFile(req, res) {
     const filePath = req.file.path;
     let fileMetaData = {
         name: req.file.originalname,
-        parents: [process.env.GOOELE_DRIVE_MEDIA_PRODUCT],
+        parents: [process.env.GOOELE_DRIVE_ACT_PRODUCT],
     };
     let media = {
         body: fs.createReadStream(filePath),
@@ -183,7 +182,7 @@ async function uploadFile(req, res) {
         });
         generatePublicUrl(response.data.id);
         const id = req.params.id;
-        ProductMedias.findByIdAndUpdate(id, { ...req.body, image: response.data.id }, { useFindAndModify: false }).then((data) => {
+        ProductActs.findByIdAndUpdate(id, { ...req.body, image: response.data.id }, { useFindAndModify: false }).then((data) => {
             if (!data) {
                 res.status(404).send({
                     status: false,
