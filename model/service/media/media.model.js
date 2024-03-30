@@ -23,6 +23,9 @@ const MediaShema = new mongoose.Schema({
     price: { type: Number, required: true },
     cost: { type: Number, required: true },
     freight: { type: Number, required: false, default: 0 },
+    profit: { type: Number, required: false, default: 0 },
+    vat: { type: Number, required: false, default: 0 },
+    net: { type: Number, required: false, default: 0 },
     status: { type: Boolean, required: false, default: true },
     emp: { type: String, required: false, default: "" },
 })
@@ -52,6 +55,9 @@ const validate = (data) => {
         price: Joi.number().required().label("โปรดกรอกราคา"),
         cost: Joi.number().required().label("โปรดกรอกต้นทุน"),
         freight: Joi.number().default(0),
+        profit: Joi.number().default(0),
+        vat: Joi.number().default(0),
+        net: Joi.number().default(0),
         status: Joi.boolean().default(true),
         emp: Joi.string().default(""),
     })
