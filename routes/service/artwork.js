@@ -4,6 +4,7 @@ const category = require("../../controllers/service/artwork/creategory.controlle
 const price = require("../../controllers/service/artwork/price.controller")
 const authAdmin = require("../../lib/auth.admin")
 const auth = require("../../lib/auth")
+const authPlatform = require("../../lib/auth.platform")
 
 // Category
 router.post("/category", authAdmin, category.create)
@@ -15,7 +16,9 @@ router.delete("/category/:id", authAdmin, category.deleteCategory)
 // Product
 router.post("/", authAdmin, artwork.create)
 router.get("/", auth, artwork.getProductAll)
+router.get("/platform", authPlatform, artwork.getProductAll)
 router.get("/:id", auth, artwork.getProductById)
+router.get("/platform/:id", authPlatform, artwork.getProductById)
 router.put("/:id", authAdmin, artwork.updateProduct)
 router.delete("/:id", authAdmin, artwork.deleteProduct)
 
