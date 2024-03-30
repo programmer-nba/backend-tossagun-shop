@@ -9,7 +9,9 @@ const authPlatform = require("../../lib/auth.platform")
 // Category
 router.post("/category", authAdmin, category.create)
 router.get("/category", auth, category.getCategoryAll)
+router.get("/category/platform", authPlatform, category.getCategoryAll)
 router.get("/category/:id", auth, category.getCategoryById)
+router.get("/category/platform/:id", authPlatform, category.getCategoryById)
 router.put("/category/:id", authAdmin, category.updateCategory)
 router.delete("/category/:id", authAdmin, category.deleteCategory)
 
