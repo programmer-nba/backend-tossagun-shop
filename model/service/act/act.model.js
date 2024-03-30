@@ -4,6 +4,7 @@ const Joi = require("joi");
 const ActSchema = new mongoose.Schema({
     image: { type: String, required: false, default: "" },
     name: { type: String, required: true },
+    category: { type: String, required: true },
     detail: { type: String, required: false, default: "" },
     type: { type: String, enum: ['ส่วนบุคคล', 'ส่วนรับจ้าง'], required: true },
     shop: {
@@ -34,6 +35,7 @@ const validate = (data) => {
     const Schema = Joi.object({
         image: Joi.string().default(""),
         name: Joi.string().required().label("โปรดกรอกชื่อแพ็คเกจ"),
+        category: Joi.string().required().label("โปรดกรอกประเภท"),
         detail: Joi.string().label("โปรดกรอกรายละเอียด"),
         type: Joi.string().required().label("โปรดกรอกประเภทของแพ็คเกจ"),
         shop: Joi.object({
