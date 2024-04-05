@@ -20,6 +20,7 @@ const ShopSchema = new mongoose.Schema({
   },
   shop_branch_id: {type: Number, required: false, default: ""},
   shop_credit: {type: Number, required: false, default: 0},
+  shop_wallet: {type: Number, required: false, default: 0},
   shop_address: {type: String, required: true}, //ที่อยู่
   shop_subdistrict: {type: String, required: true}, //ตำบล
   shop_district: {type: String, required: true}, //อำเภอ
@@ -51,6 +52,7 @@ const validate = (data) => {
     shop_type: Joi.string().required().label("กรุณากรอกประเภทเจ้าของด้วย"),
     shop_size: Joi.string().required().label("กรุณากรอกขนาดร้านด้วย"),
     shop_credit: Joi.number().default(0),
+    shop_wallet: Joi.number().default(0),
     shop_address: Joi.string().required().label("กรุณากรอกที่อยู่ร้านด้วย"),
     shop_subdistrict: Joi.string().required().label("กรุณากรอกตำบลด้วย"),
     shop_district: Joi.string().required().label("กรุณากรอกอำเภอด้วย"),

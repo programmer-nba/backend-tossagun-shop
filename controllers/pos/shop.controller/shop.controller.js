@@ -18,7 +18,7 @@ exports.findAll = async (req, res, next) => {
 exports.findOne = async (req, res) => {
   const id = req.params.id;
   try {
-    Shops.findOne({_id: id})
+    Shops.findById(id)
       .then((data) => {
         if (!data)
           return res

@@ -21,6 +21,7 @@ router.get("/", auth, artwork.getProductAll)
 router.get("/platform", authPlatform, artwork.getProductAll)
 router.get("/:id", auth, artwork.getProductById)
 router.get("/platform/:id", authPlatform, artwork.getProductById)
+router.get("/cate/:id", auth, artwork.getProductByCategoryId)
 router.put("/:id", authAdmin, artwork.updateProduct)
 router.delete("/:id", authAdmin, artwork.deleteProduct)
 

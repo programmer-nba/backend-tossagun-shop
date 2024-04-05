@@ -77,9 +77,15 @@ app.use(prefix + "/delete/image", require("./routes/deleteimage"));
 app.use(prefix + "/service/artwork", require("./routes/service/artwork"));
 app.use(prefix + "/service/media", require("./routes/service/media"));
 app.use(prefix + "/service/act", require("./routes/service/act"));
+// app.use(prefix + "/service/")
+app.use(prefix + "/service/apppremium", require("./routes/service/apppremium"));
+// Wallet
+app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
 
 // express ระบบขนส่ง
 app.use(prefix + "/express/product", require("./routes/express/product.express"));
+
+// app.use(prefix + "/product/market", require("./routes/service/product.market"))
 
 const port = process.env.PORT || 9999;
 

@@ -11,6 +11,7 @@ router.post("/shop/short", invoiceShopShort.create);
 router.post("/shop/full", auth, invoiceShopFull.create);
 router.post("/tossagun/preorder", auth, invoicePreOrderTossagun.create);
 router.post("/return/product", auth, invoiceReturnProduct.create);
+router.post("/wallet", )
 
 // router.get("/", auth, invoice.findAll);
 // router.get("/:id", auth, invoice.findOne);
