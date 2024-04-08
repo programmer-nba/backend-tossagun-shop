@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const act = require("../../controllers/service/act/act.controller");
-const category = require("../../controllers/service/act/category.controller");
+const act = require("../../controllers/service.controller/act/act.controller");
+const category = require("../../controllers/service.controller/act/category.controller");
 const authAdmin = require("../../lib/auth.admin");
 const auth = require("../../lib/auth");
 

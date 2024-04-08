@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const apppremium = require("../../controllers/service/apppremium/apppremium.controller");
+const apppremium = require("../../controllers/service.controller/apppremium/apppremium.controller");
 const authAdmin = require("../../lib/auth.admin");
 const auth = require("../../lib/auth");
 

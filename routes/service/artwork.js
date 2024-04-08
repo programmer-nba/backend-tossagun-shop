@@ -1,7 +1,8 @@
 const router = require("express").Router()
-const artwork = require("../../controllers/service/artwork/artwork.controller")
-const category = require("../../controllers/service/artwork/creategory.controller")
-const price = require("../../controllers/service/artwork/price.controller")
+const artwork = require("../../controllers/service.controller/artwork/artwork.controller")
+const category = require("../../controllers/service.controller/artwork/creategory.controller")
+const price = require("../../controllers/service.controller/artwork/price.controller")
+const order = require("../../controllers/service.controller/order/order.service.controller")
 const authAdmin = require("../../lib/auth.admin")
 const auth = require("../../lib/auth")
 const authPlatform = require("../../lib/auth.platform")
@@ -32,5 +33,7 @@ router.get("/price/:id", auth, price.getPriceById)
 router.get("/price/product/:id", auth, price.getPriceByProductId)
 router.put("/price/:id", authAdmin, price.updatePrice)
 router.delete("/price/:id", authAdmin, price.deletePrice)
+
+router.post("/order", auth, order.create);
 
 module.exports = router;

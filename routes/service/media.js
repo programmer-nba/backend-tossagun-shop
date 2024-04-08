@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const media = require("../../controllers/service/media/media.controller");
+const media = require("../../controllers/service.controller/media/media.controller");
 const authAdmin = require("../../lib/auth.admin");
 const auth = require("../../lib/auth");
 
