@@ -2,12 +2,13 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 
 const ShopSchema = new mongoose.Schema({
-  shop_landlord_id: {type: String, required: true}, // เจ้าของที่ดิน
-  shop_investor: {type: Array, default: []},
-  shop_number: {type: String, required: true},
-  shop_logo: {type: String, required: false, default: ""}, // Logo
-  shop_name_main: {type: String, required: true}, //ชื่อ
-  shop_name_second: {type: String, required: false},
+  shop_landlord_id: { type: String, required: false, default: "" }, // เจ้าของที่ดิน
+  shop_investor: { type: Array, required: false, default: [] },
+  shop_partner_id: { type: String, required: false, default: "" },
+  shop_number: { type: String, required: true },
+  shop_logo: { type: String, required: false, default: "" }, // Logo
+  shop_name_main: { type: String, required: true }, //ชื่อ
+  shop_name_second: { type: String, required: false },
   shop_type: {
     type: String,
     enum: ["One Stop Shop", "One Stop Service"],
@@ -18,32 +19,33 @@ const ShopSchema = new mongoose.Schema({
     enum: ["S", "M", "L", "XL"],
     required: true,
   },
-  shop_branch_id: {type: Number, required: false, default: ""},
-  shop_credit: {type: Number, required: false, default: 0},
-  shop_wallet: {type: Number, required: false, default: 0},
-  shop_address: {type: String, required: true}, //ที่อยู่
-  shop_subdistrict: {type: String, required: true}, //ตำบล
-  shop_district: {type: String, required: true}, //อำเภอ
-  shop_province: {type: String, required: true}, //จังหวัด
-  shop_postcode: {type: String, required: true}, //รหัสไปรษณีย์
-  shop_latitude: {type: Number, required: false, default: 0},
-  shop_longtitude: {type: Number, required: false, default: 0},
-  shop_status: {type: Boolean, required: false, default: true},
-  shop_status_tax: {type: String, required: false, default: "ไม่มี"},
-  shop_tax_name: {type: String, required: false, default: "ไม่มี"},
-  shop_tax_number: {type: String, required: false, default: "ไม่มี"},
-  shop_tax_address: {type: String, required: false, default: "ไม่มี"},
-  shop_tax_phone: {type: String, required: false, default: "ไม่มี"},
-  shop_date_start: {type: Date, required: false, default: Date.now()}, // เริ่ม
-  shop_emp: {type: String, required: false, default: "ไม่มี"},
+  shop_branch_id: { type: Number, required: false, default: "" },
+  shop_credit: { type: Number, required: false, default: 0 },
+  shop_wallet: { type: Number, required: false, default: 0 },
+  shop_address: { type: String, required: true }, //ที่อยู่
+  shop_subdistrict: { type: String, required: true }, //ตำบล
+  shop_district: { type: String, required: true }, //อำเภอ
+  shop_province: { type: String, required: true }, //จังหวัด
+  shop_postcode: { type: String, required: true }, //รหัสไปรษณีย์
+  shop_latitude: { type: Number, required: false, default: 0 },
+  shop_longtitude: { type: Number, required: false, default: 0 },
+  shop_status: { type: Boolean, required: false, default: true },
+  shop_status_tax: { type: String, required: false, default: "ไม่มี" },
+  shop_tax_name: { type: String, required: false, default: "ไม่มี" },
+  shop_tax_number: { type: String, required: false, default: "ไม่มี" },
+  shop_tax_address: { type: String, required: false, default: "ไม่มี" },
+  shop_tax_phone: { type: String, required: false, default: "ไม่มี" },
+  shop_date_start: { type: Date, required: false, default: Date.now() }, // เริ่ม
+  shop_emp: { type: String, required: false, default: "ไม่มี" },
 });
 
 const Shops = mongoose.model("shop", ShopSchema);
 
 const validate = (data) => {
   const schema = Joi.object({
-    shop_landlord_id: Joi.string().required().label("กรุณากรอกไอดีเจ้าของด้วย"),
+    shop_landlord_id: Joi.string().default(""),
     shop_investor: Joi.array().default([]),
+    shop_partner_id: Joi.string().required().label("กรุณากรอกไอดีพาร์ทเน้อ"),
     shop_number: Joi.string(),
     shop_logo: Joi.string().default(""),
     shop_branch_id: Joi.string().default(""),
@@ -73,4 +75,4 @@ const validate = (data) => {
   return schema.validate(data);
 };
 
-module.exports = {Shops, validate};
+module.exports = { Shops, validate };
