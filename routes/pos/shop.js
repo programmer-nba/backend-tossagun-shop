@@ -7,6 +7,7 @@ const authAdmin = require("../../lib/auth.admin");
 
 router.get("/landlord/:id", shops.findByLandlord);
 router.get("/investor/:id", shops.findByInvestor);
+router.get("/partner/:id", shops.findByPartnerId);
 router.post("/create", authAdmin, createShop.create);
 
 router.get("/", authAdmin, shops.findAll);
