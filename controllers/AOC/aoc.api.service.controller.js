@@ -1,11 +1,9 @@
-const {
-  airportinfo,
-} = require("../../models/aoc.api.model/airportinfo.model.js");
-const { airline_code } = require("../../model/AOC/aoc.service.models/airline.models.js");
-const { airport_code } = require("../../model/AOC/aoc.service.models/airport.models.js");
 const { city } = require("../../model/AOC/aoc.api.models/city.model.js");
 const { country } = require("../../model/AOC/aoc.api.models/country.model.js");
-const { equipment } = require("../../model/AOC/aoc.service.models/equipment.model.js");
+const { airportinfo } = require("../../model/AOC/aoc.api.models/airportinfo.model.js");
+const { airline_code } = require("../../model/AOC/aoc.api.models/airline.models.js");
+const { airport_code } = require("../../model/AOC/aoc.api.models/airport.models.js");
+const { equipment } = require("../../model/AOC/aoc.api.models/equipment.model.js");
 
 exports.getAirline = async (req, res) => {
   try {

@@ -89,6 +89,8 @@ app.use(prefix + "/express/product", require("./routes/express/product.express")
 
 // AOC สายการบิน
 app.use(prefix + "/aoc", require("./routes/AOC/order.service"));
+app.use(prefix + "/aoc/appendix", require("./routes/AOC/appendix"));
+app.use(prefix + "/aoc/iata", require("./routes/AOC/IATA.route"));
 
 const port = process.env.PORT || 9999;
 
