@@ -87,6 +87,9 @@ app.use(prefix + "/express/product", require("./routes/express/product.express")
 
 // app.use(prefix + "/product/market", require("./routes/service/product.market"))
 
+// AOC สายการบิน
+app.use(prefix + "/aoc", require("./routes/AOC/order.service"));
+
 const port = process.env.PORT || 9999;
 
 app.listen(port, () => {
