@@ -31,6 +31,8 @@ app.use(prefix + "/investor", require("./routes/user/invertor"));
 app.use(prefix + "/investor/invesment", require("./routes/invesment/slip"));
 // Outlay
 app.use(prefix + "/outlay", require("./routes/user/ouylay"));
+// Member (Platform)
+app.use(prefix + "/member", require("./routes/user/member"));
 // Shop
 app.use(prefix + "/shop", require("./routes/pos/shop"));
 app.use(prefix + "/employee", require("./routes/user/employee"));

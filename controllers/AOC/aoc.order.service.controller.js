@@ -20,7 +20,7 @@ async function getToken() {
           const fetchedToken = token.data;
           if (fetchedToken) {
             Token = fetchedToken.accessToken;
-            console.log(Token)
+            // console.log(Token)
             return {status: true, data: Token};
           } else {
             return {message: "ดึงข้อมูลไม่สำเร็จ", status: false};
@@ -37,7 +37,7 @@ async function callTokenAPI() {
     // console.log(dayTime);
     // await getToken();
     if (currentTime.hour() === 0 && currentTime.minute() === 0 && currentTime.second() === 0) {
-        console.log("Calling getToken() at 00:00:00 Bangkok time");
+        // console.log("Calling getToken() at 00:00:00 Bangkok time");
         await getToken();
     }
 }
