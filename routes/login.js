@@ -1,10 +1,11 @@
 const router = require("express").Router();
-const {Admins} = require("../model/user/admin.model");
-const {Investors} = require("../model/user/investor.model");
-const {Landlords} = require("../model/user/landlord.model");
-const {LoginHistorys} = require("../model/login.history.model");
-const {Employees} = require("../model/user/employee.model");
-const {Shops} = require("../model/pos/shop.model");
+const { Admins } = require("../model/user/admin.model");
+const { Investors } = require("../model/user/investor.model");
+const { Landlords } = require("../model/user/landlord.model");
+const { LoginHistorys } = require("../model/login.history.model");
+const { Employees } = require("../model/user/employee.model");
+const { Shops } = require("../model/pos/shop.model");
+const { Members } = require("../model/user/member.model");
 const auth = require("../lib/auth");
 const bcrypt = require("bcrypt");
 const Joi = require("joi");
@@ -22,14 +23,14 @@ const validate = (data) => {
 
 router.post("/", async (req, res) => {
   try {
-    const {error} = validate(req.body);
-    if (error) return res.status(400).send({message: error.details[0].message});
+    const { error } = validate(req.body);
+    if (error) return res.status(400).send({ message: error.details[0].message });
     let admin = await Admins.findOne({
       admin_username: req.body.username,
     });
     if (!admin) {
       // console.log("ไม่ใช่แอดมิน")
-      await checkInvestor(req, res);
+      await checkMember(req, res);
     } else {
       const validPasswordAdmin = await bcrypt.compare(
         req.body.password,
@@ -56,7 +57,7 @@ router.post("/", async (req, res) => {
       });
     }
   } catch (error) {
-    return res.status(500).send({message: "Internal Server Error"});
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 });
 
@@ -104,7 +105,7 @@ const checkInvestor = async (req, res) => {
       });
     }
   } catch (error) {
-    return res.status(500).send({message: "Internal Server Error"});
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 };
 
@@ -156,7 +157,48 @@ const checkLandLord = async (req, res) => {
       });
     }
   } catch (error) {
-    return res.status(500).send({message: "Internal Server Error"});
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+const checkMember = async (req, res) => {
+  try {
+    let member = await Members.findOne({
+      tel: req.body.username,
+    });
+    if (!member) {
+      // return res.status(401).send({
+        // message: "ไม่พบข้อมูลผู้ใช้งาน",
+        // status: false,
+      // });
+      await checkEmployee(req, res);
+    } else {
+      const validPasswordEmployee = await bcrypt.compare(
+        req.body.password,
+        member.password
+      );
+      if (!validPasswordEmployee)
+        // รหัสไม่ตรง
+        return res.status(401).send({
+          message: "password is not find",
+          status: false,
+        });
+      const token = member.generateAuthToken();
+      const ResponesData = {
+        name: member.name,
+        username: member.tel,
+        phone: member.tel,
+      };
+      return res.status(200).send({
+        token: token,
+        message: "เข้าสู่ระบบสำเร็จ",
+        result: ResponesData,
+        level: "member",
+        status: true,
+      });
+    }
+  } catch (error) {
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 };
 
@@ -167,7 +209,7 @@ const checkEmployee = async (req, res) => {
     });
     if (!employee) {
       return res.status(401).send({
-        message: "username is not find",
+        message: "ไม่พบข้อมูลผู้ใช้งาน",
         status: false,
       });
     } else {
@@ -202,14 +244,15 @@ const checkEmployee = async (req, res) => {
         token: token,
         message: "เข้าสู่ระบบสำเร็จ",
         result: ResponesData,
-        level: "landlord",
+        level: "employee",
         status: true,
       });
     }
   } catch (error) {
-    return res.status(500).send({message: "Internal Server Error"});
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 };
+
 
 router.post("/history", auth, async (req, res) => {
   try {
@@ -218,15 +261,15 @@ router.post("/history", auth, async (req, res) => {
       mac_address: MACAddress,
     });
     if (login) {
-      return res.status(201).send({status: true, message: "เพิ่มข้อมูลสำเร็จ"});
+      return res.status(201).send({ status: true, message: "เพิ่มข้อมูลสำเร็จ" });
     } else {
       return res
         .status(400)
-        .send({status: false, message: "เพิ่มข้อมูลไม่สำเร็จ"});
+        .send({ status: false, message: "เพิ่มข้อมูลไม่สำเร็จ" });
     }
   } catch (err) {
     console.log(err);
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
   }
 });
 

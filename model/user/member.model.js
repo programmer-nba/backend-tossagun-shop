@@ -17,7 +17,7 @@ const MemberSchema = new mongoose.Schema({
     image: { type: String, required: false, default: "" },
     card_number: { type: String, required: false }, //รหัสสมาชิก
     prefix: { type: String, required: true }, //คำนำหน้า
-    name: { type: String, required: true }, //ชื่อ
+    fristname: { type: String, required: true }, //ชื่อ
     lastname: { type: String, required: true }, //นามสกุล
     tel: { type: String, required: true }, //เบอร์โทร
     password: { type: String, required: true }, //รหัสผ่าน
@@ -26,12 +26,12 @@ const MemberSchema = new mongoose.Schema({
     district: { type: String, required: true }, //เขต
     province: { type: String, required: true }, //จังหวัด
     postcode: { type: String, required: true }, //รหัสไปรษณีย์
-    new_address: {
-        new_address: { type: String, required: false, default: "-" }, //ที่อยู่
-        new_subdistrict: { type: String, required: false, default: "-" }, //ที่อยู่ เเขวน ตำบล
-        new_district: { type: String, required: false, default: "-" }, //อำเภอ
-        new_province: { type: String, required: false, default: "-" }, //จังหวัด
-        new_postcode: { type: String, required: false, default: "-" }, //รหัสไปรษณีย์
+    current_address: {
+        address: { type: String, required: false, default: "-" }, //ที่อยู่
+        subdistrict: { type: String, required: false, default: "-" }, //ที่อยู่ เเขวน ตำบล
+        district: { type: String, required: false, default: "-" }, //อำเภอ
+        province: { type: String, required: false, default: "-" }, //จังหวัด
+        postcode: { type: String, required: false, default: "-" }, //รหัสไปรษณีย์
     },
     wallet: { type: Number, required: false, default: 0 }, //ยอดเงินในประเป๋าอิเล็กทรอนิกส์
     commission: { type: Number, required: false, default: 0 }, //ยอดรายได้สะสม
@@ -90,28 +90,28 @@ const Members = mongoose.model("member", MemberSchema);
 
 const validate = (data) => {
     const schema = Joi.object({
+        ref_tel: Joi.string().required().label("กรุณากรอก รหัสผู้เชิญชวน"),
         prefix: Joi.string().required().label("กรุณากรอกชื่อ"),
-        name: Joi.string().required().label("กรุณากรอกชื่อ"),
+        fristname: Joi.string().required().label("กรุณากรอกชื่อ"),
         lastname: Joi.string().required().label("กรุณากรอกนามสกุล"),
         tel: Joi.string().required().label("กรุณากรอกเบอร์โทร"),
         password: passwordComplexity(complexityOptions)
             .required()
             .label("ไม่มีข้อมูลรหัสผ่าน"),
-        new_address: Joi.object({
-            new_address: Joi.string().required().label("กรุณากรอกที่อยู่"),
-            new_subdistrict: Joi.string()
+        current_address: Joi.object({
+            address: Joi.string().required().label("กรุณากรอกที่อยู่"),
+            subdistrict: Joi.string()
                 .required()
                 .label("กรุณากรอกที่อยู่ เเขวน ตำบล"),
-            new_district: Joi.string().required().label("กรุณากรอกเขต"),
-            new_province: Joi.string().required().label("กรุณากรอกจังหวัด"),
-            new_postcode: Joi.string().required().label("กรุณากรอกรหัสไปรษณีย์"),
+            district: Joi.string().required().label("กรุณากรอกเขต"),
+            province: Joi.string().required().label("กรุณากรอกจังหวัด"),
+            postcode: Joi.string().required().label("กรุณากรอกรหัสไปรษณีย์"),
         }),
         address: Joi.string().required().label("กรุณากรอกที่อยู่"),
         subdistrict: Joi.string().required().label("กรุณากรอก ที่อยู่ เเขวน ตำบล"),
         district: Joi.string().required().label("กรุณากรอก เขต"),
         province: Joi.string().required().label("กรุณากรอก จังหวัด"),
         postcode: Joi.string().required().label("กรุณากรอก รหัสไปรษณีย์"),
-        ref_tel: Joi.string().required().label("กรุณากรอก รหัสผู้เชิญชวน"),
     });
     return schema.validate(data);
 };

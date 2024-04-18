@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const bcrypt = require("bcrypt");
 const { Members, validate } = require("../../model/user/member.model");
 const axios = require("axios");
 
@@ -177,19 +178,20 @@ exports.create = async (req, res) => {
                     message: "ไม่พบข้อมูลผู้แนะนำเบอร์โทรที่แนะนำนี้",
                 });
             }
+        } else {
+            const data = {
+                ...req.body,
+                card_number: card_number,
+                password: hashPassword,
+                // upline: upline,
+            }
+            const new_data = await Members.create(data);
+            return res.status(200).send({
+                status: true,
+                message: "สมัครสมาชิกสำเร็จ",
+                data: new_data,
+            });
         }
-        // const data = {
-        // ...req.body,
-        // card_number: card_number,
-        // password: hashPassword,
-        // upline: upline,
-        // }
-        // const new_data = await Members.create(data);
-        // return res.status(200).send({
-        // status: true,
-        // message: "สมัครสมาชิกสำเร็จ",
-        // data: new_data,
-        // });
     } catch (error) {
         return res.status(500).send({ status: false, error: error.message });
     }
