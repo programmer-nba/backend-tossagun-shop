@@ -168,8 +168,8 @@ const checkMember = async (req, res) => {
     });
     if (!member) {
       // return res.status(401).send({
-        // message: "ไม่พบข้อมูลผู้ใช้งาน",
-        // status: false,
+      // message: "ไม่พบข้อมูลผู้ใช้งาน",
+      // status: false,
       // });
       await checkEmployee(req, res);
     } else {
@@ -188,6 +188,7 @@ const checkMember = async (req, res) => {
         name: member.name,
         username: member.tel,
         phone: member.tel,
+        position: "One Stop Platform",
       };
       return res.status(200).send({
         token: token,
@@ -237,6 +238,7 @@ const checkEmployee = async (req, res) => {
         name: employee.employee_name,
         username: employee.employee_iden,
         phone: employee.employee_phone,
+        position: isShop.shop_type,
         shop_id: isShop._id,
         shop_number: isShop.shop_number,
       };

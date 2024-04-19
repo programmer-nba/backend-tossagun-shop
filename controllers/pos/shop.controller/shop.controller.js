@@ -42,7 +42,7 @@ exports.findOne = async (req, res) => {
 };
 
 exports.findByPartnerId = async (req, res) => {
-  const id = req.params.id;
+  const id = req.params.partnerid;
   try {
     const shop = Shops.find();
     const shops = shop.filter(
