@@ -6,9 +6,9 @@ const updateShop = require("../../controllers/pos/shop.controller/update.shop.co
 
 router.post("/shop/create", createShop.create);
 router.get("/shop/:partnerid", shops.findByPartnerId);
-router.get("/shop/:id", shops.findOne);
-router.put("/shop/:id", updateShop.update);
-router.delete("/shop/:id", shops.delete);
+router.get("/shop/shop/:id", shops.findOne);
+router.put("/shop/shop/:id", updateShop.update);
+router.delete("/shop/shop/:id", shops.delete);
 
 router.post("/shop/employee", employees.create);
 router.get("/shop/employee/:shopid", employees.findByShopId);
