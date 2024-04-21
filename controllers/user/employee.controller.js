@@ -76,7 +76,7 @@ exports.findById = async (req, res) => {
 };
 
 exports.findByShopId = async (req, res) => {
-  const id = req.params.id;
+  const id = req.params.shopid;
   try {
     Employees.find({ employee_shop_id: id })
       .then((data) => {
