@@ -78,13 +78,18 @@ exports.findById = async (req, res) => {
 exports.findByShopId = async (req, res) => {
   const id = req.params.shopid;
   try {
-    Employees.find({ employee_shop_id: id })
+    Employees.find()
       .then((data) => {
-        if (!data)
+        if (!data) {
           return res
             .status(404)
             .send({ message: "ไม่สามารถหาผู้ใช้งานนี้ได้", status: false });
-        else res.send({ data, status: true });
+        } else {
+          const em_shop = data.filter(
+            (el) => el.employee_shop_id === id
+          );
+          return res.send({ status: true, message: 'ดึงข้อมูลพนักงานสำเร็จ', data: em_shop });
+        }
       })
       .catch((err) => {
         return res.status(500).send({
