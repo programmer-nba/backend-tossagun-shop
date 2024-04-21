@@ -1,17 +1,18 @@
 const bcrypt = require("bcrypt");
-const {Employees, validate} = require("../../model/user/employee.model");
+const { Employees, validate } = require("../../model/user/employee.model");
 
 exports.create = async (req, res) => {
   try {
-    const {error} = validate(req.body);
+    const { error } = validate(req.body);
     if (error)
       return res
         .status(400)
-        .send({message: error.details[0].message, status: false});
+        .send({ message: error.details[0].message, status: false });
 
     const user = await Employees.findOne({
       employee_username: req.body.employee_username,
     });
+
     if (user)
       return res.status(409).send({
         status: false,
@@ -27,9 +28,9 @@ exports.create = async (req, res) => {
     }).save();
     return res
       .status(201)
-      .send({message: "สร้างข้อมูลสำเร็จ", status: true, result: result});
+      .send({ message: "สร้างข้อมูลสำเร็จ", status: true, result: result });
   } catch (error) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
 
@@ -37,7 +38,7 @@ exports.findAll = async (req, res) => {
   try {
     Employees.find()
       .then(async (data) => {
-        return res.send({data, message: "success", status: true});
+        return res.send({ data, message: "success", status: true });
       })
       .catch((err) => {
         return res.status(500).send({
@@ -45,7 +46,7 @@ exports.findAll = async (req, res) => {
         });
       });
   } catch (error) {
-    res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
 
@@ -57,8 +58,8 @@ exports.findById = async (req, res) => {
         if (!data)
           return res
             .status(404)
-            .send({message: "ไม่สามารถหาผู้ใช้งานนี้ได้", status: false});
-        else res.send({data, status: true});
+            .send({ message: "ไม่สามารถหาผู้ใช้งานนี้ได้", status: false });
+        else res.send({ data, status: true });
       })
       .catch((err) => {
         return res.status(500).send({
@@ -77,13 +78,13 @@ exports.findById = async (req, res) => {
 exports.findByShopId = async (req, res) => {
   const id = req.params.id;
   try {
-    Employees.find({employee_shop_id: id})
+    Employees.find({ employee_shop_id: id })
       .then((data) => {
         if (!data)
           return res
             .status(404)
-            .send({message: "ไม่สามารถหาผู้ใช้งานนี้ได้", status: false});
-        else res.send({data, status: true});
+            .send({ message: "ไม่สามารถหาผู้ใช้งานนี้ได้", status: false });
+        else res.send({ data, status: true });
       })
       .catch((err) => {
         return res.status(500).send({
@@ -108,7 +109,7 @@ exports.update = async (req, res) => {
     }
     const id = req.params.id;
     if (!req.body.employee_password) {
-      Employees.findByIdAndUpdate(id, req.body, {useFindAndModify: false})
+      Employees.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
         .then((data) => {
           if (!data) {
             return res.status(404).send({
@@ -132,8 +133,8 @@ exports.update = async (req, res) => {
       const hashPassword = await bcrypt.hash(req.body.employee_password, salt);
       Employees.findByIdAndUpdate(
         id,
-        {...req.body, employee_password: hashPassword},
-        {useFindAndModify: false}
+        { ...req.body, employee_password: hashPassword },
+        { useFindAndModify: false }
       )
         .then((data) => {
           if (!data) {
@@ -155,14 +156,14 @@ exports.update = async (req, res) => {
         });
     }
   } catch (error) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
 
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {
-    Employees.findByIdAndDelete(id, {useFindAndModify: false})
+    Employees.findByIdAndDelete(id, { useFindAndModify: false })
       .then((data) => {
         if (!data) {
           return res.status(404).send({
