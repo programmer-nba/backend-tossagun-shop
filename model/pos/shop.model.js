@@ -29,7 +29,7 @@ const ShopSchema = new mongoose.Schema({
   shop_postcode: { type: String, required: true }, //รหัสไปรษณีย์
   shop_latitude: { type: Number, required: false, default: 0 },
   shop_longtitude: { type: Number, required: false, default: 0 },
-  shop_status: { type: Boolean, required: false, default: true },
+  shop_status: { type: Boolean, required: false, default: false },
   shop_status_tax: { type: String, required: false, default: "ไม่มี" },
   shop_tax_name: { type: String, required: false, default: "ไม่มี" },
   shop_tax_number: { type: String, required: false, default: "ไม่มี" },
@@ -62,7 +62,7 @@ const validate = (data) => {
     shop_postcode: Joi.string().required().label("กรุณากรอกรหัสไปรษณีย์ด้วย"),
     shop_latitude: Joi.number().default(0),
     shop_longtitude: Joi.number().default(0),
-    shop_status: Joi.boolean().default(true),
+    shop_status: Joi.boolean().default(false),
     shop_status_tax: Joi.string().default("ไม่มี"), // ลงทะเบียนพาณิย์, เป็นผู้เสียภาษี
     shop_tax_name: Joi.string().default("ไม่มี"), // ชื่อผู้ประกอบการ, ชื่อผู้ลงทะเบียนผู้เสียภาษี
     shop_tax_number: Joi.string().default("ไม่มี"), // เลขผู้เสียภาษี
