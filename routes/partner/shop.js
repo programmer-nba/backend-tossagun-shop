@@ -8,6 +8,7 @@ router.get("/shop/:partnerid", shops.findByPartnerId);
 
 router.post("/shop/employee", employees.create);
 router.get("/shop/employee/:shopid", employees.findByShopId);
+router.get("/shop/employee/:id", employees.findById);
 router.put("/shop/employee/:id", employees.update);
 router.delete("/shop/employee/:id", employees.delete);
 
