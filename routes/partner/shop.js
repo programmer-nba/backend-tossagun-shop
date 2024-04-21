@@ -2,9 +2,13 @@ const router = require("express").Router();
 const shops = require("../../controllers/pos/shop.controller/shop.controller");
 const employees = require("../../controllers/user/employee.controller");
 const createShop = require("../../controllers/pos/shop.controller/partner.create.shop.controller");
+const updateShop = require("../../controllers/pos/shop.controller/update.shop.controller");
 
 router.post("/shop/create", createShop.create);
 router.get("/shop/:partnerid", shops.findByPartnerId);
+router.get("/shop/:id", shops.findOne);
+router.put("/shop/:id", updateShop.update);
+router.delete("/shop/:id", shops.delete);
 
 router.post("/shop/employee", employees.create);
 router.get("/shop/employee/:shopid", employees.findByShopId);
