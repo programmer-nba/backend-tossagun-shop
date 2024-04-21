@@ -44,15 +44,22 @@ exports.findOne = async (req, res) => {
 exports.findByPartnerId = async (req, res) => {
   const id = req.params.partnerid;
   try {
-    const shop = Shops.find();
-    const shops = shop.filter(
-      (el) => el.shop_partner_id === id
-    );
-    if (!shops)
-      return res.status(403).send({ status: false, message: "ดึงข้อมูลร้านไม่สำเร็จ" });
-    return res.status(200).send({ status: true, message: "ดึงข้อมูลร้านสำเร็จ", data: shops });
+    Shops.find()
+      .then(async (data) => {
+        const shops = data.filter(
+          (el) => el.shop_partner_id === id
+        );
+        if (!shops)
+          return res.status(403).send({ status: false, message: "ดึงข้อมูลร้านไม่สำเร็จ" });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลร้านสำเร็จ", data: shops });
+      })
+      .catch((err) => {
+        return res.status(500).send({
+          message: err.message || "มีบางอย่างผิดพลาด",
+        });
+      });
   } catch {
-    res.status(500).send({
+    return res.status(500).send({
       message: "มีบางอย่างผิดพลาด",
       status: false,
     });
