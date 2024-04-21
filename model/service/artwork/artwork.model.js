@@ -9,6 +9,7 @@ const ArtworkShema = new mongoose.Schema({
         enum: ["ราคาต่อตารางเมตร", "ราคาต่อชิ้น", "ราคาต่อชุด"],
         required: true,
     },
+    rating: { type: Number, require: false, default: 0 },
     description: { type: String, required: false },
     image: { type: String, required: false },
     emp: { type: String, required: false, default: "" },
