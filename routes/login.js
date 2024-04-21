@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
       if (!validPasswordAdmin)
         // รหัสไม่ตรง
         return res.status(401).send({
-          message: "password is not find",
+          message: "รหัสผ่านไม่ถูกต้อง",
           status: false,
         });
       const token = admin.generateAuthToken();
@@ -76,7 +76,7 @@ const checkInvestor = async (req, res) => {
       if (!validPasswordPartner)
         // รหัสไม่ตรง
         return res.status(401).send({
-          message: "password is not find",
+          message: "รหัสผ่านไม่ถูกต้อง",
           status: false,
         });
       // let isShop = await Shops.findOne({
@@ -128,7 +128,7 @@ const checkLandLord = async (req, res) => {
       if (!validPasswordPartner)
         // รหัสไม่ตรง
         return res.status(401).send({
-          message: "password is not find",
+          message: "รหัสผ่านไม่ถูกต้อง",
           status: false,
         });
       // let isShop = await Shops.findOne({
@@ -180,7 +180,7 @@ const checkMember = async (req, res) => {
       if (!validPasswordEmployee)
         // รหัสไม่ตรง
         return res.status(401).send({
-          message: "password is not find",
+          message: "รหัสผ่านไม่ถูกต้อง",
           status: false,
         });
       const token = member.generateAuthToken();
@@ -221,7 +221,7 @@ const checkEmployee = async (req, res) => {
       if (!validPasswordEmployee)
         // รหัสไม่ตรง
         return res.status(401).send({
-          message: "password is not find",
+          message: "รหัสผ่านไม่ถูกต้อง",
           status: false,
         });
       let isShop = await Shops.findOne({
