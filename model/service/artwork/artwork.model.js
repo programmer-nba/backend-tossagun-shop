@@ -11,7 +11,7 @@ const ArtworkShema = new mongoose.Schema({
     },
     rating: { type: Number, require: false, default: 0 },
     description: { type: String, required: false },
-    image: { type: String, required: false },
+    image: { type: String, required: false, default: "" },
     emp: { type: String, required: false, default: "" },
 });
 
