@@ -87,6 +87,8 @@ app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
 
 // express ระบบขนส่ง
 app.use(prefix + "/express/product", require("./routes/express/product.express"));
+app.use(prefix + "/express", require("./routes/express/booking.shippop"));
+app.use(prefix + "/express/percent_courier", require("./routes/express/percent.courier"));
 
 // app.use(prefix + "/product/market", require("./routes/service/product.market"))
 

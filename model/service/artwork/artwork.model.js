@@ -17,4 +17,14 @@ const ArtworkShema = new mongoose.Schema({
 
 const ProductArtworks = mongoose.model("artwork_product", ArtworkShema);
 
-module.exports = { ProductArtworks };
+const validate = (data) => {
+    const schema = Joi.object({
+        name: Joi.string().required().label("กรุณากรอกชื่อแพ็คเก็จ"),
+        category: Joi.string().required().label("กรุณากรอกไอดีประเภท"),
+        detail: Joi.string().required().label("กรุณากรอกประเภท"),
+        description: Joi.string().default(""),
+    });
+    return schema.validate(data);
+}
+
+module.exports = { ProductArtworks, validate };

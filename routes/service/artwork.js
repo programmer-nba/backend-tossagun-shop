@@ -7,6 +7,8 @@ const authAdmin = require("../../lib/auth.admin")
 const auth = require("../../lib/auth")
 const authPlatform = require("../../lib/auth.platform")
 
+router.get("/image/:imgname", artwork.getImage)
+
 // Category
 router.post("/category", authAdmin, category.create)
 router.get("/category", auth, category.getCategoryAll)

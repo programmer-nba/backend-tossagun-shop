@@ -61,7 +61,7 @@ exports.getById = async (req, res) => {
 
 exports.getByShopId = async (req, res) => {
     try {
-        const shop_id = req.params.shop_id;
+        const shop_id = req.params.shopid;
         const product = await ProductExpress.find({ shop_id: shop_id });
         if (product) {
             return res.status(200).send({ status: true, data: product })

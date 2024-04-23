@@ -1,44 +1,60 @@
-const { ProductArtworks } = require("../../../model/service/artwork/artwork.model");
+const { ProductArtworks, validate } = require("../../../model/service/artwork/artwork.model");
 const multer = require("multer");
 const fs = require("fs");
+const request = require('request');
+const axios = require('axios');
+const path = require("path");
+const uuidv4 = require("uuid");
+const base64Img = require("base64-img");
 
 const storage = multer.diskStorage({
-    filename: function (req, file, cb) {
-        cb(null, 'art' + "-" + file.originalname);
+    destination: (req, file, cb) => {
+        cb(null, './assets/artwork')
+    },
+    filename: (req, file, cb) => {
+        cb(null, 'art' + '-' + file.originalname);
     },
 });
 
 // Create product
 module.exports.create = async (req, res) => {
     try {
-        let upload = multer({ storage: storage, destination: 'uploads' }).single("image");
+        let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
-            console.log(req.file)
-            if (!req.file) {
-                const new_product = await new ProductArtworks({
-                    ...req.body,
-                });
-                if (!new_product)
-                    return res.status(403).send({ status: false, message: "เพิ่มข้อมูลสินค้าไม่สำเร็จ" })
-                new_product.save();
-                return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
-            } else if (err instanceof multer.MulterError) {
-                return res.send(err);
-            } else if (err) {
-                return res.send(err);
+            const { error } = validate(req.body);
+            if (error) {
+                fs.unlinkSync(req.file.path);
+                return res
+                    .status(400)
+                    .send({ message: error.details[0].message, status: false });
             } else {
-                const new_product = await new ProductArtworks({
-                    ...req.body,
-                    image: req.file.path,
+                const product = await ProductArtworks.findOne({
+                    name: req.body.name,
                 });
-                if (!new_product)
-                    return res.status(403).send({ status: false, message: "เพิ่มข้อมูลสินค้าไม่สำเร็จ" })
-                new_product.save();
-                return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                if (product) {
+                    fs.unlinkSync(req.file.path);
+                    return res.status(409).send({
+                        status: false,
+                        message: "มีสินค้านี้ในระบบแล้ว",
+                    });
+                } else {
+                    if (!req.file) {
+                        await new ProductArtworks({
+                            ...req.body,
+                        }).save();
+                        return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                    } else {
+                        await new ProductArtworks({
+                            ...req.body,
+                            image: req.file.path
+                        }).save();
+                        return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                    }
+                }
             }
         });
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
@@ -111,10 +127,10 @@ module.exports.updateProduct = async (req, res) => {
         const id = req.params.id;
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
-            console.log(req.file);
             if (!req.file) {
                 ProductArtworks.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
                     if (!data) {
+                        fs.unlinkSync(req.file.path);
                         return res.status(404).send({
                             message: `ไม่สามารถเเก้ไขรายงานนี้ได้`,
                             status: false,
@@ -125,18 +141,16 @@ module.exports.updateProduct = async (req, res) => {
                             status: true,
                         });
                 }).catch((err) => {
+                    fs.unlinkSync(req.file.path);
                     return res.status(500).send({
                         message: "มีบ่างอย่างผิดพลาด",
                         status: false,
                     });
                 });
-            } else if (err instanceof multer.MulterError) {
-                return res.send(err);
-            } else if (err) {
-                return res.send(err);
             } else {
-                ProductArtworks.findByIdAndUpdate(id, { ...req.body, image: req.file.filename }, { useFindAndModify: false }).then((data) => {
+                ProductArtworks.findByIdAndUpdate(id, { ...req.body, image: req.file.path }, { useFindAndModify: false }).then((data) => {
                     if (!data) {
+                        fs.unlinkSync(req.file.path);
                         return res.status(404).send({
                             status: false,
                             message: `Cannot update Advert with id=${id}. Maybe Advert was not found!`,
@@ -147,6 +161,7 @@ module.exports.updateProduct = async (req, res) => {
                             status: true,
                         });
                 }).catch((err) => {
+                    fs.unlinkSync(req.file.path);
                     return res.status(500).send({
                         message: "Error updating Advert with id=" + id,
                         status: false,
@@ -159,3 +174,19 @@ module.exports.updateProduct = async (req, res) => {
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
+
+module.exports.getImage = async (req, res) => {
+    try {
+        const imgname = req.params.imgname;
+        fs.readFile(`assets/artwork/${imgname}`, (err, data) => {
+            if (err) {
+                return res.status(403).send({ status: false, message: err })
+            }
+            let base64Image = Buffer.from(data, 'binary').toString('base64');
+            return res.status(200).send(base64Image)
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+}
