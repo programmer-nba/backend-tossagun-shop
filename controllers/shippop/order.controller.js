@@ -378,36 +378,6 @@ tracking = async (req, res)=>{
     }
 }
 
-trackingPurchase = async (req, res)=>{
-    try{
-        const purchase_id = req.params.purchase_id
-        const valueCheck = {
-            api_key: process.env.SHIPPOP_API_KEY,
-            purchase_id: purchase_id,
-        };
-        const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking_purchase/`,valueCheck,
-            {
-            headers: {"Accept-Encoding": "gzip,deflate,compress",
-                        "Content-Type": "application/json"},
-            }
-        )
-        if(resp){
-            return res
-                    .status(200)
-                    .send({status:true, data:resp.data})
-        }else{
-            return res
-                    .status(400)
-                    .send({status:false, message:"ไม่สามารถหาหมายเลข Purchase ID ได้"})
-        }
-    }catch(err){
-        console.log(err)
-        return res
-                .status(500)
-                .send({status:false, message:err.message})
-    }
-}
-
 labelHtml = async (req, res)=>{ //ใบแปะหน้าโดย purchase(html)
     try{
         const valueCheck = {
@@ -458,3 +428,5 @@ async function invoiceNumber() {
     console.log(combinedData);
     return combinedData;
 }
+
+module.exports = { priceList, booking ,cancelOrder, tracking, labelHtml }

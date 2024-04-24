@@ -97,6 +97,11 @@ app.use(prefix + "/aoc", require("./routes/AOC/order.service"));
 app.use(prefix + "/aoc/appendix", require("./routes/AOC/appendix"));
 app.use(prefix + "/aoc/iata", require("./routes/AOC/IATA.route"));
 
+//shippop
+app.use(prefix + "/customer", require("./routes/shippop/customer"))
+app.use(prefix + "/insured", require("./routes/shippop/insured"))
+app.use(prefix + "/shippop", require("./routes/shippop/shippop.order"))
+
 const port = process.env.PORT || 9999;
 
 app.listen(port, () => {

@@ -39,8 +39,7 @@ delend = async (req, res)=>{
 }
 getReceive = async (req, res)=>{
     try{
-        const shop_id = req.params.shop_id
-        const findReceive = await dropOffs.find({shop_id:shop_id ,status:"ผู้รับ"})
+        const findReceive = await dropOffs.find({status:"ผู้รับ"})
                 .sort({ createdAt : -1})
         if(!findReceive){
             return res
@@ -59,8 +58,7 @@ getReceive = async (req, res)=>{
 }
 getSender = async (req, res)=>{
     try{
-        const shop_id = req.params.shop_id
-        const findSender = await dropOffs.find({shop_id:shop_id ,status:"ผู้ส่ง"})
+        const findSender = await dropOffs.find({status:"ผู้ส่ง"})
                 .sort({ createdAt : -1})
         if(!findSender){
             return res
@@ -80,11 +78,11 @@ getSender = async (req, res)=>{
 getOneSender = async (req, res)=>{
     try{
         const id = req.params.id
-        const findOneSender = await dropOffs.findOne({_id:id ,status:"ผู้ส่ง"})
+        const findOneSender = await dropOffs.findOne({_id:id})
             if(!findOneSender){
                 return res
                         .status(400)
-                        .send({status:false, message:"ท่านไม่มีข้อมูลผู้ส่ง กรุณากรอกข้อมูลและทำการเช็คราคาเพื่อบันทึกข้อมูลผู้รับก่อน"})
+                        .send({status:false, message:"ท่านไม่มีข้อมูลผู้ส่ง กรุณากรอกข้อมูลและทำการเช็คราคาเพื่อบันทึกข้อมูลผู้ส่งก่อน"})
             }
         return res
                 .status(200)
