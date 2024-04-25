@@ -2,6 +2,7 @@ const { customerShippop } = require("../../model/shippop/customer.model");
 const { insuredExpress } = require("../../model/shippop/insured.model");
 const { PercentCourier } = require("../../model/shippop/percent.model");
 const { shippopBooking } = require("../../model/shippop/shippop.order");
+const axios = require("axios");
 
 priceList = async (req, res)=>{
     try{
@@ -11,6 +12,7 @@ priceList = async (req, res)=>{
         const declared_value = req.body.declared_value
         const formData = req.body
         const cod_amount = req.body.cod_amount
+        const shop = req.body.shop_id
         
             if(weight == 0){
                 return res
@@ -52,7 +54,7 @@ priceList = async (req, res)=>{
 
         //ผู้รับ
         const recipient = formData.to; // ผู้รับ
-        const filter = { ID: id, tel: recipient.tel, status: 'ผู้รับ' }; //เงื่อนไขที่ใช้กรองว่ามีใน database หรือเปล่า
+        const filter = { shop_id: id, tel: recipient.tel, status: 'ผู้รับ' }; //เงื่อนไขที่ใช้กรองว่ามีใน database หรือเปล่า
 
             const update = { //ข้อมูลที่ต้องการอัพเดท หรือ สร้างใหม่
                 ...recipient,
@@ -132,7 +134,7 @@ priceList = async (req, res)=>{
 
             for (const ob of Object.keys(obj)) {
                 if (obj[ob].available) {
-                    if (reqCod > 0 && obj[ob].courier_code == 'ECP') {
+                    if (cod_amount > 0 && obj[ob].courier_code == 'ECP') {
                         console.log('Encountered "ECP". Skipping this iteration.');
                         continue; // ข้ามไปยังรอบถัดไป
                     }
@@ -151,11 +153,10 @@ priceList = async (req, res)=>{
                     v = {
                         ...obj[ob],
                         price_remote_area: 0,
-                        cost_hub: cost_hub,
+                        cost_tg: cost_hub,
                         cost: cost,
                         cod_amount: Number(cod_amount.toFixed()),
                         fee_cod: 0,
-                        profitPartner: 0,
                         price: Number(price.toFixed()),
                         declared_value: declared_value,
                         insuranceFee: insuranceFee,
@@ -202,6 +203,12 @@ booking = async(req, res)=>{
         const weight = req.body.parcel.weight
         const id = req.decoded.userid
         const price_remote_area = req.body.price_remote_area
+        const declared_value = req.body.declared_value
+        const insuranceFee = req.body.insuranceFee
+        const shop_id = req.body.shop_id
+        const cost_tg = req.body.cost_tg
+        const cost = req.body.cost
+        const total = req.body.total
         formData.parcel.weight = weight
         const data = [{...formData}] //, courier_code:courierCode
 
@@ -239,9 +246,14 @@ booking = async(req, res)=>{
                 invoice: invoice,
                 employee_id: id,
                 purchase_id: String(resp.data.purchase_id),
-                total: resp.data.total_price,
+                cost_tg: cost_tg,
+                cost: cost,
+                declared_value: declared_value,
+                insuranceFee: insuranceFee,
                 price_remote_area: price_remote_area,
                 price: Number(price.toFixed()),
+                total: Number(total.toFixed()),
+                shop_id: shop_id
           };
          new_data.push(v);
 
@@ -290,7 +302,8 @@ cancelOrder = async(req, res)=>{
                         .status(400)
                         .send({
                             status: false, 
-                            message:"ไม่สามารถทำการยกเลิกสินค้าได้"
+                            message:"ไม่สามารถทำการยกเลิกสินค้าได้",
+                            data: respStatus.data
                         })
         }else{
                 const findPno = await shippopBooking.findOneAndUpdate(
@@ -348,14 +361,14 @@ tracking = async (req, res)=>{
 
 labelHtml = async (req, res)=>{ //ใบแปะหน้าโดย purchase(html)
     try{
+        const id = req.params.tracking_code
         const valueCheck = {
             api_key: process.env.SHIPPOP_API_KEY,
-            purchase_id: req.body.purchase_id,
+            tracking_code: id,
             type:"html",
-            size: req.body.size,
-            logo: "https://drive.google.com/thumbnail?id=1-ibHHTEzCLaRisxTJa0FKa653kNpQT-L"
+            size: req.body.size
         };
-        const resp = await axios.post(`${process.env.SHIPPOP_URL}/v2/label/`,valueCheck,
+        const resp = await axios.post(`${process.env.SHIPPOP_URL}/v2/label_tracking_code/`,valueCheck,
             {
                 headers: {"Accept-Encoding": "gzip,deflate,compress",
                             "Content-Type": "application/json"},
@@ -364,7 +377,7 @@ labelHtml = async (req, res)=>{ //ใบแปะหน้าโดย purchase(
         if(resp){
             return res
                     .status(200)
-                    .send(resp.data.html)
+                    .send(resp.data)
         }else{
             return res
                     .status(400)
@@ -398,3 +411,4 @@ async function invoiceNumber() {
 }
 
 module.exports = { priceList, booking ,cancelOrder, tracking, labelHtml }
+

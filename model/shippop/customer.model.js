@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 
 //ผู้ส่งสินค้า
 const customerSchema = new Schema({
-    status:{type:String, required:false},
+    shop_id: { type: String, required: true },
     name: {type:String, required: false},
     email: {type:String, default:"", required: false},
     address:{type:String, required: false},
@@ -12,6 +12,7 @@ const customerSchema = new Schema({
     province:{type:String, required: false},
     postcode:{type:String, required: true},
     tel:{type:String, required: true},
+    status:{type:String, required:false},
 },{timestamps: true});
 
 const customerShippop = mongoose.model("customer_shippop", customerSchema);

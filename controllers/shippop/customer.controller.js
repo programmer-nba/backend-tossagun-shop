@@ -1,8 +1,8 @@
-const { dropOffs } = require("../../Models/Delivery/dropOff");
+const { customerShippop } = require("../../model/shippop/customer.model");
 
 getAll = async (req, res)=>{
     try{
-        const get = await dropOffs.find()
+        const get = await customerShippop.find()
         if(get){
             return res
                     .status(200)
@@ -18,10 +18,11 @@ getAll = async (req, res)=>{
                 .send({status: false, message:"มีบางอย่างผิดพลาด"})
     }
 }
+
 delend = async (req, res)=>{
     try{
         const id = req.params.id
-        const deleteDrop = await dropOffs.findByIdAndDelete(id)
+        const deleteDrop = await customerShippop.findByIdAndDelete(id)
         if(deleteDrop){
             return res
                     .status(200)
@@ -37,9 +38,10 @@ delend = async (req, res)=>{
                 .send({status:false, message:"มีบางอย่างผิดพลาด"})
     }
 }
+
 getReceive = async (req, res)=>{
     try{
-        const findReceive = await dropOffs.find({status:"ผู้รับ"})
+        const findReceive = await customerShippop.find({status:"ผู้รับ"})
                 .sort({ createdAt : -1})
         if(!findReceive){
             return res
@@ -56,9 +58,10 @@ getReceive = async (req, res)=>{
                 .send({status:false, message:err})
     }
 }
+
 getSender = async (req, res)=>{
     try{
-        const findSender = await dropOffs.find({status:"ผู้ส่ง"})
+        const findSender = await customerShippop.find({status:"ผู้ส่ง"})
                 .sort({ createdAt : -1})
         if(!findSender){
             return res
@@ -75,10 +78,11 @@ getSender = async (req, res)=>{
                 .send({status:false, message:err})
     }
 }
+
 getOneSender = async (req, res)=>{
     try{
         const id = req.params.id
-        const findOneSender = await dropOffs.findOne({_id:id})
+        const findOneSender = await customerShippop.findOne({_id:id})
             if(!findOneSender){
                 return res
                         .status(400)

@@ -1,5 +1,5 @@
 const { PriceCourier } = require("../../model/express.model/percent.courier.model");
-const { OrderExpress } = require("../../model/express.model/order.express.model");
+const { OrderExpress } = require("../../model/shippop/order.express.model");
 const { Shops } = require("../../model/pos/shop.model");
 const { BookingParcel } = require("../../model/express.model/booking.parcel.model");
 const { AddressSender } = require("../../model/express.model/address.sender.model");
@@ -40,7 +40,7 @@ exports.pricelist = async (req, res) => {
             }
             // คำนวนต้นทุนของร้านค้า
             let cost_tg = Number(obj[ob].price);
-            let cost = cost_tg + p.percent_tg; // ต้นทุน nba + ((ต้นทุน nba * เปอร์เซ็น nba)/100)
+            let cost = cost_tg + p.percent_tg; 
             let price = cost + p.percent_shop;
             v = {
                 ...obj[ob],

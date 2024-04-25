@@ -1,11 +1,7 @@
+const { PercentCourier } = require("../../model/shippop/percent.model");
+
 create = async(req, res)=>{
     try{
-        const {error} = validate(req.body);
-        if(error){
-            return  res
-                    .status(400)
-                    .send({message : error.details[0].message, status : false});
-        }
         const check_courier = await PercentCourier.findOne({courier_code:req.body.courier_code});
         if(check_courier){
             return res

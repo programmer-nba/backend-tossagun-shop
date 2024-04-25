@@ -88,7 +88,7 @@ app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
 // express ระบบขนส่ง
 app.use(prefix + "/express/product", require("./routes/express/product.express"));
 app.use(prefix + "/express", require("./routes/express/booking.shippop"));
-app.use(prefix + "/express/percent_courier", require("./routes/express/percent.courier"));
+// app.use(prefix + "/express/percent_courier", require("./routes/express/percent.courier"));
 
 // app.use(prefix + "/product/market", require("./routes/service/product.market"))
 
@@ -101,6 +101,8 @@ app.use(prefix + "/aoc/iata", require("./routes/AOC/IATA.route"));
 app.use(prefix + "/customer", require("./routes/shippop/customer"))
 app.use(prefix + "/insured", require("./routes/shippop/insured"))
 app.use(prefix + "/shippop", require("./routes/shippop/shippop.order"))
+app.use(prefix + "/booking", require("./routes/shippop/shippop.manage"))
+app.use(prefix + "/shippop/percent", require("./routes/shippop/percent"));
 
 const port = process.env.PORT || 9999;
 

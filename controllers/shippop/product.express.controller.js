@@ -1,4 +1,4 @@
-const { ProductExpress, validate } = require("../../model/express.model/product.express.model")
+const { ProductExpress, validate } = require("../../model/shippop/product.express.model")
 
 exports.create = async (req, res) => {
     try {
