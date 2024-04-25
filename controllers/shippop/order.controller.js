@@ -1,11 +1,11 @@
 const { customerShippop } = require("../../model/shippop/customer.model");
 const { insuredExpress } = require("../../model/shippop/insured.model");
+const { PercentCourier } = require("../../model/shippop/percent.model");
 const { shippopBooking } = require("../../model/shippop/shippop.order");
 
 priceList = async (req, res)=>{
     try{
-        // const percent = await PercentCourier.find();
-        const shop = req.body.shop_number
+        const percent = await PercentCourier.find();
         const id = req.decoded.userid
         const weight = req.body.parcel.weight 
         const declared_value = req.body.declared_value
@@ -37,14 +37,14 @@ priceList = async (req, res)=>{
             };
 
         const optionsSender = { upsert: true }; // upsert: true จะทำการเพิ่มข้อมูลถ้าไม่พบข้อมูลที่ตรงกับเงื่อนไข
-        
+    
         const resultSender = await customerShippop.updateOne(filterSender, data_sender, optionsSender);
             if (resultSender.upsertedCount > 0) {
                 console.log('สร้างข้อมูลผู้ส่งคนใหม่');
             } else {
                 console.log('อัปเดตข้อมูลผู้ส่งเรียบร้อย');
             }
-        
+    
         const infoSender = await customerShippop.findOne(filterSender)
             if(!infoSender){
                 console.log('ไม่มีข้อมูลผู้ส่ง')
@@ -129,7 +129,7 @@ priceList = async (req, res)=>{
                     }
             }
             console.log(insuranceFee)
-            
+
             for (const ob of Object.keys(obj)) {
                 if (obj[ob].available) {
                     if (reqCod > 0 && obj[ob].courier_code == 'ECP') {
@@ -138,71 +138,40 @@ priceList = async (req, res)=>{
                     }
                     // ทำการประมวลผลเฉพาะเมื่อ obj[ob].available เป็น true
                     let v = null;
-                    let p = line[0].express.find(element => element.courier_code == obj[ob].courier_code);
+                    let p = percent.find(element => element.courier_code == obj[ob].courier_code);
                     // console.log(p)
                         if (!p) {
                             console.log(`ยังไม่มี courier name: ${obj[ob].courier_code}`);
                         }
-                    
-                    let status = null;
-                    let cod_amount = 0
+                    // คำนวนต้นทุนของร้านค้า
+                    let cost_hub = Number(obj[ob].price);
+                    let cost = Math.ceil(cost_hub + p.profit_nba); 
+                    let price = Math.ceil(cost + p.profit_shop);
 
                     v = {
                         ...obj[ob],
                         price_remote_area: 0,
                         cost_hub: cost_hub,
+                        cost: cost,
                         cod_amount: Number(cod_amount.toFixed()),
                         fee_cod: 0,
                         profitPartner: 0,
                         price: Number(price.toFixed()),
-                        total: 0,
-                        cut_partner: 0,
                         declared_value: declared_value,
                         insuranceFee: insuranceFee,
-                        status: status,
-                        profitAll: profit
+                        total: 0,
                     };
 
-                    if (cod !== undefined) {
-                        let fee = (reqCod * percentCod)/100
-                        let formattedFee = parseFloat(fee.toFixed(2));
-                        let total = price + formattedFee + insuranceFee
-                        let cut_partner = total - profit_partner
-                            v.cod_amount = reqCod; // ถ้ามี req.body.cod ก็นำไปใช้แทนที่
-                            v.fee_cod = formattedFee
-                            v.profitPartner = profit_partner
-                                if(obj[ob].hasOwnProperty("price_remote_area")){
-                                    let total1 = total + obj[ob].price_remote_area
-                                        v.total = total1
-                                        v.cut_partner = total1 - profit_partner
-                                        v.price_remote_area = obj[ob].price_remote_area
-                                            // if(reqCod > total1){ //ราคา COD ที่พาร์ทเนอร์กรอกเข้ามาต้องมากกว่าราคารวม (ค่าขนส่ง + ค่าธรรมเนียม COD + ราคาพื้นที่ห่างไกล) จึงเห็นและสั่ง order ได้
-                                            //     new_data.push(v);
-                                            // }
-                                }else{
-                                    v.cut_partner = cut_partner
-                                    v.total = total
-                                        // if(reqCod > total){ //ราคา COD ที่พาร์ทเนอร์กรอกเข้ามาต้องมากกว่าราคารวม(ค่าขนส่ง + ค่าธรรมเนียม COD) จึงเห็นและสั่ง order ได้
-                                        //     new_data.push(v);
-                                        // }
-                                }
-                            new_data.push(v);
-
-                    }else{
-                        if(obj[ob].hasOwnProperty("price_remote_area")){ //เช็คว่ามี ราคา พื้นที่ห่างไกลหรือเปล่า
+                    if(obj[ob].hasOwnProperty("price_remote_area")){ //เช็คว่ามี ราคา พื้นที่ห่างไกลหรือเปล่า
                             let total = price + obj[ob].price_remote_area + insuranceFee
                                 v.price_remote_area = obj[ob].price_remote_area
                                 v.total = total 
-                                v.cut_partner = total - profit_partner
-                                v.profitPartner = profit_partner
-                        }else{
+                    }else{
                             let total = price + insuranceFee
-                            v.profitPartner = profit_partner
-                            v.total = total
-                            v.cut_partner = total - profit_partner
-                        }
-                        new_data.push(v);
+                                v.total = total
                     }
+                    new_data.push(v);
+                    
                     // console.log(new_data);
                 } else {
                     // ทำสิ่งที่คุณต้องการทำเมื่อ obj[ob].available เป็น false
@@ -230,8 +199,7 @@ booking = async(req, res)=>{
     try{
         const formData = req.body
         const price = req.body.price
-        const cod_amount = req.body.cod_amount
-        const weight = req.body.parcel.weight * 1000
+        const weight = req.body.parcel.weight
         const id = req.decoded.userid
         const price_remote_area = req.body.price_remote_area
         formData.parcel.weight = weight
@@ -266,7 +234,7 @@ booking = async(req, res)=>{
         const parcel = data[0].parcel
         const new_data = []
         const v = {
-                ...Data, //มี declared_value อยู่แล้วใน ...Data ไม่ต้องสร้างเพิ่ม
+                ...Data, //มี declared_value และ cod_amount อยู่แล้วใน ...Data ไม่ต้องสร้างเพิ่ม
                 parcel: parcel,
                 invoice: invoice,
                 employee_id: id,
@@ -277,8 +245,8 @@ booking = async(req, res)=>{
           };
          new_data.push(v);
 
-        const createOrderAll = await orderAll.create(v)
-            if(!createOrderAll){
+        const createOrder = await shippopBooking.create(v)
+            if(!createOrder){
                 console.log("ไม่สามารถสร้างข้อมูล booking ได้")
             }
         
