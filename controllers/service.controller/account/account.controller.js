@@ -1,11 +1,11 @@
-const { ProductArtworks, validate } = require("../../../model/service/artwork/artwork.model");
+const { ProductAccounts, validate } = require("../../../model/service/account/account.model");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './assets/artwork')
+        cb(null, './assets/account')
     },
     filename: (req, file, cb) => {
         cb(null, 'art' + "-" + file.originalname);
@@ -24,7 +24,7 @@ module.exports.create = async (req, res) => {
                     .status(400)
                     .send({ message: error.details[0].message, status: false });
             } else {
-                const product = await ProductArtworks.findOne({
+                const product = await ProductAccounts.findOne({
                     name: req.body.name,
                 });
                 if (product) {
@@ -35,12 +35,12 @@ module.exports.create = async (req, res) => {
                     });
                 } else {
                     if (!req.file) {
-                        await new ProductArtworks({
+                        await new ProductAccounts({
                             ...req.body,
                         }).save();
                         return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
                     } else {
-                        await new ProductArtworks({
+                        await new ProductAccounts({
                             ...req.body,
                             image: req.file.filename
                         }).save();
@@ -58,7 +58,7 @@ module.exports.create = async (req, res) => {
 // Get All product
 module.exports.getProductAll = async (req, res) => {
     try {
-        const product = await ProductArtworks.find();
+        const product = await ProductAccounts.find();
         if (!product)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
         return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: product });
@@ -71,7 +71,7 @@ module.exports.getProductAll = async (req, res) => {
 // Get product by id
 module.exports.getProductById = async (req, res) => {
     try {
-        const product = await ProductArtworks.findById(req.params.id);
+        const product = await ProductAccounts.findById(req.params.id);
         if (!product)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
         return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: product });
@@ -85,7 +85,7 @@ module.exports.getProductById = async (req, res) => {
 module.exports.getProductByCategoryId = async (req, res) => {
     try {
         const id = req.params.id;
-        const product = await ProductArtworks.find();
+        const product = await ProductAccounts.find();
         const products = product.filter(
             (el) => el.category === id,
         );
@@ -102,7 +102,7 @@ module.exports.getProductByCategoryId = async (req, res) => {
 module.exports.deleteProduct = async (req, res) => {
     try {
         const id = req.params.id;
-        ProductArtworks.findByIdAndDelete(id, { useFindAndModify: false }).then((data) => {
+        ProductAccounts.findByIdAndDelete(id, { useFindAndModify: false }).then((data) => {
             if (!data) {
                 return res.status(404).send({ message: `ไม่สามารถลบรายงานนี้ได้`, status: false, });
             } else {
@@ -124,7 +124,7 @@ module.exports.updateProduct = async (req, res) => {
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
             if (!req.file) {
-                ProductArtworks.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
+                ProductAccounts.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
                     if (!data) {
                         fs.unlinkSync(req.file.path);
                         return res.status(404).send({
@@ -144,7 +144,7 @@ module.exports.updateProduct = async (req, res) => {
                     });
                 });
             } else {
-                ProductArtworks.findByIdAndUpdate(id, { ...req.body, image: req.file.filename }, { useFindAndModify: false }).then((data) => {
+                ProductAccounts.findByIdAndUpdate(id, { ...req.body, image: req.file.filename }, { useFindAndModify: false }).then((data) => {
                     if (!data) {
                         fs.unlinkSync(req.file.path);
                         return res.status(404).send({
@@ -174,7 +174,7 @@ module.exports.updateProduct = async (req, res) => {
 module.exports.getImage = async (req, res) => {
     try {
         const imgname = req.params.imgname;
-        const imagePath = path.join(__dirname, '../../../assets/artwork', imgname);
+        const imagePath = path.join(__dirname, '../../../assets/account', imgname);
         // return res.send(`<img src=${imagePath}>`);
         return res.sendFile(imagePath);
     } catch (error) {

@@ -80,7 +80,8 @@ app.use(prefix + "/delete/image", require("./routes/deleteimage"));
 app.use(prefix + "/service/artwork", require("./routes/service/artwork"));
 app.use(prefix + "/service/media", require("./routes/service/media"));
 app.use(prefix + "/service/act", require("./routes/service/act"));
-// app.use(prefix + "/service/")
+app.use(prefix + "/service/program", require("./routes/service/program"));
+app.use(prefix + "/service/account", require("./routes/service/account"));
 app.use(prefix + "/service/apppremium", require("./routes/service/apppremium"));
 // Wallet
 app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
