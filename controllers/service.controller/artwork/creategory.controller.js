@@ -3,9 +3,12 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
+const uploadFolder = path.join(__dirname, '../../../assets/artwork');
+fs.mkdirSync(uploadFolder, { recursive: true });
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './assets/artwork')
+        cb(null, uploadFolder)
     },
     filename: function (req, file, cb) {
         cb(null, 'cate' + "-" + file.originalname);
