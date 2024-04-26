@@ -3,9 +3,12 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
+const uploadFolder = path.join(__dirname, '../../../assets/account');
+fs.mkdirSync(uploadFolder, { recursive: true });
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './assets/account')
+        cb(null, uploadFolder)
     },
     filename: (req, file, cb) => {
         cb(null, 'art' + "-" + file.originalname);
@@ -17,6 +20,7 @@ module.exports.create = async (req, res) => {
     try {
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
+            console.log(req.file)
             const { error } = validate(req.body);
             if (error) {
                 fs.unlinkSync(req.file.path);
@@ -123,6 +127,7 @@ module.exports.updateProduct = async (req, res) => {
         const id = req.params.id;
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
+            console.log(req.file)
             if (!req.file) {
                 ProductAccounts.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
                     if (!data) {
