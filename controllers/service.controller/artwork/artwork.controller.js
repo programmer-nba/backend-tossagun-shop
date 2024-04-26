@@ -17,6 +17,7 @@ module.exports.create = async (req, res) => {
     try {
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
+            console.log(req.file)
             const { error } = validate(req.body);
             if (error) {
                 fs.unlinkSync(req.file.path);
@@ -123,6 +124,7 @@ module.exports.updateProduct = async (req, res) => {
         const id = req.params.id;
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
+            console.log(req.file)
             if (!req.file) {
                 ProductArtworks.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
                     if (!data) {
