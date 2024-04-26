@@ -20,7 +20,6 @@ module.exports.create = async (req, res) => {
     try {
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
-            console.log(uploadFolder)
             console.log(req.file)
             const category = await CategoryArtworks.findOne({
                 name: req.body.name,
@@ -103,7 +102,6 @@ module.exports.updateCategory = async (req, res) => {
         const id = req.params.id;
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
-            console.log(uploadFolder)
             console.log(req.file)
             if (!req.file) {
                 CategoryArtworks.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
