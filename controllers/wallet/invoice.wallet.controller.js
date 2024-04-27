@@ -2,7 +2,7 @@ const dayjs = require("dayjs");
 const {
     WalletSlips,
     validate,
-} = require("../../model/wallet/wallet.slip.model");
+} = require("../../model/wallet/topup.wallet.model");
 
 exports.create = async (req, res) => {
     console.log(req.body);

@@ -196,3 +196,53 @@ exports.create = async (req, res) => {
         return res.status(500).send({ status: false, error: error.message });
     }
 };
+
+exports.getMemberAll = async (req, res) => {
+    try {
+        const member = await Members.find();
+        if (!member)
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลไม่สำเร็จ' })
+        return res.status(200).send({ status: true, message: 'ดึงข้อมูลสมาชิกสำเร็จ', data: member })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, error: error.message });
+    }
+};
+
+exports.getMemberById = async (req, res) => {
+    try {
+        const member = await Members.findById(req.params.id);
+        if (!member)
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลไม่สำเร็จ' })
+        return res.status(200).send({ status: true, message: 'ดึงข้อมูลสมาชิกสำเร็จ', data: member })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, error: error.message });
+    }
+};
+
+exports.update = async (req, res) => {
+    try {
+        const id = req.params.id;
+        Members.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
+            if (!data) {
+                return res.status(404).send({
+                    message: `ไม่สารมารถแก้ไขข้อมูลสมาชิกได้!`,
+                    status: false,
+                });
+            } else
+                return res.send({
+                    message: "แก้ไขข้อมูลสมาชิกสำเร็จ",
+                    status: true,
+                });
+        }).catch((err) => {
+            return res.status(500).send({
+                message: "มีบ่างอย่างผิดพลาด",
+                status: false,
+            });
+        });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, error: error.message });
+    }
+}
