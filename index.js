@@ -105,6 +105,10 @@ app.use(prefix + "/shippop", require("./routes/shippop/shippop.order"))
 app.use(prefix + "/booking", require("./routes/shippop/shippop.manage"))
 app.use(prefix + "/shippop/percent", require("./routes/shippop/percent"));
 
+
+// topup
+app.use(prefix + "/topup", require("./routes/topup/topup"));
+
 const port = process.env.PORT || 9999;
 
 app.listen(port, () => {
