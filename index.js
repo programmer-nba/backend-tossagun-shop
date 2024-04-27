@@ -111,6 +111,10 @@ app.use(prefix + "/shippop/percent", require("./routes/shippop/percent"));
 // topup
 app.use(prefix + "/topup", require("./routes/topup/topup"));
 
+//partner
+app.use(prefix + "/emarket", require("./routes/ddscpartner/emarking"));
+app.use(prefix + "/store", require("./routes/ddscpartner/store"));
+
 const port = process.env.PORT || 9999;
 
 app.listen(port, () => {
