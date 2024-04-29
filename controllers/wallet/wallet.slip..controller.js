@@ -5,6 +5,8 @@ const multer = require("multer");
 const fs = require("fs");
 const dayjs = require("dayjs");
 const path = require("path");
+const line = require("../../lib/line.notify");
+const { Shops } = require("../../model/pos/shop.model");
 
 const uploadFolder = path.join(__dirname, '../../assets/wallet');
 fs.mkdirSync(uploadFolder, { recursive: true });
@@ -25,29 +27,44 @@ exports.create = async (req, res) => {
             console.log(req.file)
             const { error } = validate(req.body);
             if (error) {
-                fs.unlinkSync(req.file.path);
+                // fs.unlinkSync(req.file.path);
                 return res
                     .status(400)
                     .send({ message: error.details[0].message, status: false });
             } else {
                 if (!req.file) {
-                    if (req.body.payment_type === 'One Shop Platform') {
+                    if (req.body.payment_type === 'One Stop Platform') {
+                        const member = await Members.findById(req.decoded._id);
                         await new TopupWallet({
                             ...req.body,
                             maker_id: req.decoded._id,
-
                         }).save();
+                        const message = `
+แจ้งเติมเงินเข้าระบบ : 
+เลขที่ทำรายการ: ${req.body.invoice}
+ชื่อ: ${member.fristname} ${member.lastname}
+จำนวน: ${req.body.amount} บาท`;
+                        await line.linenotify(message);
                         return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
                     } else {
+                        const shop = await Shops.findById(req.decoded.shop_id);
                         await new TopupWallet({
                             ...req.body,
                             maker_id: req.decoded._id,
                             shop_id: req.decoded.shop_id,
                         }).save();
+                        const message = `
+แจ้งเติมเงินเข้าระบบ 
+เลขที่ทำรายการ: ${req.body.invoice}
+ชื่อ: ${shop.shop_name_main} ${shop.shop_name_second}
+จำนวน: ${req.body.amount} บาท`;
+                        await line.linenotify(message);
                         return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
                     }
                 } else {
-                    if (req.body.payment_type === 'One Shop Platform') {
+                    if (req.body.payment_type === 'One Stop Platform') {
+                        const member = await Members.findById(req.decoded._id);
+                        console.log(member)
                         await new TopupWallet({
                             ...req.body,
                             maker_id: req.decoded._id,
@@ -55,8 +72,15 @@ exports.create = async (req, res) => {
                                 image_slip: req.file.filename
                             },
                         }).save();
+                        const message = `
+แจ้งเติมเงินเข้าระบบ : 
+เลขที่ทำรายการ: ${req.body.invoice}           
+ชื่อ: ${member.fristname} ${member.lastname}
+จำนวน: ${req.body.amount} บาท`;
+                        await line.linenotify(message);
                         return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
                     } else {
+                        const shop = await Shops.findById(req.decoded.shop_id);
                         await new TopupWallet({
                             ...req.body,
                             maker_id: req.decoded._id,
@@ -65,6 +89,12 @@ exports.create = async (req, res) => {
                                 image_slip: req.file.filename
                             },
                         }).save();
+                        const message = `
+แจ้งเติมเงินเข้าระบบ : 
+เลขที่ทำรายการ: ${req.body.invoice}
+ชื่อ: ${shop.shop_name_main} ${shop.shop_name_second}
+จำนวน: ${req.body.amount} บาท`;
+                        await line.linenotify(message);
                         return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
                     }
                 }

@@ -12,6 +12,7 @@ router.post("/invoice", invoice.create);
 
 router.post("/slip", auth, slip.create);
 router.get("/", auth, wallet.getWalletAll);
+router.get("/:memberid", auth, wallet.getWalletByMember);
 router.put("/:id", authAdmin, slip.update);
 
 // history
