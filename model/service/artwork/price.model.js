@@ -26,7 +26,7 @@ const PriceArtworkShema = new mongoose.Schema({
     net: { type: Number, required: false, default: 0 },
     unit: { type: Number, required: true },
     unit_pack: { type: Number, required: true },
-    emp: { type: String, required: false, default: "" },
+    emp: { type: String, required: false, default: "ไม่มี" },
 });
 
 const PriceArtworks = mongoose.model("artwork_price", PriceArtworkShema);
@@ -57,7 +57,7 @@ const validate = (data) => {
         net: Joi.number().default(0),
         unit: Joi.number().required().label("กรอกจำนวนที่ขาย"),
         unit_pack: Joi.number().required().label("กรอกจำนวนแพ็ค"),
-        emp: Joi.string().default(""),
+        emp: Joi.string().default("ไม่มี"),
     })
     return Schema.validate(data);
 }

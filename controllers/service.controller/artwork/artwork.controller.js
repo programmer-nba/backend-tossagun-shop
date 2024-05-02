@@ -21,34 +21,68 @@ module.exports.create = async (req, res) => {
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
             console.log(req.file)
-            const { error } = validate(req.body);
-            if (error) {
-                fs.unlinkSync(req.file.path);
-                return res
-                    .status(400)
-                    .send({ message: error.details[0].message, status: false });
-            } else {
-                const product = await ProductArtworks.findOne({
-                    name: req.body.name,
-                });
-                if (product) {
-                    fs.unlinkSync(req.file.path);
-                    return res.status(409).send({
-                        status: false,
-                        message: "มีสินค้านี้ในระบบแล้ว",
-                    });
+            if (!req.file) {
+                const { error } = validate(req.body);
+                if (error) {
+                    // fs.unlinkSync(req.file.path);
+                    return res
+                        .status(400)
+                        .send({ message: error.details[0].message, status: false });
                 } else {
-                    if (!req.file) {
-                        await new ProductArtworks({
-                            ...req.body,
-                        }).save();
-                        return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                    const product = await ProductArtworks.findOne({
+                        name: req.body.name,
+                    });
+                    if (product) {
+                        // fs.unlinkSync(req.file.path);
+                        return res.status(409).send({
+                            status: false,
+                            message: "มีสินค้านี้ในระบบแล้ว",
+                        });
                     } else {
-                        await new ProductArtworks({
-                            ...req.body,
-                            image: req.file.filename
-                        }).save();
-                        return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                        if (!req.file) {
+                            await new ProductArtworks({
+                                ...req.body,
+                            }).save();
+                            return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                        } else {
+                            await new ProductArtworks({
+                                ...req.body,
+                                image: req.file.filename
+                            }).save();
+                            return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                        }
+                    }
+                }
+            } else {
+                const { error } = validate(req.body);
+                if (error) {
+                    fs.unlinkSync(req.file.path);
+                    return res
+                        .status(400)
+                        .send({ message: error.details[0].message, status: false });
+                } else {
+                    const product = await ProductArtworks.findOne({
+                        name: req.body.name,
+                    });
+                    if (product) {
+                        fs.unlinkSync(req.file.path);
+                        return res.status(409).send({
+                            status: false,
+                            message: "มีสินค้านี้ในระบบแล้ว",
+                        });
+                    } else {
+                        if (!req.file) {
+                            await new ProductArtworks({
+                                ...req.body,
+                            }).save();
+                            return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                        } else {
+                            await new ProductArtworks({
+                                ...req.body,
+                                image: req.file.filename
+                            }).save();
+                            return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                        }
                     }
                 }
             }
