@@ -147,9 +147,9 @@ priceList = async (req, res) => {
                 }
                 // คำนวนต้นทุนของร้านค้า
                 let cost_hub = Number(obj[ob].price);
-                let cost = Math.ceil(cost_hub + p.profit_tg);
-                let price = Math.ceil(cost + p.profit_shop);
-
+                let cost = Math.ceil(((cost_hub*p.profit_tg)/100) + cost_hub)
+                let price = Math.ceil(((cost*p.profit_shop)/100) + cost)
+                
                 v = {
                     ...obj[ob],
                     price_remote_area: 0,
