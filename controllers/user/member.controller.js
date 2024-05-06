@@ -230,11 +230,13 @@ exports.update = async (req, res) => {
                     message: `ไม่สารมารถแก้ไขข้อมูลสมาชิกได้!`,
                     status: false,
                 });
-            } else
+            } else {
+                console.log(data);
                 return res.send({
                     message: "แก้ไขข้อมูลสมาชิกสำเร็จ",
                     status: true,
                 });
+            }
         }).catch((err) => {
             return res.status(500).send({
                 message: "มีบ่างอย่างผิดพลาด",
