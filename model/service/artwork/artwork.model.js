@@ -12,7 +12,7 @@ const ArtworkShema = new mongoose.Schema({
     rating: { type: Number, require: false, default: 0 },
     description: { type: String, required: false },
     image: { type: String, required: false, default: "" },
-    emp: { type: String, required: false, default: "" },
+    emp: { type: String, required: false, default: "ไม่มี" },
 });
 
 const ProductArtworks = mongoose.model("artwork_product", ArtworkShema);
@@ -23,6 +23,7 @@ const validate = (data) => {
         category: Joi.string().required().label("กรุณากรอกไอดีประเภท"),
         detail: Joi.string().required().label("กรุณากรอกประเภท"),
         description: Joi.string().default(""),
+        emp: Joi.string().default("ไม่มี"),
     });
     return schema.validate(data);
 }

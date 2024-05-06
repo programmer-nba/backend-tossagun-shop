@@ -1,13 +1,13 @@
 const dayjs = require("dayjs");
 const {
-    WalletSlips,
+    TopupWallet,
     validate,
-} = require("../../model/wallet/wallet.slip.model");
+} = require("../../model/wallet/topup.wallet.model");
 
 exports.create = async (req, res) => {
     console.log(req.body);
     try {
-        WalletSlips.find().then((value) => {
+        TopupWallet.find().then((value) => {
             console.log(value);
             if (!value) {
                 return res.status(404);

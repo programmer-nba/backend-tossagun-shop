@@ -76,18 +76,21 @@ app.use(prefix + "/callback", require("./routes/pos/callback"));
 
 // Delete Image
 app.use(prefix + "/delete/image", require("./routes/deleteimage"));
+
 // Tossagun Service
 app.use(prefix + "/service/artwork", require("./routes/service/artwork"));
 app.use(prefix + "/service/media", require("./routes/service/media"));
 app.use(prefix + "/service/act", require("./routes/service/act"));
-// app.use(prefix + "/service/")
+app.use(prefix + "/service/program", require("./routes/service/program"));
+app.use(prefix + "/service/account", require("./routes/service/account"));
 app.use(prefix + "/service/apppremium", require("./routes/service/apppremium"));
+
 // Wallet
 app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
 
 // express ระบบขนส่ง
-app.use(prefix + "/express/product", require("./routes/express/product.express"));
-app.use(prefix + "/express", require("./routes/express/booking.shippop"));
+// app.use(prefix + "/express/product", require("./routes/express/product.express"));
+// app.use(prefix + "/express", require("./routes/express/booking.shippop"));
 // app.use(prefix + "/express/percent_courier", require("./routes/express/percent.courier"));
 
 // app.use(prefix + "/product/market", require("./routes/service/product.market"))
@@ -98,11 +101,19 @@ app.use(prefix + "/aoc/appendix", require("./routes/AOC/appendix"));
 app.use(prefix + "/aoc/iata", require("./routes/AOC/IATA.route"));
 
 //shippop
-app.use(prefix + "/customer", require("./routes/shippop/customer"))
-app.use(prefix + "/insured", require("./routes/shippop/insured"))
-app.use(prefix + "/shippop", require("./routes/shippop/shippop.order"))
-app.use(prefix + "/booking", require("./routes/shippop/shippop.manage"))
-app.use(prefix + "/shippop/percent", require("./routes/shippop/percent"));
+app.use(prefix + "/express/customer", require("./routes/shippop/customer")); // ลูกค้า
+app.use(prefix + "/express/insured", require("./routes/shippop/insured")); // ประกัน
+app.use(prefix + "/express/shippop", require("./routes/shippop/shippop.order"));
+app.use(prefix + "/express/booking", require("./routes/shippop/shippop.manage"));
+app.use(prefix + "/express/shippop/percent", require("./routes/shippop/percent"));
+
+
+// topup
+app.use(prefix + "/topup", require("./routes/topup/topup"));
+
+//partner
+app.use(prefix + "/emarket", require("./routes/ddscpartner/emarking"));
+app.use(prefix + "/store", require("./routes/ddscpartner/store"));
 
 //easybook
 app.use(prefix + "/easybook", require("./routes/easybook/easybook.service.route"))

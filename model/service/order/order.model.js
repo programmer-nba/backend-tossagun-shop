@@ -24,7 +24,7 @@ const OrderServiceSchema = new mongoose.Schema({
     },
     shop_type: {
         type: String,
-        enum: ["One Stop Shop", "One Stop Service"],
+        enum: ["One Stop Shop", "One Stop Service", "One Stop Platform"],
         required: true,
     },
     paymenttype: {

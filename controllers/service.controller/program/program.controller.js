@@ -1,9 +1,9 @@
-const { CategoryArtworks } = require("../../../model/service/artwork/category.model")
+const { ProductPrograms, validate } = require("../../../model/service/program/program.model")
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
-const uploadFolder = path.join(__dirname, '../../../assets/artwork');
+const uploadFolder = path.join(__dirname, '../../../assets/program');
 fs.mkdirSync(uploadFolder, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -11,37 +11,45 @@ const storage = multer.diskStorage({
         cb(null, uploadFolder)
     },
     filename: function (req, file, cb) {
-        cb(null, 'cate' + "-" + file.originalname);
+        cb(null, 'program' + "-" + file.originalname);
     },
 });
 
-// Create category
+// Create Media
 module.exports.create = async (req, res) => {
     try {
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
             console.log(req.file)
-            const category = await CategoryArtworks.findOne({
-                name: req.body.name,
-            });
-            if (category) {
+            const { error } = validate(req.body);
+            if (error) {
                 fs.unlinkSync(req.file.path);
-                return res.status(409).send({
-                    status: false,
-                    message: "มีประเภทสินค้านี้ในระบบแล้ว",
-                });
+                return res
+                    .status(400)
+                    .send({ message: error.details[0].message, status: false });
             } else {
-                if (!req.file) {
-                    await new CategoryArtworks({
-                        ...req.body,
-                    }).save();
-                    return res.status(201).send({ message: "เพิ่มข้อมูลประเภทสินค้าทำเร็จ", status: true });
+                const product = await ProductPrograms.findOne({
+                    name: req.body.name,
+                });
+                if (product) {
+                    fs.unlinkSync(req.file.path);
+                    return res.status(409).send({
+                        status: false,
+                        message: "มีสินค้านี้ในระบบแล้ว",
+                    });
                 } else {
-                    await new CategoryArtworks({
-                        ...req.body,
-                        image: req.file.filename
-                    }).save();
-                    return res.status(201).send({ message: "เพิ่มข้อมูลประเภทสินค้าทำเร็จ", status: true });
+                    if (!req.file) {
+                        await new ProductPrograms({
+                            ...req.body,
+                        }).save();
+                        return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                    } else {
+                        await new ProductPrograms({
+                            ...req.body,
+                            image: req.file.filename
+                        }).save();
+                        return res.status(201).send({ message: "เพิ่มข้อมูลสินค้าทำเร็จ", status: true });
+                    }
                 }
             }
         });
@@ -51,37 +59,38 @@ module.exports.create = async (req, res) => {
     }
 };
 
-// Get All category
-module.exports.getCategoryAll = async (req, res) => {
+// Get All Media
+module.exports.getMediaAll = async (req, res) => {
     try {
-        const category = await CategoryArtworks.find();
-        if (!category)
+        const media = await ProductPrograms.find();
+        if (!media)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
-        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: category });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: media });
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", error: "server side error" });
     }
 };
 
-// Get category by id
-module.exports.getCategoryById = async (req, res) => {
+// Get Media by id
+module.exports.getMediaById = async (req, res) => {
     try {
-        const category = await CategoryArtworks.findById(req.params.id);
-        if (!category)
+        const media = await ProductPrograms.findById(req.params.id);
+        if (!media)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
-        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: category });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: media });
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", error: "server side error" });
     }
 };
 
-// Delete category
-module.exports.deleteCategory = async (req, res) => {
+
+// Delete Media
+module.exports.deleteMedia = async (req, res) => {
     try {
         const id = req.params.id;
-        CategoryArtworks.findByIdAndDelete(id, { useFindAndModify: false }).then((data) => {
+        ProductPrograms.findByIdAndDelete(id, { useFindAndModify: false }).then((data) => {
             if (!data) {
                 return res.status(404).send({ message: `ไม่สามารถลบรายงานนี้ได้`, status: false, });
             } else {
@@ -96,24 +105,24 @@ module.exports.deleteCategory = async (req, res) => {
     }
 };
 
-// Update category
-module.exports.updateCategory = async (req, res) => {
+// Update Media
+module.exports.updateMedia = async (req, res) => {
     try {
         const id = req.params.id;
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
             console.log(req.file)
             if (!req.file) {
-                CategoryArtworks.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
+                ProductPrograms.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
                     if (!data) {
                         fs.unlinkSync(req.file.path);
                         return res.status(404).send({
-                            message: `ไม่สามารถเเก้ไขรายงานนี้ได้`,
+                            message: `ไม่สามารถเเก้ไขสินค้านี้ได้!`,
                             status: false,
                         });
                     } else
-                        return res.send({
-                            message: "แก้ไขรายงานนี้เรียบร้อยเเล้ว",
+                        res.send({
+                            message: "แก้ไขสินค้าสำเร็จ",
                             status: true,
                         });
                 }).catch((err) => {
@@ -124,27 +133,39 @@ module.exports.updateCategory = async (req, res) => {
                     });
                 });
             } else {
-                CategoryArtworks.findByIdAndUpdate(id, { ...req.body, image: req.file.filename }, { useFindAndModify: false }).then((data) => {
+                ProductPrograms.findByIdAndUpdate(id, { ...req.body, image: req.file.filename }, { useFindAndModify: false }).then((data) => {
                     if (!data) {
                         fs.unlinkSync(req.file.path);
                         return res.status(404).send({
                             status: false,
-                            message: `Cannot update Advert with id=${id}. Maybe Advert was not found!`,
+                            message: `ไม่สามารถเเก้ไขสินค้านี้ได้!`,
                         });
                     } else
                         return res.status(201).send({
-                            message: "แก้ไขประเภทสินค้าสำเร็จ.",
+                            message: "แก้ไขสินค้าสำเร็จ",
                             status: true,
                         });
                 }).catch((err) => {
                     fs.unlinkSync(req.file.path);
                     return res.status(500).send({
-                        message: "Error updating Advert with id=" + id,
+                        message: "มีบ่างอย่างผิดพลาด",
                         status: false,
                     });
                 });
             }
         });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.getImage = async (req, res) => {
+    try {
+        const imgname = req.params.imgname;
+        const imagePath = path.join(__dirname, '../../../assets/program', imgname);
+        // return res.send(`<img src=${imagePath}>`);
+        return res.sendFile(imagePath);
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "Internal Server Error" });

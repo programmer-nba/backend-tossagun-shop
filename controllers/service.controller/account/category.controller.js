@@ -1,9 +1,9 @@
-const { CategoryArtworks } = require("../../../model/service/artwork/category.model")
+const { CategoryAccounts } = require("../../../model/service/account/category.model")
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
-const uploadFolder = path.join(__dirname, '../../../assets/artwork');
+const uploadFolder = path.join(__dirname, '../../../assets/account');
 fs.mkdirSync(uploadFolder, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -21,7 +21,7 @@ module.exports.create = async (req, res) => {
         let upload = multer({ storage: storage }).single("image");
         upload(req, res, async function (err) {
             console.log(req.file)
-            const category = await CategoryArtworks.findOne({
+            const category = await CategoryAccounts.findOne({
                 name: req.body.name,
             });
             if (category) {
@@ -32,12 +32,12 @@ module.exports.create = async (req, res) => {
                 });
             } else {
                 if (!req.file) {
-                    await new CategoryArtworks({
+                    await new CategoryAccounts({
                         ...req.body,
                     }).save();
                     return res.status(201).send({ message: "เพิ่มข้อมูลประเภทสินค้าทำเร็จ", status: true });
                 } else {
-                    await new CategoryArtworks({
+                    await new CategoryAccounts({
                         ...req.body,
                         image: req.file.filename
                     }).save();
@@ -54,7 +54,7 @@ module.exports.create = async (req, res) => {
 // Get All category
 module.exports.getCategoryAll = async (req, res) => {
     try {
-        const category = await CategoryArtworks.find();
+        const category = await CategoryAccounts.find();
         if (!category)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
         return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: category });
@@ -67,7 +67,7 @@ module.exports.getCategoryAll = async (req, res) => {
 // Get category by id
 module.exports.getCategoryById = async (req, res) => {
     try {
-        const category = await CategoryArtworks.findById(req.params.id);
+        const category = await CategoryAccounts.findById(req.params.id);
         if (!category)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
         return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: category });
@@ -81,7 +81,7 @@ module.exports.getCategoryById = async (req, res) => {
 module.exports.deleteCategory = async (req, res) => {
     try {
         const id = req.params.id;
-        CategoryArtworks.findByIdAndDelete(id, { useFindAndModify: false }).then((data) => {
+        CategoryAccounts.findByIdAndDelete(id, { useFindAndModify: false }).then((data) => {
             if (!data) {
                 return res.status(404).send({ message: `ไม่สามารถลบรายงานนี้ได้`, status: false, });
             } else {
@@ -104,7 +104,7 @@ module.exports.updateCategory = async (req, res) => {
         upload(req, res, async function (err) {
             console.log(req.file)
             if (!req.file) {
-                CategoryArtworks.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
+                CategoryAccounts.findByIdAndUpdate(id, req.body, { useFindAndModify: false, }).then((data) => {
                     if (!data) {
                         fs.unlinkSync(req.file.path);
                         return res.status(404).send({
@@ -124,7 +124,7 @@ module.exports.updateCategory = async (req, res) => {
                     });
                 });
             } else {
-                CategoryArtworks.findByIdAndUpdate(id, { ...req.body, image: req.file.filename }, { useFindAndModify: false }).then((data) => {
+                CategoryAccounts.findByIdAndUpdate(id, { ...req.body, image: req.file.filename }, { useFindAndModify: false }).then((data) => {
                     if (!data) {
                         fs.unlinkSync(req.file.path);
                         return res.status(404).send({
