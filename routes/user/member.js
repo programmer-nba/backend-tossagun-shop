@@ -9,6 +9,7 @@ router.post("/create", member.create); //สร้าง user
 
 router.get("/", member.getMemberAll);
 router.get("/:id", member.getMemberById);
+router.get("/team/:tel", member.getMemberTeam);
 router.put("/:id", member.update);
 
 module.exports = router;

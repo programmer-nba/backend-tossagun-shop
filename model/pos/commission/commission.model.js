@@ -28,6 +28,6 @@ const commissionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Commission = new mongoose.model("commission", commissionSchema);
+const Commission = mongoose.model("commission", commissionSchema);
 
 module.exports = { Commission };
