@@ -17,6 +17,7 @@ router.put("/:id", authAdmin, slip.update);
 
 // history
 router.post("/history", auth, history.create);
-router.get("/histiry", auth, history.getHistory)
+router.get("/histiry", auth, history.getHistory);
+router.get("/history/:makerid", auth, history.getByMakerId);
 
 module.exports = router;

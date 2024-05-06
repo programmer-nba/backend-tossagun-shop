@@ -422,7 +422,7 @@ exports.confirmAOC = async (req, res) => {
 async function GenerateRiceiptNumber() {
   const order_ticket = await OrderFlightTicket.find();
   const count = order_ticket.lenght > 0 ? order_ticket[0].count + 1 : 1;
-  const data = `AOC${dayjs(Date.now()).format("YYYYMMDD")}${count
+  const data = `AOC${dayjs(Date.now()).format("YYMMDD")}${count
     .toString()
     .padStart(5, "0")}`;
   return data;
@@ -485,3 +485,31 @@ async function GetTeamMember(tel) {
     return res.status(500).send({ status: false, error: error.message });
   }
 };
+
+exports.getOrderAll = async (req, res) => {
+  try {
+    const order = await OrderFlightTicket.find();
+    if (!order)
+      return res.status(403).send({ status: false, message: 'ดึงข้อมูลไม่สำรเร็จ' });
+    return res.status(200).send({ status: true, message: 'ดึงข้อมูลสำเร็จ', data: order });
+  } catch (error) {
+    console.log(err);
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
+  }
+};
+
+exports.getOrderByMakerId = async (req, res) => {
+  try {
+    const id = req.params.makerid;
+    const order = await OrderFlightTicket.find();
+    const orders = order.filter(
+      (el) => el.maker_id === id
+    );
+    if (!orders)
+      return res.status(403).send({ status: false, message: 'ดึงข้อมูลไม่สำรเร็จ' });
+    return res.status(200).send({ status: true, message: 'ดึงข้อมูลสำเร็จ', data: orders });
+  } catch (error) {
+    console.log(err);
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
+  }
+}

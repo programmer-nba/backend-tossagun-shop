@@ -23,3 +23,19 @@ exports.getHistory = async (req, res) => {
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
     }
 };
+
+exports.getByMakerId = async (req, res) => {
+    try {
+        const id = req.params.makerid;
+        const history = await WalletHistory.find();
+        const historys = history.filter(
+            (el) => el.maker_id === id
+        );
+        if (!historys)
+            return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: historys });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
+    }
+}

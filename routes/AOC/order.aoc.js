@@ -11,4 +11,7 @@ router.post("/confirm/:id", auth, aoc.confirmAOC);
 // router.get("/store-id/:store_id", auth, order.findByStoreId);
 // router.get("/ponba/:ponba_id", auth, order.findByPoNbaId);
 
+router.get("/order", auth, aoc.getOrderAll);
+router.get("/order/:makerid", auth, aoc.getOrderByMakerId);
+
 module.exports = router;
