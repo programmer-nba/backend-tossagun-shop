@@ -99,6 +99,7 @@ app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
 app.use(prefix + "/aoc", require("./routes/AOC/order.service"));
 app.use(prefix + "/aoc/appendix", require("./routes/AOC/appendix"));
 app.use(prefix + "/aoc/iata", require("./routes/AOC/IATA.route"));
+app.use(prefix + "/aoc/airline/code", require("./routes/AOC/airline.code"));
 
 //shippop
 app.use(prefix + "/express/customer", require("./routes/shippop/customer")); // ลูกค้า
