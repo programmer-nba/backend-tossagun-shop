@@ -2,11 +2,11 @@ const { AirlineCode } = require("../../model/AOC/aoc.api.models/airline.code.mod
 
 create = async(req, res)=>{
     try{
-        const check_courier = await AirlineCode.findOne({courier_code:req.body.courier_code});
+        const check_courier = await AirlineCode.findOne({airline_code:req.body.airline_code});
         if(check_courier){
             return res
                     .status(400)
-                    .send({message: "รหัสสายการบินนี้มีในระบบแล้ว"})
+                    .send({status:false, message: "รหัสสายการบินนี้มีในระบบแล้ว"})
         }
         const percent = await AirlineCode.create(req.body);
             if(percent){
@@ -16,7 +16,7 @@ create = async(req, res)=>{
             }else{
                 return res
                         .status(401)
-                        .send({message : "เพิ่มข้อมูลไม่สำเร็จ กรุณาทำรายอีกครั้ง"})
+                        .send({status:false, message : "เพิ่มข้อมูลไม่สำเร็จ กรุณาทำรายอีกครั้ง"})
             }
     }catch(err){
         console.log(err);
