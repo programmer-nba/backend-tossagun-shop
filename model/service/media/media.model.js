@@ -20,12 +20,12 @@ const MediaShema = new mongoose.Schema({
         profit_shop: { type: Number, required: true },
         platform: { type: Number, required: true },
     },
-    price: { type: Number, required: true },
-    cost: { type: Number, required: true },
-    freight: { type: Number, required: false, default: 0 },
-    profit: { type: Number, required: false, default: 0 },
-    vat: { type: Number, required: false, default: 0 },
-    net: { type: Number, required: false, default: 0 },
+    price: { type: Number, required: true }, // ราคาขาย
+    cost: { type: Number, required: true }, // ราคาต้นทุน
+    freight: { type: Number, required: false, default: 0 }, // ค่าขนส่ง
+    profit: { type: Number, required: false, default: 0 }, // กำไร
+    vat: { type: Number, required: false, default: 0 }, // vat 3% คิดจากกำไร
+    net: { type: Number, required: false, default: 0 }, // ยอดรวม จากกำ หัก vat 3%
     status: { type: Boolean, required: false, default: true },
     emp: { type: String, required: false, default: "" },
 })

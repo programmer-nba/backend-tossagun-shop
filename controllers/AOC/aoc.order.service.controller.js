@@ -228,7 +228,7 @@ exports.getBooking = async (req, res) => {
             lv: TeamMemberData.level,
             iden: TeamMemberData.iden,
             name: TeamMemberData.name,
-            address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
+            address: `${TeamMemberData.address.address},${TeamMemberData.address.subdistrict},${TeamMemberData.address.district},${TeamMemberData.address.province},${TeamMemberData.address.postcode}`,
             tel: TeamMemberData.tel,
             commission_amount: owner,
             vat3percent: ownervat,
@@ -240,7 +240,7 @@ exports.getBooking = async (req, res) => {
             lv: TeamMemberData.level,
             iden: TeamMemberData.iden,
             name: TeamMemberData.name,
-            address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
+            address: `${TeamMemberData.address.address},${TeamMemberData.address.subdistrict},${TeamMemberData.address.district},${TeamMemberData.address.province},${TeamMemberData.address.postcode}`,
             tel: TeamMemberData.tel,
             commission_amount: lv1,
             vat3percent: lv1vat,
@@ -252,7 +252,7 @@ exports.getBooking = async (req, res) => {
             lv: TeamMemberData.level,
             iden: TeamMemberData.iden,
             name: TeamMemberData.name,
-            address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
+            address: `${TeamMemberData.address.address},${TeamMemberData.address.subdistrict},${TeamMemberData.address.district},${TeamMemberData.address.province},${TeamMemberData.address.postcode}`,
             tel: TeamMemberData.tel,
             commission_amount: lv2,
             vat3percent: lv2vat,
@@ -264,7 +264,7 @@ exports.getBooking = async (req, res) => {
             lv: TeamMemberData.level,
             iden: TeamMemberData.iden,
             name: TeamMemberData.name,
-            address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
+            address: `${TeamMemberData.address.address},${TeamMemberData.address.subdistrict},${TeamMemberData.address.district},${TeamMemberData.address.province},${TeamMemberData.address.postcode}`,
             tel: TeamMemberData.tel,
             commission_amount: lv3,
             vat3percent: lv2vat,
@@ -282,6 +282,7 @@ exports.getBooking = async (req, res) => {
         allSale: allSale,
         orderid: new_ticket._id,
         code: "Tricket",
+        timestamp: dayjs(Date.now()).format(""),
       };
       const commission = new Commission(commissionData);
       if (commission) {
@@ -296,6 +297,7 @@ exports.getBooking = async (req, res) => {
             before: wallet,
             after: newwallet,
             amount: new_ticket.total,
+            timestamp: dayjs(Date.now()).format(""),
           }
         }
         const walletHistory = new WalletHistory(wallethistory);
@@ -434,7 +436,7 @@ async function GetTeamMember(tel) {
     if (!member) {
       return res
         .status(403)
-        .send({ message: "เบอร์โทรนี้ยังไม่ได้เป็นสมาชิกของ NBA Platfrom" });
+        .send({ message: "เบอร์โทรนี้ยังไม่ได้เป็นสมาชิกของทศกัณฐ์แฟมมิลี่" });
     } else {
       const upline = [member.upline.lv1, member.upline.lv2, member.upline.lv3];
       const validUplines = upline.filter((item) => item !== "-");

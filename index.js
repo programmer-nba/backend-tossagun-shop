@@ -71,7 +71,7 @@ app.use(
 );
 app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 // Order Product
-app.use(prefix + "/order", require("./routes/pos/order/order.product"));
+app.use(prefix + "/order/product", require("./routes/pos/order/order.product"));
 app.use(prefix + "/callback", require("./routes/pos/callback"));
 
 // Delete Image
@@ -84,6 +84,9 @@ app.use(prefix + "/service/act", require("./routes/service/act"));
 app.use(prefix + "/service/program", require("./routes/service/program"));
 app.use(prefix + "/service/account", require("./routes/service/account"));
 app.use(prefix + "/service/apppremium", require("./routes/service/apppremium"));
+
+app.use(prefix + "/order/service", require("./routes/service/order"));
+app.use(prefix + "/commission", require("./routes/commission/commission"));
 
 // Wallet
 app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
@@ -107,7 +110,6 @@ app.use(prefix + "/express/insured", require("./routes/shippop/insured")); // à¸
 app.use(prefix + "/express/shippop", require("./routes/shippop/shippop.order"));
 app.use(prefix + "/express/booking", require("./routes/shippop/shippop.manage"));
 app.use(prefix + "/express/shippop/percent", require("./routes/shippop/percent"));
-
 
 // topup
 app.use(prefix + "/topup", require("./routes/topup/topup"));
