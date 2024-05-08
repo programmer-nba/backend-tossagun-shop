@@ -222,7 +222,7 @@ booking = async (req, res) => {
         const price_remote_area = req.body.price_remote_area
         const declared_value = req.body.declared_value
         const insuranceFee = req.body.insuranceFee
-        const shop_id = req.body.shop_id
+        const shop_number = req.body.shop_number
         const maker_id = req.body.maker_id
         const cost_tg = req.body.cost_tg
         const cost = req.body.cost
@@ -257,6 +257,24 @@ booking = async (req, res) => {
                 .status(400)
                 .send({ status: false, message: resp.data.data[0] });
         }
+
+        //ตัดเงิน
+        const findShop = await Shops.findOneAndUpdate(
+            {
+                shop_number:shop_number
+            },
+            {
+                $inc:{
+                    shop_wallet: -total
+                }
+            },
+            {new:true})
+            if(!findShop){
+                return res
+                        .status(404)
+                        .send({status:false, message:"ไม่สามารถค้นหาร้านที่ท่านระบุได้"})
+            }
+
         const Data = resp.data.data[0]
         const parcel = data[0].parcel
         const new_data = []
@@ -273,7 +291,7 @@ booking = async (req, res) => {
             price_remote_area: price_remote_area,
             price: Number(price.toFixed()),
             total: Number(total.toFixed()),
-            shop_id: shop_id
+            shop_id: findShop._id
         };
         new_data.push(v);
 
@@ -282,27 +300,10 @@ booking = async (req, res) => {
             console.log("ไม่สามารถสร้างข้อมูล booking ได้")
         }
         
-        //ตัดเงิน
-        const findShop = await Shops.findOneAndUpdate(
-            {
-                _id:shop_id
-            },
-            {
-                $inc:{
-                    shop_wallet: -total
-                }
-            },
-            {new:true})
-            if(!findShop){
-                return res
-                        .status(404)
-                        .send({status:false, message:"ไม่สามารถค้นหาร้านที่ท่านระบุได้"})
-            }
-        
         //บันทึกการเงิน
         let before = findShop.shop_wallet + total
         let doto = {
-                shop_id:shop_id,
+                shop_id:findShop._id,
                 maker_id:maker_id,
                 orderid:createOrder._id,
                 name:`รายการขนส่งหมายเลขที่ ${invoice}`,
@@ -319,7 +320,7 @@ booking = async (req, res) => {
             }
         return res
             .status(200)
-            .send({ status: true, data: new_data })
+            .send({ status: true, data: new_data, record:record, shop:findShop.shop_wallet  })
     } catch (err) {
         console.log(err)
         return res
