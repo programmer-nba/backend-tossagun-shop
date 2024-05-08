@@ -227,6 +227,7 @@ booking = async (req, res) => {
         const maker_id = req.body.maker_id
         const tossagun_tel = req.body.tossagun_tel
         const cost_tg = req.body.cost_tg
+        const type_payment = req.body.type_payment
         const cost = req.body.cost
         const total = req.body.total
         formData.parcel.weight = weight
@@ -296,6 +297,7 @@ booking = async (req, res) => {
             declared_value: declared_value,
             insuranceFee: insuranceFee,
             price_remote_area: price_remote_area,
+            type_payment: type_payment,
             tossagun_tel: tossagun_tel,
             price: Number(price.toFixed()),
             total: Number(total.toFixed()),

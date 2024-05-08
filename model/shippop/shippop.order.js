@@ -21,6 +21,7 @@ const shippopSchema = new Schema({
         cost: { type: Number, required: true },
         total: { type: Number, required: false },
         price_remote_area: { type: Number, required: false },
+        type_payment: { type: String, required: false },
         tossagun_tel:{ type: String, required: false },
         bill_status: { type: String, default: "พักบิล", required: false },
         order_status: { type: String, default: "booking", required: false },
