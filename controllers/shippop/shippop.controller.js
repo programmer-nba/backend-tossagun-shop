@@ -296,6 +296,7 @@ booking = async (req, res) => {
             declared_value: declared_value,
             insuranceFee: insuranceFee,
             price_remote_area: price_remote_area,
+            tossagun_tel: tossagun_tel,
             price: Number(price.toFixed()),
             total: Number(total.toFixed()),
             shop_id: findShop._id
