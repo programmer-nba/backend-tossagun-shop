@@ -4,6 +4,7 @@ const auth = require("../../lib/auth");
 const authAdmin = require("../../lib/auth.admin")
 
 router.get("/get/token", auth, easybook.getToken);
+router.get("/get/signature", easybook.signature);
 // router.post("/booking", BookingShippop.booking);
 // router.post('/label', auth, BookingShippop.label);
 // router.post("/confirm", auth, BookingShippop.confirm);
