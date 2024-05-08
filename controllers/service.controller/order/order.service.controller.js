@@ -19,7 +19,7 @@ module.exports.create = async (req, res) => {
             } else {
                 let product_price = 0;
                 for (let item of req.body.product_detail) {
-                    const artwork = await PriceArtworks.findOne({ product_id: item.packageid });
+                    const artwork = await PriceArtworks.findOne({ _id: item.priceid, product_id: item.packageid });
                     const total = artwork.price + artwork.freight;
                     product_price += total;
                 }
@@ -34,7 +34,7 @@ module.exports.create = async (req, res) => {
                     let total_platfrom = 0;
 
                     for (let item of req.body.product_detail) {
-                        const artwork = await PriceArtworks.findOne({ product_id: item.packageid });
+                        const artwork = await PriceArtworks.findOne({ _id: item.priceid, product_id: item.packageid });
                         if (artwork) {
                             const product = await ProductArtworks.findOne({ _id: item.packageid });
                             if (product) {
@@ -57,14 +57,7 @@ module.exports.create = async (req, res) => {
                                     total_price = artwork.price * item.quantity;
                                     total_cost = artwork.cost * item.quantity;
                                     total_platfrom = artwork.platform.platform * item.quantity;
-                                    if (item.quantity > 5) {
-                                        const value = item.quantity / 5;
-                                        const result_value = Math.trunc(value);
-                                        const total_value = result_value * artwork.freight;
-                                        total_freight = artwork.freight + total_value;
-                                    } else {
-                                        total_freight = artwork.freight;
-                                    }
+                                    total_freight = artwork.freight * item.quantity;
                                 } else if (product.detail === 'ราคาต่อชุด') {
                                     packagedetail = `${product.description}, ${item.detail}`
                                     total_price = artwork.price * item.quantity;
@@ -81,6 +74,7 @@ module.exports.create = async (req, res) => {
                                 }
                                 order.push({
                                     packageid: artwork.product_id,
+                                    priceid: artwork._id,
                                     packagename: product.name,
                                     packagedetail: packagedetail,
                                     quantity: item.quantity,
@@ -108,9 +102,9 @@ module.exports.create = async (req, res) => {
                         customer_name: req.body.customer_name,
                         customer_tel: req.body.customer_tel,
                         customer_address: req.body.customer_address,
-                        customer_iden: req.body.customer_iden_id,
+                        customer_iden: req.body.customer_iden,
                         customer_line: req.body.customer_line,
-                        product_detail: packagedetail,
+                        product_detail: order,
                         shop_type: req.body.shop_type,
                         paymenttype: req.body.paymenttype,
                         servicename: "Artwork",
