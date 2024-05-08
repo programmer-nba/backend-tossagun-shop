@@ -5,6 +5,7 @@ const { PercentCourier } = require("../../model/shippop/percent.model");
 const { shippopBooking } = require("../../model/shippop/shippop.order");
 const axios = require("axios");
 const { WalletHistory } = require("../../model/wallet/wallet.history.model");
+const { Members } = require("../../model/user/member.model");
 
 priceList = async (req, res) => {
     try {
@@ -224,6 +225,7 @@ booking = async (req, res) => {
         const insuranceFee = req.body.insuranceFee
         const shop_number = req.body.shop_number
         const maker_id = req.body.maker_id
+        const tossagun_tel = req.body.tossagun_tel
         const cost_tg = req.body.cost_tg
         const cost = req.body.cost
         const total = req.body.total
@@ -232,7 +234,12 @@ booking = async (req, res) => {
 
         const invoice = await invoiceNumber()
         // console.log(invoice)
-
+        const findTossagun_tel = await Members.findOne({tel: tossagun_tel})
+            if(!findTossagun_tel){
+                return res
+                        .status(404)
+                        .send({status:false, message:"คุณยังไม่ได้เป็นสมาชิกทศกัณฐ์แฟมิลี่"})
+            }
         const value = {
             api_key: process.env.SHIPPOP_API_KEY,
             email: "OrderHUB@gmail.com",
