@@ -42,12 +42,13 @@ const OrderServiceSchema = new mongoose.Schema({
     net: { type: Number, required: true },
     moneyreceive: { type: Number, required: true },
     change: { type: Number, required: true },
+    tracking: { type: String, required: false, default: "" },
     employee: { type: String, required: false, default: "ไม่มี" },
     status: { type: Array, required: false, default: [] },
     timestamp: { type: Date, required: false, default: Date.now() },
 });
 
-const OrderServiceModels = mongoose.model("orderservice", OrderServiceSchema);
+const OrderServiceModels = mongoose.model("order_service", OrderServiceSchema);
 
 const validate = (data) => {
     const Schema = Joi.object({

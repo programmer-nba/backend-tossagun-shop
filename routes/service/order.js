@@ -15,4 +15,9 @@ router.get("/aoc/:makerid", auth, order.getOrderByMakerId);
 router.get("/express", auth, order.getOrderExpress);
 router.get("/express/:shopid", auth, order.getOrderByShopId);
 
+// Order Artwork
+router.get("/artwork", auth, order.getOrderArtwork);
+router.get("/artwork/shop/:shopid", auth, order.getByShopId);
+router.get("/artwork/maker/:makerid", auth, order.getByMakerId);
+
 module.exports = router;
