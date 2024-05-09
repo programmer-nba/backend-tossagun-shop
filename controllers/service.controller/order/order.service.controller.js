@@ -7,6 +7,7 @@ const { OrderFlightTicket } = require("../../../model/AOC/api.service.models/aoc
 const { Members } = require("../../../model/user/member.model");
 const line = require("../../../lib/line.notify");
 const { WalletHistory } = require("../../../model/wallet/wallet.history.model");
+const { shippopBooking } = require("../../../model/shippop/shippop.order");
 
 module.exports.create = async (req, res) => {
     try {
@@ -396,6 +397,38 @@ module.exports.getOrderAocById = async (req, res) => {
         const order_aoc = await OrderFlightTicket.findById(req.params.id);
         if (order_aoc) {
             return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order_aoc })
+        } else {
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.getOrderExpress = async (req, res) => {
+    try {
+        const order_express = await shippopBooking.find();
+        if (order_express) {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order_express })
+        } else {
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.getOrderByShopId = async (req, res) => {
+    try {
+        const id = req.params.shopid;
+        const order_express = await shippopBooking.find();
+        const orders = order_express.filter(
+            (el) => el.shop_id === id
+        );
+        if (orders) {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: orders })
         } else {
             return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
         }

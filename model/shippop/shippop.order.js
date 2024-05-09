@@ -5,6 +5,7 @@ const Joi = require("joi");
 const shippopSchema = new Schema({
         employee_id: { type: String, required: false },
         shop_id: { type: String, required: true },
+        purchase_id: { type: String, required: true },
         tracking_code: { type: String, required: false },
         invoice: { type: String, required: false },
         from: { type: Object, required: false },
@@ -20,10 +21,10 @@ const shippopSchema = new Schema({
         cost_tg: { type: Number, required: true },
         cost: { type: Number, required: true },
         total: { type: Number, required: false },
-        price_remote_area: { type: Number, required: false },
-        type_payment: { type: String, required: false },
-        tossagun_tel:{ type: String, required: false },
-        bill_status: { type: String, default: "พักบิล", required: false },
+        // price_remote_area: { type: Number, required: false },
+        // type_payment: { type: String, required: false },
+        // tossagun_tel: { type: String, required: false },
+        // bill_status: { type: String, default: "พักบิล", required: false },
         order_status: { type: String, default: "booking", required: false },
         package_detail: { type: Object, default: null, required: false }, // กรณีมีการเรียกเก็บเพิ่มเติม
         package_detail_status: { type: Boolean, default: false, required: false }, //สถานะการหักเงินของรpartner กรณีมีการหักส่วนต่าง

@@ -6,6 +6,7 @@ const { shippopBooking } = require("../../model/shippop/shippop.order");
 const axios = require("axios");
 const { WalletHistory } = require("../../model/wallet/wallet.history.model");
 const { Members } = require("../../model/user/member.model");
+const dayjs = require("dayjs");
 
 priceList = async (req, res) => {
     try {
@@ -136,12 +137,12 @@ priceList = async (req, res) => {
         // console.log(insuranceFee)
 
         //ค้นหาร้านค้า
-        const findShop = await Shops.findOne({shop_number:shop})
-            if(!findShop){
-                return res
-                        .status(404)
-                        .send({status:false, message:"ไม่สามารถค้นหาร้านเจอที่ท่านระบุได้"})
-            }
+        const findShop = await Shops.findOne({ shop_number: shop })
+        if (!findShop) {
+            return res
+                .status(404)
+                .send({ status: false, message: "ไม่สามารถค้นหาร้านเจอที่ท่านระบุได้" })
+        }
         for (const ob of Object.keys(obj)) {
             if (obj[ob].available) {
                 if (cod_amount > 0 && obj[ob].courier_code == 'ECP') {
@@ -157,9 +158,9 @@ priceList = async (req, res) => {
                 }
                 // คำนวนต้นทุนของร้านค้า
                 let cost_hub = Number(obj[ob].price);
-                let cost = Math.ceil(((cost_hub*p.profit_tg)/100) + cost_hub)
-                let price = Math.ceil(((cost*p.profit_shop)/100) + cost)
-                
+                let cost = Math.ceil(((cost_hub * p.profit_tg) / 100) + cost_hub)
+                let price = Math.ceil(((cost * p.profit_shop) / 100) + cost)
+
                 v = {
                     ...obj[ob],
                     price_remote_area: 0,
@@ -183,9 +184,9 @@ priceList = async (req, res) => {
                     v.total = total
                 }
 
-                if(findShop.shop_wallet < v.total){
+                if (findShop.shop_wallet < v.total) {
                     v.status = "เงินในกระเป๋าของท่านไม่เพียงพอ"
-                }else{
+                } else {
                     v.status = "พร้อมใช้งาน"
                 }
 
@@ -235,12 +236,12 @@ booking = async (req, res) => {
 
         const invoice = await invoiceNumber()
         // console.log(invoice)
-        const findTossagun_tel = await Members.findOne({tel: tossagun_tel})
-            if(!findTossagun_tel){
-                return res
-                        .status(404)
-                        .send({status:false, message:"คุณยังไม่ได้เป็นสมาชิกทศกัณฐ์แฟมิลี่"})
-            }
+        const findTossagun_tel = await Members.findOne({ tel: tossagun_tel })
+        if (!findTossagun_tel) {
+            return res
+                .status(404)
+                .send({ status: false, message: "คุณยังไม่ได้เป็นสมาชิกทศกัณฐ์แฟมิลี่" })
+        }
         const value = {
             api_key: process.env.SHIPPOP_API_KEY,
             email: "OrderHUB@gmail.com",
@@ -269,19 +270,19 @@ booking = async (req, res) => {
         //ตัดเงิน
         const findShop = await Shops.findOneAndUpdate(
             {
-                shop_number:shop_number
+                shop_number: shop_number
             },
             {
-                $inc:{
+                $inc: {
                     shop_wallet: -total
                 }
             },
-            {new:true})
-            if(!findShop){
-                return res
-                        .status(404)
-                        .send({status:false, message:"ไม่สามารถค้นหาร้านที่ท่านระบุได้"})
-            }
+            { new: true })
+        if (!findShop) {
+            return res
+                .status(404)
+                .send({ status: false, message: "ไม่สามารถค้นหาร้านที่ท่านระบุได้" })
+        }
 
         const Data = resp.data.data[0]
         const parcel = data[0].parcel
@@ -290,47 +291,52 @@ booking = async (req, res) => {
             ...Data, //มี declared_value และ cod_amount อยู่แล้วใน ...Data ไม่ต้องสร้างเพิ่ม
             parcel: parcel,
             invoice: invoice,
-            employee_id: id,
             purchase_id: String(resp.data.purchase_id),
             cost_tg: cost_tg,
             cost: cost,
             declared_value: declared_value,
             insuranceFee: insuranceFee,
-            price_remote_area: price_remote_area,
-            type_payment: type_payment,
-            tossagun_tel: tossagun_tel,
+            // price_remote_area: price_remote_area,
+            // type_payment: type_payment,
+            // tossagun_tel: tossagun_tel,
             price: Number(price.toFixed()),
             total: Number(total.toFixed()),
             shop_id: findShop._id
         };
+        const o = {
+            shop_id: findShop._id,
+            platform_tel: tossagun_tel,
+            
+        }
         new_data.push(v);
 
         const createOrder = await shippopBooking.create(v)
         if (!createOrder) {
             console.log("ไม่สามารถสร้างข้อมูล booking ได้")
         }
-        
+
         //บันทึกการเงิน
         let before = findShop.shop_wallet + total
         let doto = {
-                shop_id:findShop._id,
-                maker_id:maker_id,
-                orderid:createOrder._id,
-                name:`รายการขนส่งหมายเลขที่ ${invoice}`,
-                type:`เงินออก`,
-                amount: total,
-                before: before,
-                after: findShop.shop_wallet,
+            shop_id: findShop._id,
+            maker_id: maker_id,
+            orderid: createOrder._id,
+            name: `รายการขนส่งหมายเลขที่ ${invoice}`,
+            type: `เงินออก`,
+            amount: total,
+            before: before,
+            after: findShop.shop_wallet,
+            timestamp: dayjs(Date.now()).format(""),
         }
         const record = await WalletHistory.create(doto)
-            if(!record){
-                return res
-                        .status(400)
-                        .send({status:false, message:"ไม่สามารถสร้างประวัติการเงินได้"})
-            }
+        if (!record) {
+            return res
+                .status(400)
+                .send({ status: false, message: "ไม่สามารถสร้างประวัติการเงินได้" })
+        }
         return res
             .status(200)
-            .send({ status: true, data: new_data, record:record, shop:findShop.shop_wallet  })
+            .send({ status: true, data: new_data, record: record, shop: findShop.shop_wallet })
     } catch (err) {
         console.log(err)
         return res
@@ -480,6 +486,30 @@ async function invoiceNumber() {
 
     console.log(combinedData);
     return combinedData;
+}
+
+order = async (req, res) => {
+    try {
+        const { error } = validate(req.body);
+        if (error) {
+            return res.status(400).send({ statue: false, message: error.details[0].message })
+        }
+        const invoice = await invoiceNumber(req.body.shop_id, req.body.status[0].timestamp);
+        const date = dayjs(Date.now()).format('')
+        const data = {
+            ...req.body, invoice: invoice, timestamp: date
+        };
+        const order = await OrderExpress.create(data);
+        if (order) {
+            return res.status(201).send({ status: true, message: "สร้างรายการสำเร็จ", result: order });
+        } else {
+            return res.status(400).send({ status: false, message: "สร้างรายการไม่สำเร็จ" });
+        }
+    } catch (err) {
+        return res
+            .status(500)
+            .send({ status: false, message: err.message })
+    }
 }
 
 module.exports = { priceList, booking, cancelOrder, tracking, labelHtml }
