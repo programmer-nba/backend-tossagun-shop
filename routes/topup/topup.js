@@ -10,6 +10,9 @@ router.get("/mobile", auth, topups.getTopupMobile);
 //gentoken
 router.post("/gentoken", topup.gentoken);
 
+// topup เติมเงิน
+router.post("/", topup.topup);
+
 // เติมเงิน ais 
 router.post("/topupais", topup.topup_ais);
 

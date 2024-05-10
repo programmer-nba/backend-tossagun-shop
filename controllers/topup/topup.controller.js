@@ -19,6 +19,52 @@ const gentoken = async (req, res) => {
 
 };
 
+//topup
+const topup = async (req, res) => {
+    try{
+        const {amount,mobile,service_id,ref1} = req.body;
+        const tokentopup = process.env.TOPUP_TOKEN;
+        const username = process.env.TOPUP_USERNAME;
+        let data 
+        if(ref1 == null || ref1 == '')
+        {
+            data = {
+                reference_order:await runreference_order(),
+                amount: amount,
+                branch: username,
+                service_id : service_id,
+                mobile: mobile,
+            }
+
+        }else{
+            data={
+                reference_order:await runreference_order(),
+                amount: amount,
+                branch: username,
+                service_id : service_id,
+                mobile: mobile,
+                ref1: ref1
+            }
+        }
+
+        const apiResponse = await axios.post(`${process.env.TOPUP_URL}`,data,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${tokentopup}`
+            },
+        });
+        if(apiResponse.data.status == 200){
+            return res.status(200).send({status:true, message:apiResponse.data.message})
+        }else{
+            return res.status(400).send({status:false, message:apiResponse.data.message})
+        }
+    }catch(err){
+        return res.status(500).send({status:false, message:err.message})
+    }
+}
+
+
 // เติมเงิน ais 
 const topup_ais = async (req, res) => {
     try{
@@ -365,6 +411,7 @@ module.exports = {
     topup_shopeepay,
     topup_rabbitlinepay,
     send_sms,
-    getorderbyreference_order
+    getorderbyreference_order,
+    topup
     
 }
