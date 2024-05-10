@@ -1,17 +1,18 @@
-const {ProductTG, validate} = require("../../../model/pos/product/product.tossagun.model");
+const { ProductTG, validate } = require("../../../model/pos/product/product.tossagun.model");
+const path = require("path");
 
 exports.findAll = async (req, res) => {
   try {
     const product = await ProductTG.find();
     if (product) {
-      return res.status(200).send({data: product, status: true});
+      return res.status(200).send({ data: product, status: true });
     } else {
       return res
         .status(400)
-        .send({status: false, message: "ดึงข้อมูลไม่สำเร็จ"});
+        .send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
     }
   } catch (err) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
 
@@ -23,8 +24,8 @@ exports.findOne = async (req, res) => {
         if (!data)
           return res
             .status(404)
-            .send({message: "ไม่สามารถหารายงานนี้ได้", status: false});
-        else res.send({data, status: true});
+            .send({ message: "ไม่สามารถหารายงานนี้ได้", status: false });
+        else res.send({ data, status: true });
       })
       .catch((err) => {
         return res.status(500).send({
@@ -43,23 +44,23 @@ exports.findOne = async (req, res) => {
 exports.getByBarcode = async (req, res) => {
   try {
     const barcode = req.params.barcode;
-    const product = await ProductTG.findOne({productTG_barcode: barcode});
+    const product = await ProductTG.findOne({ productTG_barcode: barcode });
     if (product) {
-      return res.status(200).send({status: true, data: product});
+      return res.status(200).send({ status: true, data: product });
     } else {
       return res
         .status(400)
-        .send({status: false, message: "ไม่พบข้อมูลสินค้า"});
+        .send({ status: false, message: "ไม่พบข้อมูลสินค้า" });
     }
   } catch (err) {
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
   }
 };
 
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {
-    ProductTG.findByIdAndDelete(id, {useFindAndModify: false})
+    ProductTG.findByIdAndDelete(id, { useFindAndModify: false })
       .then((data) => {
         if (!data) {
           return res.status(404).send({
@@ -89,16 +90,30 @@ exports.delete = async (req, res) => {
 
 exports.findByCredit = async (req, res) => {
   try {
-    const product = await ProductTG.find({productTG_status_type: "เครดิต"});
-    if (product) {
-      return res.status(200).send({status: true, data: product});
+    const product = await ProductTG.find();
+    const products = product.filter(
+      (el) => el.productTG_status_type === 'เครดิต'
+    );
+    if (products) {
+      return res.status(200).send({ status: true, data: products });
     } else {
       return res
         .status(400)
-        .send({status: false, message: "ดึงข้อมูลไม่สำเร็จ"});
+        .send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
     }
   } catch (err) {
     console.log(err);
-    return res.status(500).send({message: "มีบางอย่างผิดพลาด"});
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
+  }
+};
+
+module.exports.getImage = async (req, res) => {
+  try {
+    const imgname = req.params.imgname;
+    const imagePath = path.join(__dirname, '../../../assets/product', imgname);
+    return res.sendFile(imagePath);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 };

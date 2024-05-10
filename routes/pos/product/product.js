@@ -6,11 +6,14 @@ const category = require("../../../controllers/pos/product.tossagun.controller/c
 const auth = require("../../../lib/auth");
 const authAdmin = require("../../../lib/auth.admin");
 
+router.get("/image/:imgname", products.getImage);
+
 router.post("/", authAdmin, createProduct.create);
 router.get("/", authAdmin, products.findAll);
 router.get("/:id", auth, products.findOne);
 router.get("/barcode/:barcode", auth, products.getByBarcode);
 router.put("/:id", auth, updateProduct.update);
+router.get("/by/credit", auth, products.findByCredit);
 router.delete("/:id", authAdmin, products.delete);
 
 router.post("/category", authAdmin, category.create);
