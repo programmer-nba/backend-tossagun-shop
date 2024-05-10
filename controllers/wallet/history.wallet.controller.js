@@ -14,7 +14,15 @@ exports.create = async (req, res) => {
 
 exports.getHistory = async (req, res) => {
     try {
-        const history = await WalletHistory.find();
+        const pipelint = [
+            {
+                $match: { category: 'Wallet' },
+            },
+            {
+                $group: { _id: 0, count: { $sum: 1 } },
+            },
+        ];
+        const history = await WalletHistory.aggregate(pipelint);
         if (!history)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
         return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: history });
@@ -27,13 +35,18 @@ exports.getHistory = async (req, res) => {
 exports.getByMakerId = async (req, res) => {
     try {
         const id = req.params.makerid;
-        const history = await WalletHistory.find();
-        const historys = history.filter(
-            (el) => el.maker_id === id
-        );
-        if (!historys)
+        const pipelint = [
+            {
+                $match: { category: 'Wallet', maker_id: id },
+            },
+            {
+                $group: { _id: 0, count: { $sum: 1 } },
+            },
+        ];
+        const history = await WalletHistory.aggregate(pipelint);
+        if (!history)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
-        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: historys });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: history });
     } catch (error) {
         console.log(error)
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
@@ -43,13 +56,18 @@ exports.getByMakerId = async (req, res) => {
 exports.getByShopId = async (req, res) => {
     try {
         const id = req.params.shopid;
-        const history = await WalletHistory.find();
-        const historys = history.filter(
-            (el) => el.shop_id === id
-        );
-        if (!historys)
+        const pipelint = [
+            {
+                $match: { category: 'Wallet', shop_id: id },
+            },
+            {
+                $group: { _id: 0, count: { $sum: 1 } },
+            },
+        ];
+        const history = await WalletHistory.aggregate(pipelint);
+        if (!history)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
-        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: historys });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: history });
     } catch (error) {
         console.log(error)
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });

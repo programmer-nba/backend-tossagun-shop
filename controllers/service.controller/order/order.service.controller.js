@@ -10,6 +10,8 @@ const { WalletHistory } = require("../../../model/wallet/wallet.history.model");
 const { shippopBooking } = require("../../../model/shippop/shippop.order");
 const { Shops } = require("../../../model/pos/shop.model");
 const dayjs = require("dayjs");
+const office = require("../../../function/office")
+const commissions = require("../../../function/commission");
 
 module.exports.create = async (req, res) => {
     try {
@@ -228,6 +230,7 @@ module.exports.create = async (req, res) => {
                                         orderid: new_order._id,
                                         name: `รายการสั่งซื้อ Artwork ใบเสร็จเลขที่ ${new_order.invoice}`,
                                         type: "เงินออก",
+                                        category: 'Wallet',
                                         before: member.wallet,
                                         after: newwallet,
                                         amount: new_order.net,
@@ -276,6 +279,7 @@ const checkEmployee = async (req, res) => {
                 return res.status(403).send({ status: false, message: "ยอดเงินในระบบไม่เพียงพอ", });
             } else {
                 const order = [];
+                const order_office = [];
                 let packagedetail;
                 let total_price = 0;
                 let total_cost = 0;
@@ -330,6 +334,11 @@ const checkEmployee = async (req, res) => {
                                 cost: total_cost,
                                 freight: total_freight,
                             });
+                            order_office.push({
+                                packagename: product.name,
+                                packagedetail: packagedetail,
+                                quantity: item.quantity,
+                            })
                         } else {
                             return res.status(403).send({ status: false, message: 'ไม่พบข้อมูลสินค้า' });
                         }
@@ -339,7 +348,7 @@ const checkEmployee = async (req, res) => {
                 const totalcost = order.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0);
                 const totalfreight = order.reduce((accumulator, currentValue) => accumulator + currentValue.freight, 0);
 
-                const invoice = await GenerateRiceiptNumber();
+                const invoice = await GenerateRiceiptNumber(req.body.shop_type);
                 const data = {
                     invoice: invoice,
                     maker_id: req.body.maker_id,
@@ -367,11 +376,25 @@ const checkEmployee = async (req, res) => {
                     timestamp: dayjs(Date.now()).format(""),
                 };
                 const new_order = new OrderServiceModels(data);
+                const formOrderOffice = {
+                    receiptnumber: invoice,
+                    detail: "Graphics",
+                    customer: {
+                        customer_iden: req.body.customer_iden,
+                        customer_name: req.body.customer_name,
+                        customer_tel: req.body.customer_tel,
+                        customer_address: req.body.customer_address,
+                        customer_line: req.body.customer_line,
+                    },
+                    product_detail: order_office,
+                };
                 const getteammember = await GetTeamMember(req.body.platform);
                 if (!getteammember) {
                     return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
                 } else {
                     new_order.save();
+                    await office.OrderOfficeCreate(formOrderOffice);
+
                     // ตัดเงิน
                     const newwallet = shop.shop_wallet - (totalprice + totalfreight);
                     await Shops.findByIdAndUpdate(shop._id, { shop_wallet: newwallet }, { useFindAndModify: false });
@@ -396,6 +419,24 @@ const checkEmployee = async (req, res) => {
                     const lv1vat = (lv1 * 3) / 100;
                     const lv2vat = (lv2 * 3) / 100;
                     const lv3vat = (lv3 * 3) / 100;
+
+                    const givecommission = {
+                        invoice: invoice,
+                        tel: req.body.platform,
+                        platform: {
+                            owner: owner,
+                            lv1: lv1,
+                            lv2: lv2,
+                            lv3: lv3,
+                        },
+                        central: {
+                            allsale: (allSale * percent.percent_central.allsale) / 100,
+                            central: (allSale * percent.percent_central.central) / 100,
+                        },
+                        emp_bonus: bonus,
+                    };
+
+                    await commissions.GiveCommission(givecommission);
 
                     const ownercommission = owner - ownervat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
                     const lv1commission = lv1 - lv1vat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
@@ -475,6 +516,7 @@ const checkEmployee = async (req, res) => {
                             orderid: new_order._id,
                             name: `รายการสั่งซื้อ Artwork ใบเสร็จเลขที่ ${new_order.invoice}`,
                             type: "เงินออก",
+                            category: 'Wallet',
                             before: shop.shop_wallet,
                             after: newwallet,
                             amount: new_order.net,
@@ -488,8 +530,8 @@ const checkEmployee = async (req, res) => {
 แจ้งงานเข้า : ${new_order.servicename}
 เลขที่ทำรายการ : ${new_order.invoice}
 ตรวจสอบได้ที่ : https://office.ddscservices.com/
-                                                                                                    
-*ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
+                
+ *ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
                             await line.linenotify(message);
                             return res.status(200).send({ status: true, data: data, ยอดเงินคงเหลือ: newwallet });
                         }
@@ -503,13 +545,38 @@ const checkEmployee = async (req, res) => {
     }
 }
 
-async function GenerateRiceiptNumber() {
-    const order = await OrderServiceModels.find();
-    const count = order.lenght > 0 ? order[0].count + 1 : 1;
-    const data = `ART${dayjs(Date.now()).format("YYMMDD")}${count
-        .toString()
-        .padStart(5, "0")}`;
-    return data;
+async function GenerateRiceiptNumber(shop_type) {
+    if (shop_type === 'One Stop Service') {
+        const pipelint = [
+            {
+                $match: { shop_type: shop_type },
+            },
+            {
+                $group: { _id: 0, count: { $sum: 1 } },
+            },
+        ];
+        const count = await OrderServiceModels.aggregate(pipelint);
+        const countValue = count.length > 0 ? count[0].count + 1 : 1;
+        const data = `TGS${dayjs(Date.now()).format("YYMMDD")}${countValue
+            .toString()
+            .padStart(5, "0")}`;
+        return data;
+    } else if (shop_type === 'One Stop Platform') {
+        const pipelint = [
+            {
+                $match: { shop_type: shop_type },
+            },
+            {
+                $group: { _id: 0, count: { $sum: 1 } },
+            },
+        ];
+        const count = await OrderServiceModels.aggregate(pipelint);
+        const countValue = count.length > 0 ? count[0].count + 1 : 1;
+        const data = `TGP${dayjs(Date.now()).format("YYMMDD")}${countValue
+            .toString()
+            .padStart(5, "0")}`;
+        return data;
+    }
 };
 
 async function GetTeamMember(tel) {

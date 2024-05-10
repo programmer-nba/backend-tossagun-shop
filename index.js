@@ -54,18 +54,9 @@ app.use(prefix + "/brand", require("./routes/pos/brand"));
 app.use(prefix + "/delete/image", require("./routes/image/delete"));
 app.use(prefix + "/collection/image", require("./routes/image/collection"));
 // Preorder
-app.use(
-  prefix + "/preorder/tossagun",
-  require("./routes/pos/preorder/preorder.tossagun")
-);
-app.use(
-  prefix + "/preorder/shop",
-  require("./routes/pos/preorder/preorder.shop")
-);
-app.use(
-  prefix + "/preorder/shop-full",
-  require("./routes/pos/preorder/preorder.shop.full")
-);
+app.use(prefix + "/preorder/tossagun", require("./routes/pos/preorder/preorder.tossagun"));
+app.use(prefix + "/preorder/shop", require("./routes/pos/preorder/preorder.shop"));
+app.use(prefix + "/preorder/shop-full", require("./routes/pos/preorder/preorder.shop.full"));
 app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 // Order Product
 app.use(prefix + "/order/product", require("./routes/pos/order/order.product"));

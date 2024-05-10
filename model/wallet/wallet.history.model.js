@@ -2,11 +2,15 @@ const mongoose = require("mongoose")
 const Joi = require("joi")
 
 const wallethistory = new mongoose.Schema({
-    shop_id: { type: String, default:"", required: false },
-    maker_id: { type: String, default:"", required: false, },
+    form: { type: String, required: false, default: "" },
+    shop_id: { type: String, default: "", required: false },
+    maker_id: { type: String, default: "", required: false, },
     orderid: { type: String },
+    category: { type: String, enum: ['Wallet', 'Commission'], required: false },
     name: { type: String, required: true },
     type: { type: String, enum: ['เงินเข้า', 'เงินออก'], required: true },
+    vat: { type: Number, required: false, default: 0 },
+    total: { type: Number, required: false, default: 0 },
     amount: { type: Number, required: true },
     before: { type: Number, required: true },
     after: { type: Number, required: true },
