@@ -112,11 +112,9 @@ priceList = async (req, res) => {
             api_key: process.env.SHIPPOP_API_KEY,
             data: data,
         };
-        const resp = await axios.post(`${process.env.SHIPPOP_URL}/pricelist/`, value,
-            {
-                headers: { "Accept-Encoding": "gzip,deflate,compress" },
-            }
-        )
+        const resp = await axios.post(`${process.env.SHIPPOP_URL}/pricelist/`, value, {
+            headers: { "Accept-Encoding": "gzip,deflate,compress" },
+        })
         if (!resp.data.status) {
             return res
                 .status(400)
@@ -308,7 +306,7 @@ booking = async (req, res) => {
             product: data,
             employee: req.body.employee,
             status: [
-                { name: "รอชำระเงิน", timestamp: dayjs(Date.now()).format() }
+                { name: "ชำระเงิน", timestamp: dayjs(Date.now()).format() }
             ],
             timestamp: dayjs(Date.now()).format(),
         }
@@ -325,6 +323,8 @@ booking = async (req, res) => {
         } else {
             createOrder.save();
             createOrderShippop.save();
+
+            await confirmOrder(String(resp.data.purchase_id), findShop._id);
 
             //บันทึกการเงิน
             let before = findShop.shop_wallet + total
@@ -381,14 +381,12 @@ cancelOrder = async (req, res) => {
                 .send({ status: false, message: "หมายเลขสินค้านี้ถูก cancel ไปแล้ว" })
         }
 
-        const respStatus = await axios.post(`${process.env.SHIPPOP_URL}/cancel/`, valueCheck,
-            {
-                headers: {
-                    "Accept-Encoding": "gzip,deflate,compress",
-                    "Content-Type": "application/json"
-                },
-            }
-        )
+        const respStatus = await axios.post(`${process.env.SHIPPOP_URL}/cancel/`, valueCheck, {
+            headers: {
+                "Accept-Encoding": "gzip,deflate,compress",
+                "Content-Type": "application/json"
+            },
+        })
         if (respStatus.data.status != true) {
             return res
                 .status(400)
@@ -412,7 +410,6 @@ cancelOrder = async (req, res) => {
                 .status(200)
                 .send({ status: false, data: findPno })
         }
-
     } catch (err) {
         console.log(err)
         return res
@@ -428,14 +425,12 @@ tracking = async (req, res) => {
             api_key: process.env.SHIPPOP_API_KEY,
             tracking_code: tracking,
         };
-        const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking/`, valueCheck,
-            {
-                headers: {
-                    "Accept-Encoding": "gzip,deflate,compress",
-                    "Content-Type": "application/json"
-                },
-            }
-        )
+        const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking/`, valueCheck, {
+            headers: {
+                "Accept-Encoding": "gzip,deflate,compress",
+                "Content-Type": "application/json"
+            },
+        })
         if (!resp) {
             return res
                 .status(400)

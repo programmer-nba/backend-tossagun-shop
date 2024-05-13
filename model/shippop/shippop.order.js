@@ -7,6 +7,7 @@ const shippopSchema = new Schema({
         shop_id: { type: String, required: true },
         purchase_id: { type: String, required: true },
         tracking_code: { type: String, required: false },
+        courier_tracking_code: { type: String, required: false },
         invoice: { type: String, required: false },
         from: { type: Object, required: false },
         to: { type: Object, required: false },
