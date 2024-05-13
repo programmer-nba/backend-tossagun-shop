@@ -2,7 +2,7 @@ const router = require("express").Router();
 const employees = require("../../controllers/user/employee.controller");
 const auth = require("../../lib/auth");
 
-router.get("/shop/:id", auth, employees.findByShopId);
+router.get("/shop/:shopid", auth, employees.findByShopId);
 
 router.post("/", auth, employees.create);
 router.get("/", auth, employees.findAll);

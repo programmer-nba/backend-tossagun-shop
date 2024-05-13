@@ -3,6 +3,7 @@ const dayjs = require("dayjs");
 const { Members } = require("../model/user/member.model");
 const { WalletHistory } = require("../model/wallet/wallet.history.model");
 const { MoneySavings } = require("../model/wallet/money.save.model");
+const { Percents } = require("../model/pos/commission/percent.model");
 
 const validate_commission = (data) => {
 	const schema = Joi.object({
@@ -177,4 +178,117 @@ async function GiveCommission(packageData) {
 	}
 };
 
-module.exports = { GiveCommission };
+async function Commission(order, total_platfrom, getteammember, codeOrder) {
+	try {
+		const percent = await Percents.findOne({ code: 'Service' });
+
+		const platfromcommission = (total_platfrom * percent.percent.platform) / 100;
+		const bonus = (total_platfrom * percent.percent.terrestrial) / 100;
+		const allSale = (total_platfrom * percent.percent.central) / 100;
+
+		const level = getteammember;
+		const validLevel = level.filter((item) => item !== null);
+		const storeData = [];
+
+		const owner = (platfromcommission * percent.percent_platform.level_owner) / 100;
+		const lv1 = (platfromcommission * percent.percent_platform.level_one) / 100;
+		const lv2 = (platfromcommission * percent.percent_platform.level_two) / 100;
+		const lv3 = (platfromcommission * percent.percent_platform.level_tree) / 100;
+
+		const ownervat = (owner * 3) / 100;
+		const lv1vat = (lv1 * 3) / 100;
+		const lv2vat = (lv2 * 3) / 100;
+		const lv3vat = (lv3 * 3) / 100;
+
+		const givecommission = {
+			invoice: order.invoice,
+			tel: order.platform,
+			platform: {
+				owner: owner,
+				lv1: lv1,
+				lv2: lv2,
+				lv3: lv3,
+			},
+			central: {
+				allsale: (allSale * percent.percent_central.allsale) / 100,
+				central: (allSale * percent.percent_central.central) / 100,
+			},
+			emp_bonus: bonus,
+		};
+
+		await GiveCommission(givecommission);
+
+		const ownercommission = owner - ownervat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
+		const lv1commission = lv1 - lv1vat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
+		const lv2commission = lv2 - lv2vat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
+		const lv3commission = lv3 - lv3vat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
+
+		for (const TeamMemberData of validLevel) {
+			let integratedData;
+			if (TeamMemberData.level == "owner") {
+				integratedData = {
+					lv: TeamMemberData.level,
+					iden: TeamMemberData.iden,
+					name: TeamMemberData.name,
+					address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
+					tel: TeamMemberData.tel,
+					commission_amount: owner,
+					vat3percent: ownervat,
+					remainding_commission: ownercommission,
+				};
+			} else if (TeamMemberData.level == "1") {
+				integratedData = {
+					lv: TeamMemberData.level,
+					iden: TeamMemberData.iden,
+					name: TeamMemberData.name,
+					address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
+					tel: TeamMemberData.tel,
+					commission_amount: lv1,
+					vat3percent: lv1vat,
+					remainding_commission: lv1commission,
+				};
+			} else if (TeamMemberData.level == "2") {
+				integratedData = {
+					lv: TeamMemberData.level,
+					iden: TeamMemberData.iden,
+					name: TeamMemberData.name,
+					address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
+					tel: TeamMemberData.tel,
+					commission_amount: lv2,
+					vat3percent: lv2vat,
+					remainding_commission: lv2commission,
+				};
+			} else if (TeamMemberData.level == "3") {
+				integratedData = {
+					lv: TeamMemberData.level,
+					iden: TeamMemberData.iden,
+					name: TeamMemberData.name,
+					address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
+					tel: TeamMemberData.tel,
+					commission_amount: lv3,
+					vat3percent: lv2vat,
+					remainding_commission: lv3commission,
+				};
+			}
+
+			if (integratedData) {
+				storeData.push(integratedData);
+			}
+		}
+
+		const commissionData = {
+			data: storeData,
+			platformcommission: platfromcommission,
+			bonus: bonus,
+			allSale: allSale,
+			orderid: order._id,
+			code: codeOrder,
+		};
+
+		return commissionData;
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+module.exports = { GiveCommission, Commission };

@@ -76,27 +76,17 @@ exports.findById = async (req, res) => {
 };
 
 exports.findByShopId = async (req, res) => {
-  const id = req.params.shopid;
   try {
-    Employees.find()
-      .then((data) => {
-        if (!data) {
-          return res
-            .status(404)
-            .send({ message: "ไม่สามารถหาผู้ใช้งานนี้ได้", status: false });
-        } else {
-          const em_shop = data.filter(
-            (el) => el.employee_shop_id === id
-          );
-          return res.send({ status: true, message: 'ดึงข้อมูลพนักงานสำเร็จ', data: em_shop });
-        }
-      })
-      .catch((err) => {
-        return res.status(500).send({
-          message: "มีบางอย่างผิดพลาด",
-          status: false,
-        });
-      });
+    const id = req.params.shopid;
+    const pipelint = [
+      {
+        $match: { employee_shop_id: id },
+      }
+    ];
+    const employee = await Employees.aggregate(pipelint);
+    if (!employee)
+      return res.status(403).send({ status: false, message: "ดึงข้อมูลพนักงานไม่สำเร็จ" });
+    return res.status(200).send({ status: true, message: "ดึงข้อมูลพนักสำเร็จ", data: employee });
   } catch (error) {
     return res.status(500).send({
       message: "มีบางอย่างผิดพลาด",

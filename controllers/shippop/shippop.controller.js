@@ -3,10 +3,13 @@ const { customerShippop } = require("../../model/shippop/customer.model");
 const { insuredExpress } = require("../../model/shippop/insured.model");
 const { PercentCourier } = require("../../model/shippop/percent.model");
 const { shippopBooking } = require("../../model/shippop/shippop.order");
+const { OrderExpress } = require("../../model/shippop/order.express.model");
 const axios = require("axios");
 const { WalletHistory } = require("../../model/wallet/wallet.history.model");
 const { Members } = require("../../model/user/member.model");
 const dayjs = require("dayjs");
+const commissions = require("../../function/commission");
+const { Commission } = require("../../model/pos/commission/commission.model");
 
 priceList = async (req, res) => {
     try {
@@ -233,18 +236,17 @@ booking = async (req, res) => {
         const total = req.body.total
         formData.parcel.weight = weight
         const data = [{ ...formData }] //, courier_code:courierCode
+        const total_platfrom = req.body.cost - req.body.cost_tg
 
         const invoice = await invoiceNumber()
         // console.log(invoice)
         const findTossagun_tel = await Members.findOne({ tel: tossagun_tel })
         if (!findTossagun_tel) {
-            return res
-                .status(404)
-                .send({ status: false, message: "คุณยังไม่ได้เป็นสมาชิกทศกัณฐ์แฟมิลี่" })
+            return res.status(404).send({ status: false, message: "คุณยังไม่ได้เป็นสมาชิกทศกัณฐ์แฟมิลี่" })
         }
         const value = {
             api_key: process.env.SHIPPOP_API_KEY,
-            email: "OrderHUB@gmail.com",
+            email: "nbadigitalservice@gmail.com",
             url: {
                 "success": "http://shippop.com/?success",
                 "fail": "http://shippop.com/?fail"
@@ -253,35 +255,26 @@ booking = async (req, res) => {
             force_confirm: 1
         };
 
-        const resp = await axios.post(`${process.env.SHIPPOP_URL}/booking/`, value,
-            {
-                headers: {
-                    "Accept-Encoding": "gzip,deflate,compress",
-                    "Content-Type": "application/json"
-                },
-            }
-        );
+        const resp = await axios.post(`${process.env.SHIPPOP_URL}/booking/`, value, {
+            headers: {
+                "Accept-Encoding": "gzip,deflate,compress",
+                "Content-Type": "application/json"
+            },
+        });
         if (!resp.data.status) {
-            return res
-                .status(400)
-                .send({ status: false, message: resp.data.data[0] });
+            return res.status(400).send({ status: false, message: resp.data.data[0] });
         }
 
         //ตัดเงิน
-        const findShop = await Shops.findOneAndUpdate(
-            {
-                shop_number: shop_number
-            },
-            {
-                $inc: {
-                    shop_wallet: -total
-                }
-            },
-            { new: true })
+        const findShop = await Shops.findOneAndUpdate({
+            shop_number: shop_number
+        }, {
+            $inc: {
+                shop_wallet: -total
+            }
+        }, { new: true })
         if (!findShop) {
-            return res
-                .status(404)
-                .send({ status: false, message: "ไม่สามารถค้นหาร้านที่ท่านระบุได้" })
+            return res.status(404).send({ status: false, message: "ไม่สามารถค้นหาร้านที่ท่านระบุได้" })
         }
 
         const Data = resp.data.data[0]
@@ -301,42 +294,67 @@ booking = async (req, res) => {
             // tossagun_tel: tossagun_tel,
             price: Number(price.toFixed()),
             total: Number(total.toFixed()),
-            shop_id: findShop._id
+            shop_id: findShop._id,
         };
         const o = {
             shop_id: findShop._id,
-            platform_tel: tossagun_tel,
-            
+            platform: tossagun_tel,
+            invoice: invoice,
+            total: Number(total.toFixed()),
+            total_cost: cost,
+            total_cost_tg: cost_tg,
+            payment_type: type_payment,
+            purchase_id: String(resp.data.purchase_id),
+            product: data,
+            employee: req.body.employee,
+            status: [
+                { name: "รอชำระเงิน", timestamp: dayjs(Date.now()).format() }
+            ],
+            timestamp: dayjs(Date.now()).format(),
         }
         new_data.push(v);
-
-        const createOrder = await shippopBooking.create(v)
-        if (!createOrder) {
+        const createOrder = new OrderExpress(o);
+        const createOrderShippop = new shippopBooking(v)
+        if (!createOrderShippop && !createOrder) {
             console.log("ไม่สามารถสร้างข้อมูล booking ได้")
         }
 
-        //บันทึกการเงิน
-        let before = findShop.shop_wallet + total
-        let doto = {
-            shop_id: findShop._id,
-            maker_id: maker_id,
-            orderid: createOrder._id,
-            name: `รายการขนส่งหมายเลขที่ ${invoice}`,
-            type: `เงินออก`,
-            amount: total,
-            before: before,
-            after: findShop.shop_wallet,
-            timestamp: dayjs(Date.now()).format(""),
+        const getteammember = await GetTeamMember(tossagun_tel);
+        if (!getteammember) {
+            return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
+        } else {
+            createOrder.save();
+            createOrderShippop.save();
+
+            //บันทึกการเงิน
+            let before = findShop.shop_wallet + total
+            let doto = {
+                shop_id: findShop._id,
+                maker_id: maker_id,
+                orderid: createOrder._id,
+                name: `รายการขนส่งหมายเลขที่ ${invoice}`,
+                type: `เงินออก`,
+                categort: 'Wallet',
+                amount: total,
+                before: before,
+                after: findShop.shop_wallet,
+                timestamp: dayjs(Date.now()).format(""),
+            }
+            const record = await WalletHistory.create(doto)
+            if (!record) {
+                return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติการเงินได้" })
+            }
+
+            // จ่ายค่าคอมมิชชั่น
+            const commissionData = await commissions.Commission(createOrder, total_platfrom, getteammember, 'Express');
+            const commission = new Commission(commissionData);
+            if (!commission) {
+                return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
+            } else {
+                commission.save();
+            }
+            return res.status(200).send({ status: true, data: new_data, record: record, shop: findShop.shop_wallet })
         }
-        const record = await WalletHistory.create(doto)
-        if (!record) {
-            return res
-                .status(400)
-                .send({ status: false, message: "ไม่สามารถสร้างประวัติการเงินได้" })
-        }
-        return res
-            .status(200)
-            .send({ status: true, data: new_data, record: record, shop: findShop.shop_wallet })
     } catch (err) {
         console.log(err)
         return res
@@ -437,30 +455,37 @@ tracking = async (req, res) => {
 
 labelHtml = async (req, res) => { //ใบแปะหน้าโดย purchase(html)
     try {
-        const id = req.params.tracking_code
-        const valueCheck = {
-            api_key: process.env.SHIPPOP_API_KEY,
-            tracking_code: id,
-            type: "html",
-            size: req.body.size
-        };
-        const resp = await axios.post(`${process.env.SHIPPOP_URL}/v2/label_tracking_code/`, valueCheck,
-            {
-                headers: {
-                    "Accept-Encoding": "gzip,deflate,compress",
-                    "Content-Type": "application/json"
-                },
-            }
-        )
-        if (resp) {
-            return res
-                .status(200)
-                .send(resp.data)
-        } else {
-            return res
-                .status(400)
-                .send({ status: false, message: "ไม่สามารถหาหมายเลข Tracking ได้" })
+        const { shop_id, purchase_id } = req.body;
+        if (shop_id === undefined || purchase_id === undefined) {
+            return res.status(400).send({ status: false, message: "รับข้อมูลไม่ครบถ้วน" });
         }
+        const booking = await shippopBooking.find({
+            shop_id: shop_id,
+            purchase_id: purchase_id,
+        });
+        const tracking_code = [];
+        let option = {};
+        for (let i = 0; i < booking.length; i++) {
+            if (booking[i].status !== "cancel") {
+                tracking_code.push(booking[i].tracking_code);
+            }
+            option[booking[i].tracking_code] = {
+                replaceOrigin: { ...booking[i].from },
+            };
+        }
+        const value = {
+            api_key: process.env.SHIPPOP_API_KEY,
+            purchase_id: purchase_id,
+            tracking_code: String(tracking_code),
+            size: "sticker4x6",
+            // logo: "https://nbadigitalworlds.com/img/nba-express2.png",
+            type: "html",
+            options: option,
+        };
+        const resp = await axios.post(`${process.env.SHIPPOP_URL}/v2/label/`, value, {
+            headers: { "Accept-Encoding": "gzip,deflate,compress" },
+        });
+        return res.status(200).send(resp.data);
     } catch (err) {
         console.log(err)
         return res
@@ -487,6 +512,65 @@ async function invoiceNumber() {
     console.log(combinedData);
     return combinedData;
 }
+
+async function GetTeamMember(tel) {
+    try {
+        const member = await Members.findOne({ tel: tel });
+        if (!member) {
+            return res
+                .status(403)
+                .send({ message: "เบอร์โทรนี้ยังไม่ได้เป็นสมาชิกของทศกัณฐ์แฟมมิลี่" });
+        } else {
+            const upline = [member.upline.lv1, member.upline.lv2, member.upline.lv3];
+            const validUplines = upline.filter((item) => item !== "-");
+            const uplineData = [];
+            let i = 0;
+            for (const item of validUplines) {
+                const include = await Members.findOne({ _id: item });
+                if (include !== null) {
+                    uplineData.push({
+                        iden: include.iden.number,
+                        name: include.fristname,
+                        address: {
+                            address: include.address,
+                            subdistrict: include.subdistrict,
+                            district: include.district,
+                            province: include.province,
+                            postcode: include.postcode,
+                        },
+                        tel: include.tel,
+                        level: i + 1,
+                    });
+                    i++;
+                }
+            }
+            const owner = {
+                iden: member.iden.number,
+                name: member.fristname,
+                address: {
+                    address: member.address,
+                    subdistrict: member.subdistrict,
+                    district: member.district,
+                    province: member.province,
+                    postcode: member.postcode,
+                },
+                tel: member.tel,
+                level: "owner",
+            };
+            const data = [
+                owner || null,
+                uplineData[0] || null,
+                uplineData[1] || null,
+                uplineData[2] || null,
+            ];
+            return data
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, error: error.message });
+    }
+};
+
 
 order = async (req, res) => {
     try {

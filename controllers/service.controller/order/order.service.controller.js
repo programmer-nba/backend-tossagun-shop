@@ -8,6 +8,7 @@ const { Members } = require("../../../model/user/member.model");
 const line = require("../../../lib/line.notify");
 const { WalletHistory } = require("../../../model/wallet/wallet.history.model");
 const { shippopBooking } = require("../../../model/shippop/shippop.order");
+const { OrderExpress } = require("../../../model/shippop/order.express.model");
 const { Shops } = require("../../../model/pos/shop.model");
 const dayjs = require("dayjs");
 const office = require("../../../function/office")
@@ -368,6 +369,7 @@ const checkEmployee = async (req, res) => {
                     freight: totalfreight,
                     net: totalprice + totalfreight,
                     moneyreceive: req.body.moneyreceive,
+                    employee: req.body.employee,
                     change: req.body.change,
                     status: {
                         name: "รอดำเนินการ",
@@ -399,115 +401,11 @@ const checkEmployee = async (req, res) => {
                     const newwallet = shop.shop_wallet - (totalprice + totalfreight);
                     await Shops.findByIdAndUpdate(shop._id, { shop_wallet: newwallet }, { useFindAndModify: false });
 
-                    const percent = await Percents.findOne({ code: 'Service' });
-
-                    const commisstion = total_platfrom;
-                    const platfromcommission = (commisstion * percent.percent.platform) / 100;
-                    const bonus = (commisstion * percent.percent.terrestrial) / 100;
-                    const allSale = (commisstion * percent.percent.central) / 100;
-
-                    const level = getteammember;
-                    const validLevel = level.filter((item) => item !== null);
-                    const storeData = [];
-
-                    const owner = (platfromcommission * percent.percent_platform.level_owner) / 100;
-                    const lv1 = (platfromcommission * percent.percent_platform.level_one) / 100;
-                    const lv2 = (platfromcommission * percent.percent_platform.level_two) / 100;
-                    const lv3 = (platfromcommission * percent.percent_platform.level_tree) / 100;
-
-                    const ownervat = (owner * 3) / 100;
-                    const lv1vat = (lv1 * 3) / 100;
-                    const lv2vat = (lv2 * 3) / 100;
-                    const lv3vat = (lv3 * 3) / 100;
-
-                    const givecommission = {
-                        invoice: invoice,
-                        tel: req.body.platform,
-                        platform: {
-                            owner: owner,
-                            lv1: lv1,
-                            lv2: lv2,
-                            lv3: lv3,
-                        },
-                        central: {
-                            allsale: (allSale * percent.percent_central.allsale) / 100,
-                            central: (allSale * percent.percent_central.central) / 100,
-                        },
-                        emp_bonus: bonus,
-                    };
-
-                    await commissions.GiveCommission(givecommission);
-
-                    const ownercommission = owner - ownervat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
-                    const lv1commission = lv1 - lv1vat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
-                    const lv2commission = lv2 - lv2vat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
-                    const lv3commission = lv3 - lv3vat; //ใช้ค่านี้เพื่อจ่ายค่าคอมมิสชัน
-
-                    for (const TeamMemberData of validLevel) {
-                        let integratedData;
-
-                        if (TeamMemberData.level == "owner") {
-                            integratedData = {
-                                lv: TeamMemberData.level,
-                                iden: TeamMemberData.iden,
-                                name: TeamMemberData.name,
-                                address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
-                                tel: TeamMemberData.tel,
-                                commission_amount: owner,
-                                vat3percent: ownervat,
-                                remainding_commission: ownercommission,
-                            };
-                        } else if (TeamMemberData.level == "1") {
-                            integratedData = {
-                                lv: TeamMemberData.level,
-                                iden: TeamMemberData.iden,
-                                name: TeamMemberData.name,
-                                address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
-                                tel: TeamMemberData.tel,
-                                commission_amount: lv1,
-                                vat3percent: lv1vat,
-                                remainding_commission: lv1commission,
-                            };
-                        } else if (TeamMemberData.level == "2") {
-                            integratedData = {
-                                lv: TeamMemberData.level,
-                                iden: TeamMemberData.iden,
-                                name: TeamMemberData.name,
-                                address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
-                                tel: TeamMemberData.tel,
-                                commission_amount: lv2,
-                                vat3percent: lv2vat,
-                                remainding_commission: lv2commission,
-                            };
-                        } else if (TeamMemberData.level == "3") {
-                            integratedData = {
-                                lv: TeamMemberData.level,
-                                iden: TeamMemberData.iden,
-                                name: TeamMemberData.name,
-                                address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
-                                tel: TeamMemberData.tel,
-                                commission_amount: lv3,
-                                vat3percent: lv2vat,
-                                remainding_commission: lv3commission,
-                            };
-                        }
-
-                        if (integratedData) {
-                            storeData.push(integratedData);
-                        }
-                    }
-
-                    const commissionData = {
-                        data: storeData,
-                        platformcommission: platfromcommission,
-                        bonus: bonus,
-                        allSale: allSale,
-                        orderid: new_order._id,
-                        code: "Artwork",
-                    };
+                    // จ่ายค่าคอมมิชชั่น
+                    const commissionData = await commissions.Commission(new_order, total_platfrom, getteammember, 'Artwork');
                     const commission = new Commission(commissionData);
                     if (!commission) {
-                        return res.status(403).send({ status: false, message: 'ไม่สามารถบันทึกได้' });
+                        return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
                     } else {
                         commission.save();
                         const wallethistory = {
@@ -543,7 +441,7 @@ const checkEmployee = async (req, res) => {
         console.error(error);
         return res.status(500).send({ message: "Internal Server Error" });
     }
-}
+};
 
 async function GenerateRiceiptNumber(shop_type) {
     if (shop_type === 'One Stop Service') {
@@ -585,7 +483,7 @@ async function GetTeamMember(tel) {
         if (!member) {
             return res
                 .status(403)
-                .send({ message: "เบอร์โทรนี้ยังไม่ได้เป็นสมาชิกของ NBA Platfrom" });
+                .send({ message: "เบอร์โทรนี้ยังไม่ได้เป็นสมาชิกของทศกัณฐ์แฟมมิลี่" });
         } else {
             const upline = [member.upline.lv1, member.upline.lv2, member.upline.lv3];
             const validUplines = upline.filter((item) => item !== "-");
@@ -637,6 +535,24 @@ async function GetTeamMember(tel) {
     }
 };
 
+module.exports.confirmOrder = async (req, res) => {
+    try {
+        const updateStatus = await OrderServiceModels.findOne({ _id: req.params.id });
+        if (!updateStatus) {
+            return res.status(403).send({ status: false, message: 'ไม่พบข้อมูลรายการออเดอร์' });
+        } else {
+            updateStatus.status.push({
+                name: "กำลังดำเนินการ",
+                timestamp: dayjs(Date.now()).format(""),
+            });
+            updateStatus.save();
+            return res.status(200).send({ status: true, message: 'ยืนยันรับงานสำเร็จ' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
 
 module.exports.getOrderList = async (req, res) => {
     try {
@@ -714,7 +630,7 @@ module.exports.getOrderAocById = async (req, res) => {
 
 module.exports.getOrderExpress = async (req, res) => {
     try {
-        const order_express = await shippopBooking.find();
+        const order_express = await OrderExpress.find();
         if (order_express) {
             return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order_express })
         } else {
@@ -729,12 +645,34 @@ module.exports.getOrderExpress = async (req, res) => {
 module.exports.getOrderByShopId = async (req, res) => {
     try {
         const id = req.params.shopid;
-        const order_express = await shippopBooking.find();
-        const orders = order_express.filter(
-            (el) => el.shop_id === id
-        );
-        if (orders) {
-            return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: orders })
+        const pipelint = [
+            {
+                $match: { shop_id: id },
+            }
+        ];
+        const order = await OrderExpress.aggregate(pipelint);
+        if (order) {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order })
+        } else {
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.getOrderPurchaseId = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const pipelint = [
+            {
+                $match: { purchase_id: id },
+            }
+        ];
+        const order = await shippopBooking.aggregate(pipelint);
+        if (order) {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order })
         } else {
             return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
         }

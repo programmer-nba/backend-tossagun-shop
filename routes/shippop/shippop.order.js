@@ -7,6 +7,7 @@ router.post("/price/list", auth, shippop.priceList);
 router.post("/booking", auth, shippop.booking);
 router.post("/cancel/:tracking_code", auth, shippop.cancelOrder);
 router.post("/tracking/:id", auth, shippop.tracking);
-router.post("/label/html/:tracking_code", auth, shippop.labelHtml);
+
+router.post("/label", auth, shippop.labelHtml);
 
 module.exports = router
