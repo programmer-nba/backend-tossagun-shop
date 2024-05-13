@@ -1,28 +1,17 @@
-const { Shops } = require("../../../model/pos/shop.model")
+const { Shops, validate } = require("../../../model/pos/shop.model")
 const multer = require("multer");
 const fs = require("fs");
-const { google } = require("googleapis");
-const CLIENT_ID = process.env.GOOGLE_DRIVE_CLIENT_ID;
-const CLIENT_SECRET = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
-const REDIRECT_URI = process.env.GOOGLE_DRIVE_REDIRECT_URI;
-const REFRESH_TOKEN = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
+const path = require("path");
 
-const oauth2Client = new google.auth.OAuth2(
-    CLIENT_ID,
-    CLIENT_SECRET,
-    REDIRECT_URI
-);
-
-oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-const drive = google.drive({
-    version: "v3",
-    auth: oauth2Client,
-});
+const uploadFolder = path.join(__dirname, '../../../assets/artwork');
+fs.mkdirSync(uploadFolder, { recursive: true });
 
 const storage = multer.diskStorage({
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
-        // console.log(file.originalname);
+    destination: (req, file, cb) => {
+        cb(null, uploadFolder)
+    },
+    filename: (req, file, cb) => {
+        cb(null, 'shop' + "-" + file.originalname);
     },
 });
 
@@ -31,67 +20,90 @@ module.exports.create = async (req, res) => {
     try {
         let upload = multer({ storage: storage }).single("shop_logo");
         upload(req, res, async function (err) {
+            console.log(req.file)
             if (!req.file) {
-                await new Shops({
-                    ...req.body,
-                }).save();
-                return res.status(201).send({ message: "สร้างร้านค้าสำเร็จ", status: true });
-            } else if (err instanceof multer.MulterError) {
-                return res.send(err);
-            } else if (err) {
-                return res.send(err);
+                const { error } = validate(req.body);
+                if (error) {
+                    fs.unlinkSync(req.file.path);
+                    return res
+                        .status(400)
+                        .send({ message: error.details[0].message, status: false });
+                } else {
+                    const shop = await Shops.findOne({
+                        shop_name_second: req.body.shop_name_second,
+                        shop_number: req.body.shop_number,
+                    });
+                    if (shop) {
+                        fs.unlinkSync(req.file.path);
+                        return res.status(409).send({ status: false, message: "รหัสร้าน หรือ ชื่อร้านค้าซ้ำในระบบ", });
+                    } else {
+                        const shop_number = await GenerateNumber(req.body.shop_type);
+                        await new Shops({
+                            ...req.body,
+                            shop_number: shop_number,
+                        }).save();
+                        return res.status(201).send({ message: "เพิ่มร้านค้าสำเร็จ", status: true });
+                    }
+                }
             } else {
-                uploadFileCreate(req, res);
+                const { error } = validate(req.body);
+                if (error) {
+                    fs.unlinkSync(req.file.path);
+                    return res
+                        .status(400)
+                        .send({ message: error.details[0].message, status: false });
+                } else {
+                    const shop = await Shops.findOne({
+                        shop_name_second: req.body.shop_name_second,
+                        shop_number: req.body.shop_number,
+                    });
+                    if (shop) {
+                        fs.unlinkSync(req.file.path);
+                        return res.status(409).send({ status: false, message: "รหัสร้าน หรือ ชื่อร้านค้าซ้ำในระบบ", });
+                    } else {
+                        const shop_number = await GenerateNumber(req.body.shop_type);
+                        await new Shops({
+                            ...req.body,
+                            shop_number: shop_number,
+                            shop_logo: req.file.filename,
+                        }).save();
+                        return res.status(201).send({ message: "เพิ่มร้านค้าสำเร็จ", status: true });
+                    }
+                }
             }
         });
-
-        async function uploadFileCreate(req, res) {
-            const filePath = req.file.path;
-
-            let fileMetaData = {
-                name: req.file.originalname,
-                parents: [process.env.GOOELE_DRIVE_ARTWORK_CATEGORY],
-            };
-            let media = {
-                body: fs.createReadStream(filePath),
-            };
-            try {
-                const response = await drive.files.create({
-                    resource: fileMetaData,
-                    media: media,
-                });
-                generatePublicUrl(response.data.id);
-                await new Shops({
-                    ...req.body,
-                    image: response.data.id,
-                }).save();
-                return res.status(201).send({ message: "สร้างร้านค้าสำเร็จ", status: true });
-            } catch (error) {
-                return res.status(500).send({ message: "Internal Server Error", status: false });
-            }
-        }
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
 
-async function generatePublicUrl(res) {
-    try {
-        const fileId = res;
-        await drive.permissions.create({
-            fileId: fileId,
-            requestBody: {
-                role: "reader",
-                type: "anyone",
+async function GenerateNumber(shop_type) {
+    if (shop_type === 'One Stop Service') {
+        const pipelint = [
+            {
+                $match: { shop_type: shop_type },
             },
-        });
-        const result = await drive.files.get({
-            fileId: fileId,
-            fields: "webViewLink, webContentLink",
-        });
-        console.log(result.data);
-    } catch (error) {
-        console.log(error.message);
+            {
+                $group: { _id: 0, count: { $sum: 1 } },
+            },
+        ];
+        const count = await Shops.aggregate(pipelint);
+        const countValue = count.length > 0 ? count[0].count + 1 : 1;
+        const data = `TGSS${countValue.toString().padStart(5, "0")}`;
+        return data;
+    } else if (shop_type === 'One Stop Shop') {
+        const pipelint = [
+            {
+                $match: { shop_type: shop_type },
+            },
+            {
+                $group: { _id: 0, count: { $sum: 1 } },
+            },
+        ];
+        const count = await Shops.aggregate(pipelint);
+        const countValue = count.length > 0 ? count[0].count + 1 : 1;
+        const data = `TGS${countValue.toString().padStart(5, "0")}`;
+        return data;
     }
-}
+};
