@@ -334,6 +334,7 @@ const checkEmployee = async (req, res) => {
                                 price: total_price,
                                 cost: total_cost,
                                 freight: total_freight,
+                                platform: total_platfrom,
                             });
                             order_office.push({
                                 packagename: product.name,
@@ -348,6 +349,7 @@ const checkEmployee = async (req, res) => {
                 const totalprice = order.reduce((accumulator, currentValue) => accumulator + currentValue.price, 0);
                 const totalcost = order.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0);
                 const totalfreight = order.reduce((accumulator, currentValue) => accumulator + currentValue.freight, 0);
+                const totalplatform = order.reduce((accumulator, currentValue) => accumulator + currentValue.platform, 0);
 
                 const invoice = await GenerateRiceiptNumber(req.body.shop_type);
                 const data = {
@@ -368,6 +370,7 @@ const checkEmployee = async (req, res) => {
                     price: totalprice,
                     freight: totalfreight,
                     net: totalprice + totalfreight,
+                    totalplatform: totalplatform,
                     moneyreceive: req.body.moneyreceive,
                     employee: req.body.employee,
                     change: req.body.change,
@@ -402,7 +405,7 @@ const checkEmployee = async (req, res) => {
                     await Shops.findByIdAndUpdate(shop._id, { shop_wallet: newwallet }, { useFindAndModify: false });
 
                     // จ่ายค่าคอมมิชชั่น
-                    const commissionData = await commissions.Commission(new_order, total_platfrom, getteammember, 'Artwork');
+                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Artwork');
                     const commission = new Commission(commissionData);
                     if (!commission) {
                         return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
@@ -682,7 +685,7 @@ module.exports.getOrderPurchaseId = async (req, res) => {
     }
 };
 
-module.exports.getOrderArtwork = async (req, res) => {
+module.exports.getOrderService = async (req, res) => {
     try {
         const order = await OrderServiceModels.find();
         if (order) {

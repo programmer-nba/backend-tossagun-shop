@@ -3,7 +3,7 @@ const order = require("../../controllers/service.controller/order/order.service.
 const auth = require("../../lib/auth");
 const authAdmin = require("../../lib/auth.admin");
 
-router.get("/", auth, order.getOrderList);
+// router.get("/", auth, order.getOrderList);
 // router.get("/:id", auth, order.getOrderById);
 
 // Confirm Order
@@ -20,9 +20,9 @@ router.get("/express", auth, order.getOrderExpress);
 router.get("/express/:shopid", auth, order.getOrderByShopId);
 router.get("/express/purchase/:id", auth, order.getOrderPurchaseId);
 
-// Order Artwork
-router.get("/artwork", auth, order.getOrderArtwork);
-router.get("/artwork/shop/:shopid", auth, order.getByShopId);
-router.get("/artwork/maker/:makerid", auth, order.getByMakerId);
+// Order
+router.get("/", auth, order.getOrderService);
+router.get("/shop/:shopid", auth, order.getByShopId);
+router.get("/maker/:makerid", auth, order.getByMakerId);
 
 module.exports = router;
