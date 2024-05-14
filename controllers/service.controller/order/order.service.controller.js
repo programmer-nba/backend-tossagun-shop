@@ -272,9 +272,13 @@ const checkEmployee = async (req, res) => {
             }
             let product_price = 0;
             for (let item of req.body.product_detail) {
-                const artwork = await PriceArtworks.findOne({ _id: item.priceid, product_id: item.packageid });
+                const artwork = await PriceArtworks.findOne({
+                    _id: item.priceid,
+                    product_id: item.packageid
+                });
                 const total = artwork.price + artwork.freight;
-                product_price += total;
+                const net = total * item.amount;
+                product_price += net;
             }
             if (shop.shop_wallet < product_price) {
                 return res.status(403).send({ status: false, message: "ยอดเงินในระบบไม่เพียงพอ", });
@@ -298,24 +302,24 @@ const checkEmployee = async (req, res) => {
                                     total_price = artwork.price * item.quantity;
                                     total_cost = artwork.cost * item.quantity;
                                     total_freight = artwork.freight * item.quantity;
-                                    total_platfrom = artwork.platform.platform * item.quantity;
+                                    total_platfrom = artwork.service.platform * item.quantity;
                                 } else {
                                     total_price = (artwork.price * ((item.width / 100) * (item.height / 100))) * item.quantity;
                                     total_cost = (artwork.cost * ((item.width / 100) * (item.height / 100))) * item.quantity;
                                     total_freight = (artwork.freight * (((item.width / 100) * (item.height / 100)) - 1 * 10)) * item.quantity;
-                                    total_platfrom = artwork.platform.platform * item.quantity;
+                                    total_platfrom = artwork.service.platform * item.quantity;
                                 }
                             } else if (product.detail === 'ราคาต่อชิ้น') {
                                 packagedetail = `${product.description}, ${item.packagedetail}`
                                 total_price = artwork.price * item.quantity;
                                 total_cost = artwork.cost * item.quantity;
-                                total_platfrom = artwork.platform.platform * item.quantity;
+                                total_platfrom = artwork.service.platform * item.quantity;
                                 total_freight = artwork.freight * item.quantity;
                             } else if (product.detail === 'ราคาต่อชุด') {
                                 packagedetail = `${product.description}, ${item.packagedetail}`
                                 total_price = artwork.price * item.quantity;
                                 total_cost = artwork.cost * item.quantity;
-                                total_platfrom = artwork.platform.platform * item.quantity;
+                                total_platfrom = artwork.service.platform * item.quantity;
                                 if (item.quantity > 5) {
                                     const value = item.quantity / 5;
                                     const result_value = Math.trunc(value);

@@ -13,7 +13,7 @@ async function OrderOfficeCreate(packageData) {
 	await axios(config).then((res) => {
 		console.log(res.data.message);
 	}).catch((err) => {
-		console.log(err);
+		console.log(err.response.data);
 	})
 }
 

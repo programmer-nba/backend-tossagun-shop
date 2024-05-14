@@ -20,4 +20,6 @@ router.get("/cate/:id", auth, account.getProductByCategoryId);
 router.put("/:id", authAdmin, account.updateProduct);
 router.delete("/:id", authAdmin, account.deleteProduct);
 
+router.post('/order', auth, account.createOrder);
+
 module.exports = router;
