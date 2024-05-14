@@ -41,7 +41,7 @@ const OrderServiceSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     freight: { type: Number, required: true },
     net: { type: Number, required: true },
-    totalplatofrm: { type: Number, required: true },
+    totalplatform: { type: Number, required: false, default: 0 },
     moneyreceive: { type: Number, required: true },
     change: { type: Number, required: true },
     tracking: { type: String, required: false, default: "" },
