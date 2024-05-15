@@ -67,7 +67,7 @@ app.use(prefix + "/delete/image", require("./routes/deleteimage"));
 
 // Tossagun Service
 app.use(prefix + "/service/artwork", require("./routes/service/artwork")); // สื่อสิ่งพิมพ์
-app.use(prefix + "/service/media", require("./routes/service/media")); // 
+app.use(prefix + "/service/media", require("./routes/service/media")); // ส่งเสริมการตลาด
 app.use(prefix + "/service/act", require("./routes/service/act")); // พ.ร.บ
 app.use(prefix + "/service/program", require("./routes/service/program")); // ออกแบบเว็บไซต์ พัฒนาโปรแกรม
 app.use(prefix + "/service/account", require("./routes/service/account")); // บัญชี

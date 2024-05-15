@@ -17,7 +17,10 @@ router.delete("/category/:id", authAdmin, category.deleteCategory);
 router.post("/", authAdmin, act.create);
 router.get("/", auth, act.getAll);
 router.get("/:id", auth, act.getById);
+router.get("/cate/:cateid", auth, act.getByCateId);
 router.put("/:id", authAdmin, act.update);
 router.delete("/:id", authAdmin, act.delete);
+
+router.post("/order", auth, act.createOrder);
 
 module.exports = router;
