@@ -9,7 +9,6 @@ const authAdmin = require("../../lib/auth.admin");
 // Confirm Order
 router.put("/:id", order.confirmOrder);
 
-
 // Order Tricket AOC
 router.get("/aoc", auth, order.getOrderAoc);
 router.get("/aoc/:makerid", auth, order.getOrderByMakerId);
@@ -22,6 +21,9 @@ router.get("/express/purchase/:id", auth, order.getOrderPurchaseId);
 
 // Order
 router.get("/", auth, order.getOrderService);
+router.get("/orderref/:invoice", auth, order.getOrderByInvoice);
+router.put("/orderref/book/:id", auth, order.updateOrderRefBook);
+router.put("/orderref/iden/:id", auth, order.updateOrderRefIden);
 router.get("/shop/:shopid", auth, order.getByShopId);
 router.get("/maker/:makerid", auth, order.getByMakerId);
 

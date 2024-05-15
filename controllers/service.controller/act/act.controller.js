@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require("path");
 const { Shops } = require("../../../model/pos/shop.model");
 const { OrderServiceModels } = require("../../../model/service/order/order.model");
-const { OrderServiceRefModels } = require("../../../model/service/order/order.ref.model");
+const { OrderActRefModels } = require("../../../model/service/order/order.ref.model");
 const { Commission } = require("../../../model/pos/commission/commission.model");
 const { WalletHistory } = require("../../../model/wallet/wallet.history.model");
 const { Members } = require("../../../model/user/member.model");
@@ -310,7 +310,7 @@ const checkEmployee = async (req, res) => {
                     cost: totalcost,
                     price: totalprice,
                     freight: totalfreight,
-                    net: totalprice,
+                    net: totalprice + totalfreight,
                     totalplatform: totalplatform,
                     moneyreceive: req.body.moneyreceive,
                     employee: req.body.employee,
@@ -333,10 +333,10 @@ const checkEmployee = async (req, res) => {
                 };
 
                 const new_order = new OrderServiceModels(data);
-                const new_order_ref = new OrderServiceRefModels(data_ref);
+                const new_order_ref = new OrderActRefModels(data_ref);
                 const formOrderOffice = {
                     receiptnumber: invoice,
-                    detail: "Marketing",
+                    detail: "Accoutting",
                     customer: {
                         customer_iden: req.body.customer_iden,
                         customer_name: req.body.customer_name,

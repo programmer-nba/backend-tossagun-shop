@@ -3,9 +3,9 @@ const { Percents } = require("../../../model/pos/commission/percent.model");
 const { ProductArtworks } = require("../../../model/service/artwork/artwork.model");
 const { PriceArtworks } = require("../../../model/service/artwork/price.model");
 const { OrderServiceModels, validate } = require("../../../model/service/order/order.model");
+const { OrderActRefModels } = require("../../../model/service/order/order.ref.model");
 const { OrderFlightTicket } = require("../../../model/AOC/api.service.models/aoc.tricket.model")
 const { Members } = require("../../../model/user/member.model");
-const line = require("../../../lib/line.notify");
 const { WalletHistory } = require("../../../model/wallet/wallet.history.model");
 const { shippopBooking } = require("../../../model/shippop/shippop.order");
 const { OrderExpress } = require("../../../model/shippop/order.express.model");
@@ -13,6 +13,23 @@ const { Shops } = require("../../../model/pos/shop.model");
 const dayjs = require("dayjs");
 const office = require("../../../function/office")
 const commissions = require("../../../function/commission");
+const line = require("../../../lib/line.notify");
+
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
+
+const uploadFolder = path.join(__dirname, '../../../assets/act');
+fs.mkdirSync(uploadFolder, { recursive: true });
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadFolder)
+    },
+    filename: function (req, file, cb) {
+        cb(null, 'act' + "-" + Date.now() + file.originalname);
+    },
+});
 
 module.exports.create = async (req, res) => {
     try {
@@ -702,6 +719,86 @@ module.exports.getOrderService = async (req, res) => {
         } else {
             return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
         }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.getOrderByInvoice = async (req, res) => {
+    try {
+        const order = await OrderActRefModels.findOne({ invoice: req.params.invoice });
+        if (order) {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order })
+        } else {
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.updateOrderRefBook = async (req, res) => {
+    try {
+        const id = req.params.id;
+        let upload = multer({ storage: storage }).single("image");
+        upload(req, res, async function (err) {
+            console.log(req.file)
+            OrderActRefModels.findByIdAndUpdate(id, { ...req.body, book: req.file.filename }, { useFindAndModify: false }).then((data) => {
+                if (!data) {
+                    fs.unlinkSync(req.file.path);
+                    return res.status(404).send({
+                        status: false,
+                        message: `เพิ่มรูปภาพไม่สำเร็จ!`,
+                    });
+                } else {
+                    return res.status(201).send({
+                        message: "เพิ่มรูปภาพสำเร็จ",
+                        status: true,
+                    });
+                }
+            }).catch((err) => {
+                fs.unlinkSync(req.file.path);
+                return res.status(500).send({
+                    message: "มีบ่างอย่างผิดพลาด",
+                    status: false,
+                });
+            })
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.updateOrderRefIden = async (req, res) => {
+    try {
+        const id = req.params.id;
+        let upload = multer({ storage: storage }).single("image");
+        upload(req, res, async function (err) {
+            console.log(req.file)
+            OrderActRefModels.findByIdAndUpdate(id, { ...req.body, iden: req.file.filename }, { useFindAndModify: false }).then((data) => {
+                if (!data) {
+                    fs.unlinkSync(req.file.path);
+                    return res.status(404).send({
+                        status: false,
+                        message: `เพิ่มรูปภาพไม่สำเร็จ!`,
+                    });
+                } else {
+                    return res.status(201).send({
+                        message: "เพิ่มรูปภาพสำเร็จ",
+                        status: true,
+                    });
+                }
+            }).catch((err) => {
+                fs.unlinkSync(req.file.path);
+                return res.status(500).send({
+                    message: "มีบ่างอย่างผิดพลาด",
+                    status: false,
+                });
+            })
+        })
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "Internal Server Error" });

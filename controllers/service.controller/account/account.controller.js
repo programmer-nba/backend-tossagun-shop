@@ -300,7 +300,7 @@ const checkEmployee = async (req, res) => {
                 const new_order = new OrderServiceModels(data);
                 const formOrderOffice = {
                     receiptnumber: invoice,
-                    detail: "Account",
+                    detail: "Accoutting",
                     customer: {
                         customer_iden: req.body.customer_iden,
                         customer_name: req.body.customer_name,
