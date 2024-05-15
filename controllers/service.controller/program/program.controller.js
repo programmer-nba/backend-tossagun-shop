@@ -2,6 +2,15 @@ const { ProductPrograms, validate } = require("../../../model/service/program/pr
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const { Shops } = require("../../../model/pos/shop.model");
+const { OrderServiceModels } = require("../../../model/service/order/order.model");
+const { Commission } = require("../../../model/pos/commission/commission.model");
+const { WalletHistory } = require("../../../model/wallet/wallet.history.model");
+const { Members } = require("../../../model/user/member.model");
+const dayjs = require("dayjs");
+const office = require("../../../function/office")
+const commissions = require("../../../function/commission");
+const line = require("../../../lib/line.notify");
 
 const uploadFolder = path.join(__dirname, '../../../assets/program');
 fs.mkdirSync(uploadFolder, { recursive: true });
@@ -11,7 +20,7 @@ const storage = multer.diskStorage({
         cb(null, uploadFolder)
     },
     filename: function (req, file, cb) {
-        cb(null, 'program' + "-" + file.originalname);
+        cb(null, 'program' + file.originalname, + "-" + Date.now());
     },
 });
 
@@ -84,7 +93,6 @@ module.exports.getMediaById = async (req, res) => {
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", error: "server side error" });
     }
 };
-
 
 // Delete Media
 module.exports.deleteMedia = async (req, res) => {
@@ -169,5 +177,263 @@ module.exports.getImage = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.createOrder = async (req, res) => {
+    try {
+        if (req.body.shop_type === 'One Stop Service') {
+            await checkEmployee(req, res);
+        } else {
+            console.log('ยังไม่สามารถดำเนินการได้')
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+const checkEmployee = async (req, res) => {
+    try {
+        const shop = await Shops.findOne({ _id: req.body.shop_id });
+        if (!shop) {
+            return res.status(403).send({ message: "ไม่พบข้อมูลร้านค้า" });
+        } else {
+            if (shop.shop_status === false) {
+                return res.status(403).send({ message: "ร้านค้าดังกล่าวไม่สามารถทำรายการได้" });
+            }
+            let product_price = 0;
+            for (let item of req.body.product_detail) {
+                const account = await ProductPrograms.findOne({
+                    _id: item.packageid
+                });
+                product_price += account.net;
+            }
+            if (shop.shop_wallet < product_price) {
+                return res.status(403).send({ status: false, message: "ยอดเงินในระบบไม่เพียงพอ", });
+            } else {
+                const order = [];
+                const order_office = [];
+                let packagedetail;
+                let total_price = 0;
+                let total_cost = 0;
+                let total_platfrom = 0;
+
+                for (let item of req.body.product_detail) {
+                    const product = await ProductPrograms.findOne({ _id: item.packageid });
+                    if (product) {
+                        packagedetail = `${product.detail}, ${item.packagedetail}`
+                        total_price = product.price * item.quantity;
+                        total_cost = product.cost * item.quantity;
+                        total_platfrom = product.service.platform * item.quantity;
+                        order.push({
+                            packageid: product._id,
+                            packagename: product.name,
+                            packagedetail: packagedetail,
+                            quantity: item.quantity,
+                            price: total_price,
+                            cost: total_cost,
+                            platform: total_platfrom,
+                        });
+                        order_office.push({
+                            packagename: product.name,
+                            packagedetail: packagedetail,
+                            quantity: item.quantity,
+                        })
+                    } else {
+                        return res.status(403).send({ status: false, message: 'ไม่พบข้อมูลสินค้า' });
+                    }
+                }
+
+                const totalprice = order.reduce((accumulator, currentValue) => accumulator + currentValue.price, 0);
+                const totalcost = order.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0);
+                const totalplatform = order.reduce((accumulator, currentValue) => accumulator + currentValue.platform, 0);
+                const invoice = await GenerateRiceiptNumber(req.body.shop_type, shop._id, shop.shop_number);
+
+                const data = {
+                    invoice: invoice,
+                    maker_id: req.body.maker_id,
+                    shop_id: shop._id,
+                    platform: req.body.platform,
+                    customer_name: req.body.customer_name,
+                    customer_tel: req.body.customer_tel,
+                    customer_address: req.body.customer_address,
+                    customer_iden: req.body.customer_iden,
+                    customer_line: req.body.customer_line,
+                    product_detail: order,
+                    shop_type: req.body.shop_type,
+                    paymenttype: req.body.paymenttype,
+                    servicename: "Website",
+                    cost: totalcost,
+                    price: totalprice,
+                    freight: 0,
+                    net: totalprice,
+                    totalplatform: totalplatform,
+                    moneyreceive: req.body.moneyreceive,
+                    employee: req.body.employee,
+                    change: req.body.change,
+                    status: {
+                        name: "รอดำเนินการ",
+                        timestamp: dayjs(Date.now()).format(""),
+                    },
+                    timestamp: dayjs(Date.now()).format(""),
+                };
+
+                const new_order = new OrderServiceModels(data);
+                const formOrderOffice = {
+                    receiptnumber: invoice,
+                    detail: "Website",
+                    customer: {
+                        customer_iden: req.body.customer_iden,
+                        customer_name: req.body.customer_name,
+                        customer_tel: req.body.customer_tel,
+                        customer_address: req.body.customer_address,
+                        customer_line: req.body.customer_line,
+                    },
+                    product_detail: order_office,
+                };
+                const getteammember = await GetTeamMember(req.body.platform);
+                if (!getteammember) {
+                    return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
+                } else {
+                    new_order.save();
+                    await office.OrderOfficeCreate(formOrderOffice);
+
+                    // ตัดเงิน
+                    const newwallet = shop.shop_wallet - (totalprice);
+                    await Shops.findByIdAndUpdate(shop._id, { shop_wallet: newwallet }, { useFindAndModify: false });
+
+                    // จ่ายค่าคอมมิชชั่น
+                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Website');
+                    const commission = new Commission(commissionData);
+
+                    if (!commission) {
+                        return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
+                    } else {
+                        commission.save();
+                        const wallethistory = {
+                            maker_id: req.body.maker_id,
+                            shop_id: shop._id,
+                            orderid: new_order._id,
+                            name: `รายการบริการ Account ใบเสร็จเลขที่ ${new_order.invoice}`,
+                            type: "เงินออก",
+                            category: 'Wallet',
+                            before: shop.shop_wallet,
+                            after: newwallet,
+                            amount: new_order.net,
+                        };
+                        const walletHistory = new WalletHistory(wallethistory);
+                        if (!walletHistory) {
+                            return res.status(403).send({ status: false, message: 'ไม่สามารถบันทึกประวัติการเงินได้' });
+                        } else {
+                            walletHistory.save();
+                            const message = `
+แจ้งงานเข้า : ${new_order.servicename}
+เลขที่ทำรายการ : ${new_order.invoice}
+ตรวจสอบได้ที่ : https://office.ddscservices.com/
+               
+*ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
+                            await line.linenotify(message);
+                            return res.status(200).send({ status: true, data: data, ยอดเงินคงเหลือ: newwallet });
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+}
+
+async function GenerateRiceiptNumber(shop_type, shop_id, shop_number) {
+    if (shop_type === 'One Stop Service') {
+        const pipelint = [
+            {
+                $match: { shop_type: shop_type, shop_id: shop_id },
+            },
+            {
+                $group: { _id: 0, count: { $sum: 1 } },
+            },
+        ];
+        const count = await OrderServiceModels.aggregate(pipelint);
+        const countValue = count.length > 0 ? count[0].count + 1 : 1;
+        const data = `TG${dayjs(Date.now()).format("YYMM")}${shop_number}${countValue
+            .toString()
+            .padStart(3, "0")}`;
+        return data;
+    } else if (shop_type === 'One Stop Platform') {
+        const pipelint = [
+            {
+                $match: { shop_type: shop_type },
+            },
+            {
+                $group: { _id: 0, count: { $sum: 1 } },
+            },
+        ];
+        const count = await OrderServiceModels.aggregate(pipelint);
+        const countValue = count.length > 0 ? count[0].count + 1 : 1;
+        const data = `PF${dayjs(Date.now()).format("YYMM")}${countValue
+            .toString()
+            .padStart(3, "0")}`;
+        return data;
+    }
+};
+
+async function GetTeamMember(tel) {
+    try {
+        const member = await Members.findOne({ tel: tel });
+        if (!member) {
+            return res
+                .status(403)
+                .send({ message: "เบอร์โทรนี้ยังไม่ได้เป็นสมาชิกของทศกัณฐ์แฟมมิลี่" });
+        } else {
+            const upline = [member.upline.lv1, member.upline.lv2, member.upline.lv3];
+            const validUplines = upline.filter((item) => item !== "-");
+            const uplineData = [];
+            let i = 0;
+            for (const item of validUplines) {
+                const include = await Members.findOne({ _id: item });
+                if (include !== null) {
+                    uplineData.push({
+                        iden: include.iden.number,
+                        name: include.fristname,
+                        address: {
+                            address: include.address,
+                            subdistrict: include.subdistrict,
+                            district: include.district,
+                            province: include.province,
+                            postcode: include.postcode,
+                        },
+                        tel: include.tel,
+                        level: i + 1,
+                    });
+                    i++;
+                }
+            }
+            const owner = {
+                iden: member.iden.number,
+                name: member.fristname,
+                address: {
+                    address: member.address,
+                    subdistrict: member.subdistrict,
+                    district: member.district,
+                    province: member.province,
+                    postcode: member.postcode,
+                },
+                tel: member.tel,
+                level: "owner",
+            };
+            const data = [
+                owner || null,
+                uplineData[0] || null,
+                uplineData[1] || null,
+                uplineData[2] || null,
+            ];
+            return data
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, error: error.message });
     }
 };

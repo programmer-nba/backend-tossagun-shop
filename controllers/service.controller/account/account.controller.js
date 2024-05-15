@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
         cb(null, uploadFolder)
     },
     filename: (req, file, cb) => {
-        cb(null, 'art' + "-" + file.originalname);
+        cb(null, 'act' + file.originalname, + "-" + Date.now());
     },
 });
 
@@ -267,7 +267,7 @@ const checkEmployee = async (req, res) => {
                 const totalcost = order.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0);
                 const totalplatform = order.reduce((accumulator, currentValue) => accumulator + currentValue.platform, 0);
 
-                const invoice = await GenerateRiceiptNumber(req.body.shop_type);
+                const invoice = await GenerateRiceiptNumber(req.body.shop_type, shop._id, shop.shop_number);
 
                 const data = {
                     invoice: invoice,
@@ -333,7 +333,7 @@ const checkEmployee = async (req, res) => {
                             maker_id: req.body.maker_id,
                             shop_id: shop._id,
                             orderid: new_order._id,
-                            name: `รายการสั่งซื้อ Account ใบเสร็จเลขที่ ${new_order.invoice}`,
+                            name: `รายการบริการ Account ใบเสร็จเลขที่ ${new_order.invoice}`,
                             type: "เงินออก",
                             category: 'Wallet',
                             before: shop.shop_wallet,
@@ -364,11 +364,11 @@ const checkEmployee = async (req, res) => {
     }
 }
 
-async function GenerateRiceiptNumber(shop_type) {
+async function GenerateRiceiptNumber(shop_type, shop_id, shop_number) {
     if (shop_type === 'One Stop Service') {
         const pipelint = [
             {
-                $match: { shop_type: shop_type },
+                $match: { shop_type: shop_type, shop_id: shop_id },
             },
             {
                 $group: { _id: 0, count: { $sum: 1 } },
@@ -376,9 +376,9 @@ async function GenerateRiceiptNumber(shop_type) {
         ];
         const count = await OrderServiceModels.aggregate(pipelint);
         const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TGS${dayjs(Date.now()).format("YYMMDD")}${countValue
+        const data = `TG${dayjs(Date.now()).format("YYMM")}${shop_number}${countValue
             .toString()
-            .padStart(5, "0")}`;
+            .padStart(3, "0")}`;
         return data;
     } else if (shop_type === 'One Stop Platform') {
         const pipelint = [
@@ -391,7 +391,7 @@ async function GenerateRiceiptNumber(shop_type) {
         ];
         const count = await OrderServiceModels.aggregate(pipelint);
         const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TGP${dayjs(Date.now()).format("YYMMDD")}${countValue
+        const data = `PF${dayjs(Date.now()).format("YYMM")}${countValue
             .toString()
             .padStart(5, "0")}`;
         return data;

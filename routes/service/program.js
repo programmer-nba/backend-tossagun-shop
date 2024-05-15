@@ -11,4 +11,6 @@ router.get("/:id", auth, program.getMediaById);
 router.put("/:id", authAdmin, program.updateMedia);
 router.delete("/:id", authAdmin, program.deleteMedia);
 
+router.post("/order", auth, program.createOrder);
+
 module.exports = router;

@@ -355,93 +355,93 @@ const checkEmployee = async (req, res) => {
                 const totalfreight = order.reduce((accumulator, currentValue) => accumulator + currentValue.freight, 0);
                 const totalplatform = order.reduce((accumulator, currentValue) => accumulator + currentValue.platform, 0);
 
-                const invoice = await GenerateRiceiptNumber(req.body.shop_type);
-                const data = {
-                    invoice: invoice,
-                    maker_id: req.body.maker_id,
-                    shop_id: shop._id,
-                    platform: req.body.platform,
-                    customer_name: req.body.customer_name,
-                    customer_tel: req.body.customer_tel,
-                    customer_address: req.body.customer_address,
-                    customer_iden: req.body.customer_iden,
-                    customer_line: req.body.customer_line,
-                    product_detail: order,
-                    shop_type: req.body.shop_type,
-                    paymenttype: req.body.paymenttype,
-                    servicename: "Artwork",
-                    cost: totalcost,
-                    price: totalprice,
-                    freight: totalfreight,
-                    net: totalprice + totalfreight,
-                    totalplatform: totalplatform,
-                    moneyreceive: req.body.moneyreceive,
-                    employee: req.body.employee,
-                    change: req.body.change,
-                    status: {
-                        name: "รอดำเนินการ",
-                        timestamp: dayjs(Date.now()).format(""),
-                    },
-                    timestamp: dayjs(Date.now()).format(""),
-                };
-                const new_order = new OrderServiceModels(data);
-                const formOrderOffice = {
-                    receiptnumber: invoice,
-                    detail: "Graphics",
-                    customer: {
-                        customer_iden: req.body.customer_iden,
-                        customer_name: req.body.customer_name,
-                        customer_tel: req.body.customer_tel,
-                        customer_address: req.body.customer_address,
-                        customer_line: req.body.customer_line,
-                    },
-                    product_detail: order_office,
-                };
-                const getteammember = await GetTeamMember(req.body.platform);
-                if (!getteammember) {
-                    return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
-                } else {
-                    new_order.save();
-                    await office.OrderOfficeCreate(formOrderOffice);
+                const invoice = await GenerateRiceiptNumber(req.body.shop_type, shop._id, shop.shop_number);
+                // const data = {
+                    // invoice: invoice,
+                    // maker_id: req.body.maker_id,
+                    // shop_id: shop._id,
+                    // platform: req.body.platform,
+                    // customer_name: req.body.customer_name,
+                    // customer_tel: req.body.customer_tel,
+                    // customer_address: req.body.customer_address,
+                    // customer_iden: req.body.customer_iden,
+                    // customer_line: req.body.customer_line,
+                    // product_detail: order,
+                    // shop_type: req.body.shop_type,
+                    // paymenttype: req.body.paymenttype,
+                    // servicename: "Artwork",
+                    // cost: totalcost,
+                    // price: totalprice,
+                    // freight: totalfreight,
+                    // net: totalprice + totalfreight,
+                    // totalplatform: totalplatform,
+                    // moneyreceive: req.body.moneyreceive,
+                    // employee: req.body.employee,
+                    // change: req.body.change,
+                    // status: {
+                        // name: "รอดำเนินการ",
+                        // timestamp: dayjs(Date.now()).format(""),
+                    // },
+                    // timestamp: dayjs(Date.now()).format(""),
+                // };
+                // const new_order = new OrderServiceModels(data);
+                // const formOrderOffice = {
+                    // receiptnumber: invoice,
+                    // detail: "Graphics",
+                    // customer: {
+                        // customer_iden: req.body.customer_iden,
+                        // customer_name: req.body.customer_name,
+                        // customer_tel: req.body.customer_tel,
+                        // customer_address: req.body.customer_address,
+                        // customer_line: req.body.customer_line,
+                    // },
+                    // product_detail: order_office,
+                // };
+                // const getteammember = await GetTeamMember(req.body.platform);
+                // if (!getteammember) {
+                    // return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
+                // } else {
+                    // new_order.save();
+                    // await office.OrderOfficeCreate(formOrderOffice);
 
                     // ตัดเงิน
-                    const newwallet = shop.shop_wallet - (totalprice + totalfreight);
-                    await Shops.findByIdAndUpdate(shop._id, { shop_wallet: newwallet }, { useFindAndModify: false });
+                    // const newwallet = shop.shop_wallet - (totalprice + totalfreight);
+                    // await Shops.findByIdAndUpdate(shop._id, { shop_wallet: newwallet }, { useFindAndModify: false });
 
                     // จ่ายค่าคอมมิชชั่น
-                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Artwork');
-                    const commission = new Commission(commissionData);
-                    if (!commission) {
-                        return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
-                    } else {
-                        commission.save();
-                        const wallethistory = {
-                            maker_id: req.body.maker_id,
-                            shop_id: shop._id,
-                            orderid: new_order._id,
-                            name: `รายการสั่งซื้อ Artwork ใบเสร็จเลขที่ ${new_order.invoice}`,
-                            type: "เงินออก",
-                            category: 'Wallet',
-                            before: shop.shop_wallet,
-                            after: newwallet,
-                            amount: new_order.net,
-                        };
-                        const walletHistory = new WalletHistory(wallethistory);
-                        if (!walletHistory) {
-                            return res.status(403).send({ status: false, message: 'ไม่สามารถบันทึกประวัติการเงินได้' });
-                        } else {
-                            walletHistory.save();
-                            const message = `
-แจ้งงานเข้า : ${new_order.servicename}
-เลขที่ทำรายการ : ${new_order.invoice}
-ตรวจสอบได้ที่ : https://office.ddscservices.com/
-                
- *ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
-                            await line.linenotify(message);
-                            return res.status(200).send({ status: true, data: data, ยอดเงินคงเหลือ: newwallet });
-                        }
-                    }
-                }
+                    // const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Artwork');
+                    // const commission = new Commission(commissionData);
+                    // if (!commission) {
+                        // return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
+                    // } else {
+                        // commission.save();
+                        // const wallethistory = {
+                            // maker_id: req.body.maker_id,
+                            // shop_id: shop._id,
+                            // orderid: new_order._id,
+                            // name: `รายการสั่งซื้อ Artwork ใบเสร็จเลขที่ ${new_order.invoice}`,
+                            // type: "เงินออก",
+                            // category: 'Wallet',
+                            // before: shop.shop_wallet,
+                            // after: newwallet,
+                            // amount: new_order.net,
+                        // };
+                        // const walletHistory = new WalletHistory(wallethistory);
+                        // if (!walletHistory) {
+                            // return res.status(403).send({ status: false, message: 'ไม่สามารถบันทึกประวัติการเงินได้' });
+                        // } else {
+                            // walletHistory.save();
+                            // const message = `
+// แจ้งงานเข้า : ${new_order.servicename}
+// เลขที่ทำรายการ : ${new_order.invoice}
+// ตรวจสอบได้ที่ : https://office.ddscservices.com/
+                // 
+//  *ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
+                            // await line.linenotify(message);
+                            // return res.status(200).send({ status: true, data: data, ยอดเงินคงเหลือ: newwallet });
+                        // }
+                    // }
+                // }
             }
         }
     } catch (error) {
@@ -450,21 +450,23 @@ const checkEmployee = async (req, res) => {
     }
 };
 
-async function GenerateRiceiptNumber(shop_type) {
+async function GenerateRiceiptNumber(shop_type, shop_id, shop_number) {
+    console.log(shop_id)
     if (shop_type === 'One Stop Service') {
         const pipelint = [
             {
-                $match: { shop_type: shop_type },
+                $match: { shop_type: shop_type, shop_id: shop_id },
             },
             {
                 $group: { _id: 0, count: { $sum: 1 } },
             },
         ];
         const count = await OrderServiceModels.aggregate(pipelint);
+        console.log(count)
         const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TGS${dayjs(Date.now()).format("YYMMDD")}${countValue
+        const data = `TG${dayjs(Date.now()).format("YYMM")}${shop_number}${countValue
             .toString()
-            .padStart(5, "0")}`;
+            .padStart(3, "0")}`;
         return data;
     } else if (shop_type === 'One Stop Platform') {
         const pipelint = [
@@ -477,9 +479,9 @@ async function GenerateRiceiptNumber(shop_type) {
         ];
         const count = await OrderServiceModels.aggregate(pipelint);
         const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TGP${dayjs(Date.now()).format("YYMMDD")}${countValue
+        const data = `PF${dayjs(Date.now()).format("YYMM")}${countValue
             .toString()
-            .padStart(5, "0")}`;
+            .padStart(3, "0")}`;
         return data;
     }
 };
