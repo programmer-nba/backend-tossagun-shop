@@ -267,7 +267,7 @@ const checkEmployee = async (req, res) => {
                 const totalcost = order.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0);
                 const totalplatform = order.reduce((accumulator, currentValue) => accumulator + currentValue.platform, 0);
 
-                const invoice = await GenerateRiceiptNumber(req.body.shop_type, shop._id, shop.shop_number);
+                const invoice = await GenerateRiceiptNumber(req.body.shop_type, req.body.shop_id, shop.shop_number);
 
                 const data = {
                     invoice: invoice,
@@ -364,11 +364,16 @@ const checkEmployee = async (req, res) => {
     }
 }
 
-async function GenerateRiceiptNumber(shop_type, shop_id, shop_number) {
+async function GenerateRiceiptNumber(shop_type, id, number) {
     if (shop_type === 'One Stop Service') {
         const pipelint = [
             {
-                $match: { shop_type: shop_type, shop_id: shop_id },
+                $match: {
+                    $and: [
+                        { shop_type: shop_type },
+                        { shop_id: id },
+                    ],
+                },
             },
             {
                 $group: { _id: 0, count: { $sum: 1 } },
@@ -376,7 +381,7 @@ async function GenerateRiceiptNumber(shop_type, shop_id, shop_number) {
         ];
         const count = await OrderServiceModels.aggregate(pipelint);
         const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TG${dayjs(Date.now()).format("YYMM")}${shop_number}${countValue
+        const data = `TG${dayjs(Date.now()).format("YYMM")}${number}${countValue
             .toString()
             .padStart(3, "0")}`;
         return data;
