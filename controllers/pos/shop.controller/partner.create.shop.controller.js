@@ -31,7 +31,7 @@ module.exports.create = async (req, res) => {
                 } else {
                     const shop = await Shops.findOne({
                         shop_name_second: req.body.shop_name_second,
-                        shop_number: req.body.shop_number,
+                        // shop_number: req.body.shop_number,
                     });
                     if (shop) {
                         // fs.unlinkSync(req.file.path);
