@@ -3,7 +3,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
-const uploadFolder = path.join(__dirname, '../../../assets/artwork');
+const uploadFolder = path.join(__dirname, '../../../assets/shop');
 fs.mkdirSync(uploadFolder, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
         cb(null, uploadFolder)
     },
     filename: (req, file, cb) => {
-        cb(null, 'shop' + "-" + file.originalname);
+        cb(null, 'shop' + "-" + Date.now());
     },
 });
 
@@ -24,7 +24,7 @@ module.exports.create = async (req, res) => {
             if (!req.file) {
                 const { error } = validate(req.body);
                 if (error) {
-                    fs.unlinkSync(req.file.path);
+                    // fs.unlinkSync(req.file.path);
                     return res
                         .status(400)
                         .send({ message: error.details[0].message, status: false });
@@ -34,7 +34,7 @@ module.exports.create = async (req, res) => {
                         shop_number: req.body.shop_number,
                     });
                     if (shop) {
-                        fs.unlinkSync(req.file.path);
+                        // fs.unlinkSync(req.file.path);
                         return res.status(409).send({ status: false, message: "รหัสร้าน หรือ ชื่อร้านค้าซ้ำในระบบ", });
                     } else {
                         const shop_number = await GenerateNumber(req.body.shop_type);

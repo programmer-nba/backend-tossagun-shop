@@ -40,13 +40,15 @@ module.exports.getPriceById = async (req, res) => {
 
 module.exports.getPriceByProductId = async (req, res) => {
     try {
-        const price = await PriceArtworks.find();
-        const prices = price.filter(
-            (el) => el.product_id === req.params.id
-        );
-        if (!prices)
+        const pipeline = [
+            {
+                $match: { "product_id": req.params.productid },
+            }
+        ];
+        const price = await PriceArtworks.aggregate(pipeline);
+        if (!price)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
-        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: prices });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: price });
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", error: "server side error" });

@@ -122,14 +122,15 @@ module.exports.getProductById = async (req, res) => {
 // Get product by categiry id
 module.exports.getProductByCategoryId = async (req, res) => {
     try {
-        const id = req.params.id;
-        const product = await ProductArtworks.find();
-        const products = product.filter(
-            (el) => el.category === id,
-        );
-        if (!products)
+        const pipeline = [
+            {
+                $match: { "category": req.params.cateid },
+            }
+        ];
+        const product = await ProductArtworks.aggregate(pipeline);
+        if (!product)
             return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
-        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: products });
+        return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: product });
     } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "มีบางอย่างผิดพลาด", error: "server side error" });
