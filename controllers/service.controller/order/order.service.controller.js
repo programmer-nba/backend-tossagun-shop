@@ -93,13 +93,14 @@ const checkEmployee = async (req, res) => {
                                     total_freight = artwork.freight + ((result - 1) * 10) * item.quantity;
                                     total_platfrom = (artwork.service.platform * result) * item.quantity;
                                 }
-                            } else if (product.detail === 'ราคาต่อชิ้น') {
-                                packagedetail = `${product.description}, ${item.packagedetail}`
-                                total_price = artwork.price * item.quantity;
-                                total_cost = artwork.cost * item.quantity;
-                                total_platfrom = artwork.service.platform * item.quantity;
-                                total_freight = artwork.freight * item.quantity;
-                            } else if (product.detail === 'ราคาต่อชุด') {
+                                // } 
+                                // else if (product.detail === 'ราคาต่อชิ้น') {
+                                // packagedetail = `${product.description}, ${item.packagedetail}`
+                                // total_price = artwork.price * item.quantity;
+                                // total_cost = artwork.cost * item.quantity;
+                                // total_platfrom = artwork.service.platform * item.quantity;
+                                // total_freight = artwork.freight * item.quantity;
+                            } else if (product.detail === 'ราคาต่อชุด' || product.detail === 'ราคาต่อชิ้น') {
                                 packagedetail = `${product.description}, ${item.packagedetail}`
                                 total_price = artwork.price * item.quantity;
                                 total_cost = artwork.cost * item.quantity;
