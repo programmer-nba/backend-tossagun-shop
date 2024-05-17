@@ -5,8 +5,8 @@ module.exports.getCommissionByTel = async (req, res) => {
         let tel;
         if (req.user.row === 'member') {
             tel = req.user.tel;
-        } else {
-
+        } else if (req.user.row === 'employee') {
+            tel = req.user.phone.replace(/-/g, "");
         }
         const pipeline = [
             {

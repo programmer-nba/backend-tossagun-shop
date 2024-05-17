@@ -332,7 +332,7 @@ booking = async (req, res) => {
                 orderid: createOrder._id,
                 name: `รายการขนส่งหมายเลขที่ ${invoice}`,
                 type: `เงินออก`,
-                categort: 'Wallet',
+                category: 'Wallet',
                 amount: total,
                 before: before,
                 after: findShop.shop_wallet,

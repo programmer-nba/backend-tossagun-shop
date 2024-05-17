@@ -31,7 +31,6 @@ EmployeeSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
     {
       _id: this._id,
-      name: `${this.employee_firstname} ${this.employee_lastname}`,
       shop_id: this.employee_shop_id,
       phone: this.employee_phone,
       row: "employee",
