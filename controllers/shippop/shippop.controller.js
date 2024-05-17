@@ -36,7 +36,7 @@ priceList = async (req, res) => {
         }
 
         //ผู้ส่ง
-        const sender = formData.from;
+        const sender = formData.origin;
         const filterSender = { shop_id: shop, tel: sender.tel, status: 'ผู้ส่ง' }; //เงื่อนไขที่ใช้กรองว่ามีใน database หรือเปล่า
 
         const data_sender = { //ข้อมูลที่ต้องการอัพเดท หรือ สร้างใหม่
@@ -89,6 +89,15 @@ priceList = async (req, res) => {
                 "postcode": req.body.from.postcode,
                 "tel": req.body.from.tel
             },
+            "origin": {
+                "name": req.body.origin.name,
+                "address": req.body.origin.address,
+                "district": req.body.origin.district,
+                "state": req.body.origin.state,
+                "province": req.body.origin.province,
+                "postcode": req.body.origin.postcode,
+                "tel": req.body.origin.tel
+            },
             "to": {
                 "name": req.body.to.name,
                 "address": req.body.to.address,
@@ -138,7 +147,7 @@ priceList = async (req, res) => {
         // console.log(insuranceFee)
 
         //ค้นหาร้านค้า
-        const findShop = await Shops.findOne({ shop_number: shop })
+        const findShop = await Shops.findOne({ _id: shop })
         if (!findShop) {
             return res
                 .status(404)
@@ -158,15 +167,17 @@ priceList = async (req, res) => {
                     console.log(`ยังไม่มี courier name: ${obj[ob].courier_code}`);
                 }
                 // คำนวนต้นทุนของร้านค้า
-                let cost_hub = Number(obj[ob].price);
-                let cost = Math.ceil(((cost_hub * p.profit_tg) / 100) + cost_hub)
-                let price = Math.ceil(((cost * p.profit_shop) / 100) + cost)
+                let cost_tg = Number(obj[ob].price);
+                let cost = Math.ceil(((cost_tg * p.profit_tg) / 100) + cost_tg);
+                let price = Math.ceil(((cost * p.profit_shop) / 100) + cost);
+                let total_platform = Math.ceil((cost - cost_tg) * (p.platform / 100));
 
                 v = {
                     ...obj[ob],
                     price_remote_area: 0,
-                    cost_tg: cost_hub,
+                    cost_tg: cost_tg,
                     cost: cost,
+                    total_platform: total_platform,
                     cod_amount: Number(cod_amount.toFixed()),
                     fee_cod: 0,
                     price: Number(price.toFixed()),
@@ -218,27 +229,9 @@ priceList = async (req, res) => {
 
 booking = async (req, res) => {
     try {
-        const formData = req.body
-        const price = req.body.price
-        const weight = req.body.parcel.weight
-        const id = req.decoded.userid
-        const price_remote_area = req.body.price_remote_area
-        const declared_value = req.body.declared_value
-        const insuranceFee = req.body.insuranceFee
-        const shop_number = req.body.shop_number
-        const maker_id = req.body.maker_id
-        const tossagun_tel = req.body.tossagun_tel
-        const cost_tg = req.body.cost_tg
-        const type_payment = req.body.type_payment
-        const cost = req.body.cost
-        const total = req.body.total
-        formData.parcel.weight = weight
-        const data = [{ ...formData }] //, courier_code:courierCode
-        const total_platfrom = req.body.cost - req.body.cost_tg
-
-        const invoice = await invoiceNumber()
+        const invoice = await invoiceNumber();
         // console.log(invoice)
-        const findTossagun_tel = await Members.findOne({ tel: tossagun_tel })
+        const findTossagun_tel = await Members.findOne({ tel: req.body.platform })
         if (!findTossagun_tel) {
             return res.status(404).send({ status: false, message: "คุณยังไม่ได้เป็นสมาชิกทศกัณฐ์แฟมิลี่" })
         }
@@ -249,7 +242,7 @@ booking = async (req, res) => {
                 "success": "http://shippop.com/?success",
                 "fail": "http://shippop.com/?fail"
             },
-            data: data,
+            data: req.body.product_detail,
             force_confirm: 1
         };
 
@@ -263,10 +256,57 @@ booking = async (req, res) => {
             return res.status(400).send({ status: false, message: resp.data.data[0] });
         }
 
-        //ตัดเงิน
-        const findShop = await Shops.findOneAndUpdate({
-            shop_number: shop_number
-        }, {
+        const obj = resp.data.data;
+        const new_data = [];
+        let cost_tg = 0;
+        let cost = 0;
+        let total = 0;
+        let total_platform = 0;
+        Object.keys(obj).forEach(async (ob) => {
+            const percel = req.body.product_detail[ob];
+            const v = {
+                ...obj[ob],
+                ...percel,
+                invoice: invoice,
+                purchase_id: String(resp.data.purchase_id),
+                shop_id: req.body.shop_id,
+                employee_id: req.body.employee,
+                type_payment: req.body.paymenttype,
+                tossagun_tel: req.body.platform,
+            };
+            new_data.push(v);
+            cost_tg += percel.cost_tg;
+            cost += percel.cost;
+            total += percel.total;
+            total_platform += percel.total_platform;
+        });
+
+        const o = {
+            shop_id: req.body.shop_id,
+            platform: req.body.platform,
+            invoice: invoice,
+            total: Number(total.toFixed()),
+            total_cost: cost,
+            total_cost_tg: cost_tg,
+            total_platform: total_platform,
+            payment_type: req.body.paymenttype,
+            purchase_id: String(resp.data.purchase_id),
+            product: new_data,
+            employee: req.body.employee,
+            status: [
+                { name: "ชำระเงิน", timestamp: dayjs(Date.now()).format() }
+            ],
+            timestamp: dayjs(Date.now()).format(),
+        };
+
+        const createOrder = await OrderExpress.create(o);
+        const createOrderShippop = await shippopBooking.insertMany(new_data);
+        if (!createOrderShippop && !createOrder) {
+            console.log("ไม่สามารถสร้างข้อมูล booking ได้")
+        }
+
+        // ตัดเงิน
+        const findShop = await Shops.findByIdAndUpdate(req.body.shop_id, {
             $inc: {
                 shop_wallet: -total
             }
@@ -275,62 +315,20 @@ booking = async (req, res) => {
             return res.status(404).send({ status: false, message: "ไม่สามารถค้นหาร้านที่ท่านระบุได้" })
         }
 
-        const Data = resp.data.data[0]
-        const parcel = data[0].parcel
-        const new_data = []
-        const v = {
-            ...Data, //มี declared_value และ cod_amount อยู่แล้วใน ...Data ไม่ต้องสร้างเพิ่ม
-            parcel: parcel,
-            invoice: invoice,
-            purchase_id: String(resp.data.purchase_id),
-            cost_tg: cost_tg,
-            cost: cost,
-            declared_value: declared_value,
-            insuranceFee: insuranceFee,
-            // price_remote_area: price_remote_area,
-            // type_payment: type_payment,
-            // tossagun_tel: tossagun_tel,
-            price: Number(price.toFixed()),
-            total: Number(total.toFixed()),
-            shop_id: findShop._id,
-        };
-        const o = {
-            shop_id: findShop._id,
-            platform: tossagun_tel,
-            invoice: invoice,
-            total: Number(total.toFixed()),
-            total_cost: cost,
-            total_cost_tg: cost_tg,
-            payment_type: type_payment,
-            purchase_id: String(resp.data.purchase_id),
-            product: data,
-            employee: req.body.employee,
-            status: [
-                { name: "ชำระเงิน", timestamp: dayjs(Date.now()).format() }
-            ],
-            timestamp: dayjs(Date.now()).format(),
-        }
-        new_data.push(v);
-        const createOrder = new OrderExpress(o);
-        const createOrderShippop = new shippopBooking(v)
-        if (!createOrderShippop && !createOrder) {
-            console.log("ไม่สามารถสร้างข้อมูล booking ได้")
-        }
-
-        const getteammember = await GetTeamMember(tossagun_tel);
+        const getteammember = await GetTeamMember(req.body.platform);
         if (!getteammember) {
             return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
         } else {
-            createOrder.save();
-            createOrderShippop.save();
+            // createOrder.save();
+            // createOrderShippop.save();
 
-            await confirmOrder(String(resp.data.purchase_id), findShop._id);
+            // await confirmOrder(String(resp.data.purchase_id), findShop._id);
 
-            //บันทึกการเงิน
+            // บันทึกการเงิน
             let before = findShop.shop_wallet + total
             let doto = {
                 shop_id: findShop._id,
-                maker_id: maker_id,
+                maker_id: req.body.maker_id,
                 orderid: createOrder._id,
                 name: `รายการขนส่งหมายเลขที่ ${invoice}`,
                 type: `เงินออก`,
@@ -346,14 +344,14 @@ booking = async (req, res) => {
             }
 
             // จ่ายค่าคอมมิชชั่น
-            const commissionData = await commissions.Commission(createOrder, total_platfrom, getteammember, 'Express');
+            const commissionData = await commissions.Commission(createOrder, total_platform, getteammember, 'Express');
             const commission = new Commission(commissionData);
             if (!commission) {
                 return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
             } else {
                 commission.save();
             }
-            return res.status(200).send({ status: true, data: new_data, record: record, shop: findShop.shop_wallet })
+            return res.status(200).send({ status: true, data: new_data, record: record, shop: findShop.shop_wallet, invoice: invoice })
         }
     } catch (err) {
         console.log(err)
@@ -560,6 +558,49 @@ async function GetTeamMember(tel) {
             ];
             return data
         }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, error: error.message });
+    }
+};
+
+async function confirmOrder(purchase_id, shop_id, res) {
+    try {
+        if (purchase_id === undefined || shop_id === undefined) {
+            // return res.status(500).send({ status: false, message: "รับข้อมูลไม่ครบถ้วน" });
+            console.log("รับข้อมูลไม่ครบถ้วน")
+        }
+
+        const booking = await shippopBooking.find({
+            shop_id: shop_id,
+            purchase_id: purchase_id,
+        });
+
+        const value = {
+            api_key: process.env.SHIPPOP_API_KEY,
+            purchase_id: purchase_id,
+        };
+
+        const resp = await axios.post(`${process.env.SHIPPOP_URL}/confirm/`, value, {
+            headers: {
+                "Accept-Encoding": "gzip,deflate,compress",
+                "Content-Type": "application/json"
+            },
+        });
+
+        // console.log(resp)
+
+        if (!resp.data.status) {
+            console.log(resp.data.message)
+            // return res.status(400).send({ status: false, message: resp.data.message });
+        }
+
+        for (let i = 0; i < booking.length; i++) {
+            await shippopBooking.findByIdAndUpdate(booking[i]._id, {
+                order_status: "booking",
+            });
+        }
+        console.log("ยืนยันใบสั่งซื้อ : " + purchase_id);
     } catch (error) {
         console.log(error)
         return res.status(500).send({ status: false, error: error.message });

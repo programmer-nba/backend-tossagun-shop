@@ -9,6 +9,7 @@ const OrderExpressSchema = new mongoose.Schema({
     total: { type: Number, required: true },
     total_cost: { type: Number, required: false, default: 0 },
     total_cost_th: { type: Number, required: false, default: 0 },
+    total_platform: { type: Number, required: false, default: 0 },
     receive: { type: Number, required: true, default: 0 },
     payment_type: { type: String, required: true },
     purchase_id: { type: String, required: true, default: "ไม่มี" },
