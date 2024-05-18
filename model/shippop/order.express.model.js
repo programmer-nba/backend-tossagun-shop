@@ -8,7 +8,7 @@ const OrderExpressSchema = new mongoose.Schema({
     invoice_full: { type: String, default: "ไม่มี" },
     total: { type: Number, required: true },
     total_cost: { type: Number, required: false, default: 0 },
-    total_cost_th: { type: Number, required: false, default: 0 },
+    total_cost_tg: { type: Number, required: false, default: 0 },
     total_platform: { type: Number, required: false, default: 0 },
     receive: { type: Number, required: true, default: 0 },
     payment_type: { type: String, required: true },

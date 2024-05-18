@@ -18,6 +18,8 @@ const line = require("../../../lib/line.notify");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const { OrderApppremium } = require("../../../model/apppremium/order.apppremium.model");
+const { AppPremiumBooking } = require("../../../model/apppremium/apppremium.model");
 
 const uploadFolder = path.join(__dirname, '../../../assets/act');
 fs.mkdirSync(uploadFolder, { recursive: true });
@@ -60,7 +62,7 @@ const checkEmployee = async (req, res) => {
                     product_id: item.packageid
                 });
                 const total = artwork.price + artwork.freight;
-                const net = total * item.amount;
+                const net = total * item.quantity;
                 product_price += net;
             }
             if (shop.shop_wallet < product_price) {
@@ -439,6 +441,7 @@ module.exports.getOrderExpress = async (req, res) => {
     }
 };
 
+
 module.exports.getOrderByShopId = async (req, res) => {
     try {
         const id = req.params.shopid;
@@ -468,6 +471,60 @@ module.exports.getOrderPurchaseId = async (req, res) => {
             }
         ];
         const order = await shippopBooking.aggregate(pipelint);
+        if (order) {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order })
+        } else {
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.getOrderAppPremium = async (req, res) => {
+    try {
+        const order = await OrderApppremium.find();
+        if (order) {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order })
+        } else {
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.getOrderAppByShopId = async (req, res) => {
+    try {
+        const id = req.params.shopid;
+        const pipelint = [
+            {
+                $match: { shop_id: id },
+            }
+        ];
+        const order = await OrderApppremium.aggregate(pipelint);
+        if (order) {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order })
+        } else {
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลออเดอร์ไม่สำเร็จ' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports.getOrderAppPurchaseId = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const pipelint = [
+            {
+                $match: { purchase_id: id },
+            }
+        ];
+        const order = await AppPremiumBooking.aggregate(pipelint);
         if (order) {
             return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order })
         } else {

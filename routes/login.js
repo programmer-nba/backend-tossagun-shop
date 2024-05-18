@@ -7,16 +7,19 @@ const { Employees } = require("../model/user/employee.model");
 const { Shops } = require("../model/pos/shop.model");
 const { Members } = require("../model/user/member.model");
 const auth = require("../lib/auth");
+const dayjs = require("dayjs");
 const bcrypt = require("bcrypt");
 const Joi = require("joi");
 require("dotenv").config();
 const getmac = require("getmac");
+const { default: axios } = require("axios");
 const MACAddress = getmac.default();
 
 const validate = (data) => {
   const schema = Joi.object({
     username: Joi.string().required().label("username"),
     password: Joi.string().required().label("password"),
+    ip_address: Joi.string().required().label("ip_address"),
   });
   return schema.validate(data);
 };
@@ -185,11 +188,18 @@ const checkMember = async (req, res) => {
         });
       const token = member.generateAuthToken();
       const ResponesData = {
-        name: member.name,
+        name: member.fristname,
         username: member.tel,
         phone: member.tel,
         position: "One Stop Platform",
       };
+      const login_history = {
+        name: member.fristname,
+        ref: member._id,
+        ip_address: req.body.ip_address,
+        timestamp: dayjs(Date.now()).format(),
+      };
+      await LoginHistorys.create(login_history);
       return res.status(200).send({
         token: token,
         message: "เข้าสู่ระบบสำเร็จ",
@@ -235,13 +245,20 @@ const checkEmployee = async (req, res) => {
         });
       const token = employee.generateAuthToken();
       const ResponesData = {
-        name: employee.employee_name,
-        username: employee.employee_iden,
+        name: employee.employee_firstname,
+        username: employee.employee_username,
         phone: employee.employee_phone,
         position: isShop.shop_type,
         shop_id: isShop._id,
         shop_number: isShop.shop_number,
       };
+      const login_history = {
+        name: employee.employee_firstname,
+        ref: employee._id,
+        ip_address: req.body.ip_address,
+        timestamp: dayjs(Date.now()).format(),
+      };
+      await LoginHistorys.create(login_history);
       return res.status(200).send({
         token: token,
         message: "เข้าสู่ระบบสำเร็จ",
@@ -255,19 +272,24 @@ const checkEmployee = async (req, res) => {
   }
 };
 
-
-router.post("/history", auth, async (req, res) => {
+router.get("/history", auth, async (req, res) => {
   try {
-    const login = await LoginHistorys.create({
-      ...req.body,
-      mac_address: MACAddress,
-    });
-    if (login) {
-      return res.status(201).send({ status: true, message: "เพิ่มข้อมูลสำเร็จ" });
+    let id;
+    if (req.user.row === 'member') {
+      id = req.user._id;
+    } else if (req.user.row === 'employee') {
+      id = req.user._id;
+    }
+    const pipeline = [
+      {
+        $match: { "ref": id },
+      }
+    ];
+    const data = await LoginHistorys.aggregate(pipeline);
+    if (data) {
+      return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: data });
     } else {
-      return res
-        .status(400)
-        .send({ status: false, message: "เพิ่มข้อมูลไม่สำเร็จ" });
+      return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
     }
   } catch (err) {
     console.log(err);
