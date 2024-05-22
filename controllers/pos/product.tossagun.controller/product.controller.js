@@ -16,6 +16,21 @@ exports.findAll = async (req, res) => {
   }
 };
 
+exports.getbydealer = async (req, res) => {
+  try{
+    const dealer = req.params.id;
+    const product = await ProductTG.find({productTG_dealer_id: dealer});
+    if(product){
+      return res.status(200).send({data: product, status: true});
+    }else{
+      return res.status(400).send({status: false, message: "ดึงข้อมูลไม่สำเร็จ"});
+    }
+
+  }catch(error){
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
+  }
+}
+
 exports.findOne = async (req, res) => {
   const id = req.params.id;
   try {
@@ -117,3 +132,4 @@ module.exports.getImage = async (req, res) => {
     return res.status(500).send({ message: "Internal Server Error" });
   }
 };
+
