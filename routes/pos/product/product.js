@@ -10,7 +10,11 @@ router.get("/image/:imgname", products.getImage);
 
 // partner
 router.post("/partner", createProduct.create);
+router.get("/bypartner/:id", products.findOne);
 router.get("/partner/category/all", category.getAll);
+router.put("/partner/:id", updateProduct.update);
+router.delete("/partner/:id", products.delete);
+
 
 router.post("/", authAdmin, createProduct.create);
 router.get("/", authAdmin, products.findAll);

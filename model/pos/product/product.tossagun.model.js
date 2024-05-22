@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
-
+ 
 const ProductSchema = new mongoose.Schema({
   productTG_brand_id: {type: String, required: false, default: "ไม่มี"},
   productTG_dealer_id: {type: String, required: false, default: "ไม่มี"},
