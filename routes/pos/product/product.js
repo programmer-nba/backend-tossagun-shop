@@ -8,6 +8,10 @@ const authAdmin = require("../../../lib/auth.admin");
 
 router.get("/image/:imgname", products.getImage);
 
+// partner
+router.post("/partner", createProduct.create);
+router.get("/partner/category/all", category.getAll);
+
 router.post("/", authAdmin, createProduct.create);
 router.get("/", authAdmin, products.findAll);
 router.get("/:id", auth, products.findOne);

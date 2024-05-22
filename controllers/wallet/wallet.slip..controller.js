@@ -7,18 +7,33 @@ const dayjs = require("dayjs");
 const path = require("path");
 const line = require("../../lib/line.notify");
 const { Shops } = require("../../model/pos/shop.model");
+const axios = require("axios");
+const Tesseract = require('tesseract.js');
+const Jimp = require('jimp');
 
 const uploadFolder = path.join(__dirname, '../../assets/wallet');
 fs.mkdirSync(uploadFolder, { recursive: true });
+
+const uploadFolderTest = path.join(__dirname, '../../assets/test');
+fs.mkdirSync(uploadFolderTest, { recursive: true });
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, uploadFolder)
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
+        cb(null, "slip" + "-" + Date.now());
     },
 });
+
+const storageTest = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadFolderTest)
+    },
+    filename: function (req, file, cb) {
+        cb(null, "Test" + Date.now() + file.originalname);
+    },
+})
 
 exports.create = async (req, res) => {
     try {
@@ -164,3 +179,32 @@ module.exports.getImage = async (req, res) => {
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
+
+
+module.exports.checkClip = async (req, res) => {
+    try {
+        let upload = multer({ storage: storageTest }).single("image");
+        upload(req, res, async function (err) {
+            console.log(req.file)
+            Tesseract.recognize(
+                req.file.path,
+                'eng', // เลือกภาษาเป้าหมาย (ในที่นี้เป็นภาษาอังกฤษ)
+                {
+                    logger: m => console.log(m)
+                } // ใช้ logger เพื่อรับข้อมูลส่วนต่าง ๆ
+            ).then(({ data: { text } }) => {
+                console.log('ข้อความในภาพ:', text);
+                // return res.send(text);
+            }).catch(error => {
+                console.error('เกิดข้อผิดพลาด:', error);
+            });
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+async function checkSlipData(data) {
+    console.log(data)
+}

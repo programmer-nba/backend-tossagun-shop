@@ -238,7 +238,7 @@ const checkEmployee = async (req, res) => {
 };
 
 async function GenerateRiceiptNumber(shop_type, id, number) {
-    if (shop_type === 'One Stop Service') {
+    if (shop_type === 'One Stop Shop') {
         const pipelint = [
             {
                 $match: {
@@ -258,18 +258,18 @@ async function GenerateRiceiptNumber(shop_type, id, number) {
             .toString()
             .padStart(3, "0")}`;
         return data;
-    } else if (shop_type === 'One Stop Platform') {
+    } else {
         const pipelint = [
-            {
-                $match: { shop_type: shop_type },
-            },
+            // {
+            // $match: { shop_type: shop_type },
+            // },
             {
                 $group: { _id: 0, count: { $sum: 1 } },
             },
         ];
         const count = await OrderServiceModels.aggregate(pipelint);
         const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `PF${dayjs(Date.now()).format("YYMM")}${countValue
+        const data = `TGS${dayjs(Date.now()).format("YYMM")}${countValue
             .toString()
             .padStart(3, "0")}`;
         return data;
@@ -352,6 +352,29 @@ module.exports.confirmOrder = async (req, res) => {
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
+
+module.exports.submitOrder = async (req, res) => {
+    try {
+        const updateStatus = await OrderServiceModels.findOne({ _id: req.params.id });
+        if (!updateStatus) {
+            return res.status(403).send({ status: false, message: 'ไม่พบข้อมูลรายการออเดอร์' });
+        } else {
+            updateStatus.status.push({
+                name: "ดำเนินการเสร็จสิ้น",
+                timestamp: dayjs(Date.now()).format(""),
+            });
+            updateStatus.status.push({
+                name: "รอจัดส่ง",
+                timestamp: dayjs(Date.now()).format(""),
+            });
+            updateStatus.save();
+            return res.status(200).send({ status: true, message: 'ยืนยันรับงานสำเร็จ' });
+        }
+    } catch (err) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+}
 
 module.exports.getOrderList = async (req, res) => {
     try {

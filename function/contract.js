@@ -1,11 +1,11 @@
 const axios = require("axios");
 
-async function GetContractPDPA(packageData) {
+async function GetContractPDPA() {
+  const code = 'PDPA'
   const config = {
-    method: "post",
+    method: 'GET',
     headers: {},
-    url: `${process.env.TOSSAGUN_CONTRACT}/base-contract/code`,
-    data: packageData,
+    url: `${process.env.OFFICE_URL}/lawyer/${code}/one`,
   };
   const response = await axios(config);
   return response.data;
