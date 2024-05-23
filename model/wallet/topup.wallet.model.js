@@ -5,6 +5,7 @@ const TopupWalletSchema = new mongoose.Schema({
     maker_id: { type: String, required: false, default: "" },
     shop_id: { type: String, required: false, default: "" },
     invoice: { type: String, required: false }, // เลขที่ทำรายการ
+    transaction: { type: String, required: false, default: "" },
     amount: { type: Number, require: true }, // จำนวนเงิน
     charge: { type: Number, required: false, default: 0 }, // ค่าธรรมเนียม
     payment_type: {
@@ -12,7 +13,7 @@ const TopupWalletSchema = new mongoose.Schema({
         enum: ["One Stop Shop", "One Stop Service", "One Stop Platform"],
         required: true,
     },
-    detail: { type: Object, required: false, default: null },
+    detail: { type: String, required: false, default: "" },
     status: { type: String, required: false, default: 'รอตรวจสอบ' },
     employee: { type: String, required: false, default: 'ไม่มี' }, //ชื่อเจ้าหน้าที่ ทำรายการยืนยัน กรณีเป็นการแจ้งเติมเงินแบบแนบสลิป
     remark: { type: String, required: false, default: '' },
@@ -29,7 +30,7 @@ const validate = (data) => {
         amount: Joi.number().required().label('ไม่มียอดเติมเงิน'),
         charge: Joi.number().default(0),
         payment_type: Joi.string(),
-        detail: Joi.object().default(null),
+        detail: Joi.string().default(""),
         employee: Joi.string().default('ไม่มี'),
         status: Joi.string().label('รอตรวจสอบ'),
         remark: Joi.string().default(''),
