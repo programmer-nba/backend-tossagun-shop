@@ -277,7 +277,7 @@ booking = async (req, res) => {
             new_data.push(v);
             cost_tg += percel.cost_tg;
             cost += percel.cost;
-            total += percel.total;
+            total += percel.net;
             total_platform += percel.total_platform;
         });
 
@@ -286,8 +286,8 @@ booking = async (req, res) => {
             platform: req.body.platform,
             invoice: invoice,
             total: Number(total.toFixed()),
-            total_cost: cost,
-            total_cost_tg: cost_tg,
+            total_cost: Number(cost.toFixed()),
+            total_cost_tg: Number(cost_tg.toFixed()),
             total_platform: total_platform,
             payment_type: req.body.paymenttype,
             purchase_id: String(resp.data.purchase_id),

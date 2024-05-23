@@ -6,7 +6,7 @@ const OrderExpressSchema = new mongoose.Schema({
     platform: { type: String, required: false, default: '' },
     invoice: { type: String, required: false, default: "ไม่มี" },
     invoice_full: { type: String, default: "ไม่มี" },
-    total: { type: Number, required: true },
+    total: { type: Number, required: false },
     total_cost: { type: Number, required: false, default: 0 },
     total_cost_tg: { type: Number, required: false, default: 0 },
     total_platform: { type: Number, required: false, default: 0 },
