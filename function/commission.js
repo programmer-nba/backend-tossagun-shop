@@ -50,7 +50,7 @@ async function GiveCommission(packageData) {
 		//OWNER
 		const vat_owner = vat3percent(packageData.platform.owner);
 		const new_money_owner = member.commission + vat_owner.amount;
-		const new_allsale = member.allsale + packageData.central.allsale;
+		const new_allsale = member.allsale + packageData.platform.owner;
 
 		await Members.findByIdAndUpdate(member._id, {
 			commission: new_money_owner,
@@ -79,7 +79,7 @@ async function GiveCommission(packageData) {
 			const mem_lv1 = await Members.findById(member.upline.lv1);
 			const vat_lv1 = vat3percent(packageData.platform.lv1);
 			const new_money_lv1 = mem_lv1.commission + vat_lv1.amount;
-			const new_allsale_lv1 = mem_lv1.allsale + packageData.central.allsale;
+			const new_allsale_lv1 = mem_lv1.allsale + packageData.platform.lv1;
 			await Members.findByIdAndUpdate(mem_lv1._id, {
 				commission: new_money_lv1,
 				allsale: new_allsale_lv1,
@@ -109,7 +109,7 @@ async function GiveCommission(packageData) {
 			const mem_lv2 = await Members.findById(member.upline.lv2);
 			const vat_lv2 = vat3percent(packageData.platform.lv2);
 			const new_money_lv2 = mem_lv2.commission + vat_lv2.amount;
-			const new_allsale_lv2 = mem_lv2.allsale + packageData.central.allsale;
+			const new_allsale_lv2 = mem_lv2.allsale + packageData.platform.lv2;
 			await Members.findByIdAndUpdate(mem_lv2._id, {
 				commission: new_money_lv2,
 				allsale: new_allsale_lv2,
@@ -139,7 +139,7 @@ async function GiveCommission(packageData) {
 			const mem_lv3 = await Members.findById(member.upline.lv3);
 			const vat_lv3 = vat3percent(packageData.platform.lv3);
 			const new_money_lv3 = mem_lv3.commission + vat_lv3.amount;
-			const new_allsale_lv3 = mem_lv3.allsale + packageData.central.allsale;
+			const new_allsale_lv3 = mem_lv3.allsale + packageData.platform.lv3;
 			await Members.findByIdAndUpdate(mem_lv3._id, {
 				commission: new_money_lv3,
 				allsale: new_allsale_lv3,

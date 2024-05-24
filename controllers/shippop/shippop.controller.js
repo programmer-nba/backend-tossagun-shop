@@ -187,14 +187,25 @@ priceList = async (req, res) => {
                     status: null
                 };
 
+                let total = 0;
+
                 if (obj[ob].hasOwnProperty("price_remote_area")) { //เช็คว่ามี ราคา พื้นที่ห่างไกลหรือเปล่า
-                    let total = price + obj[ob].price_remote_area + insuranceFee
+                    total += obj[ob].price_remote_area + insuranceFee
                     v.price_remote_area = obj[ob].price_remote_area
-                    v.total = total
                 } else {
-                    let total = price + insuranceFee
-                    v.total = total
+                    total += insuranceFee
                 }
+
+                if (cod_amount !== 0) {
+                    let vat3per = Number(cod_amount) * (3 / 100);
+                    let vat7per = Number(vat3per.toFixed(2)) * (7 / 100);
+                    let vatCOD = Number(vat3per.toFixed(2)) + Number(vat7per.toFixed(2));
+                    v.price_cod = Number(vat3per.toFixed(2));
+                    v.price_cod_vat = Number(vat7per.toFixed(2));
+                    total += Number(vatCOD.toFixed(2));
+                }
+
+                v.total = price + total;
 
                 if (findShop.shop_wallet < v.total) {
                     v.status = "เงินในกระเป๋าของท่านไม่เพียงพอ"
@@ -262,6 +273,9 @@ booking = async (req, res) => {
         let cost = 0;
         let total = 0;
         let total_platform = 0;
+        let cod = 0;
+        let cod_charge = 0;
+        let cod_vat = 0;
         Object.keys(obj).forEach(async (ob) => {
             const percel = req.body.product_detail[ob];
             const v = {
@@ -277,19 +291,27 @@ booking = async (req, res) => {
             new_data.push(v);
             cost_tg += percel.cost_tg;
             cost += percel.cost;
-            total += percel.net;
+            total += percel.total;
             total_platform += percel.total_platform;
+            cod += percel.cod_amount;
+            cod_charge += percel.price_cod;
+            cod_vat += percel.price_cod_vat;
         });
 
         const o = {
             shop_id: req.body.shop_id,
             platform: req.body.platform,
             invoice: invoice,
-            total: Number(total.toFixed()),
-            total_cost: Number(cost.toFixed()),
-            total_cost_tg: Number(cost_tg.toFixed()),
+            total: Number(total.toFixed(2)),
+            total_cost: Number(cost.toFixed(2)),
+            total_cost_tg: Number(cost_tg.toFixed(2)),
             total_platform: total_platform,
+            total_cod: Number(cod.toFixed(2)),
+            total_cod_charge: Number(cod_charge.toFixed(2)),
+            total_cod_vat: Number(cod_vat.toFixed(2)),
             payment_type: req.body.paymenttype,
+            moneyreceive: req.body.moneyreceive,
+            change: req.body.change,
             purchase_id: String(resp.data.purchase_id),
             product: new_data,
             employee: req.body.employee,
