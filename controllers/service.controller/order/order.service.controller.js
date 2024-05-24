@@ -254,9 +254,7 @@ async function GenerateRiceiptNumber(shop_type, id, number) {
         ];
         const count = await OrderServiceModels.aggregate(pipelint);
         const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TG${dayjs(Date.now()).format("YYMM")}${number}${countValue
-            .toString()
-            .padStart(3, "0")}`;
+        const data = `TG${dayjs(Date.now()).format("YYMM")}${number}${countValue.toString().padStart(3, "0")}`;
         return data;
     } else {
         const pipelint = [

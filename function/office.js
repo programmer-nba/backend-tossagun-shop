@@ -7,7 +7,7 @@ async function OrderOfficeCreate(packageData) {
 		headers: {
 			"Content-Type": "application/json"
 		},
-		url: `${process.env.OFFICE_URL}/project`,
+		url: `${process.env.OFFICE_URL}/project/shop`,
 		data: data,
 	};
 	await axios(config).then((res) => {
