@@ -309,4 +309,42 @@ exports.getMemberTeam = async (req, res) => {
         console.log(error)
         return res.status(500).send({ status: false, error: error.message });
     }
-}
+};
+
+module.exports.resetpassword = async (req, res) => {
+    try {
+        if (req.user.row === 'member') {
+            const member = await Members.findOne({ _id: req.user._id });
+            if (!member) {
+                return res.status(403).send({ status: false, message: 'ไม่พบข้อมูลสมาชิก' });
+            } else {
+                const salt = await bcrypt.genSalt(Number(process.env.SALT));
+                const hashPassword = await bcrypt.hash(req.body.password, salt);
+                member.password = hashPassword;
+                member.save();
+                return res.status(200).send({ status: true, message: 'เปลี่ยนรหัสผ่านสำเร็จ' });
+            }
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, error: error.message });
+    }
+};
+
+module.exports.forgetpassword = async (req, res) => {
+    try {
+        const member = await Members.findOne({ tel: req.body.tel });
+        if (!member) {
+            return res.status(403).send({ status: false, message: 'ไม่พบข้อมูลสมาชิก' });
+        } else {
+            const salt = await bcrypt.genSalt(Number(process.env.SALT));
+            const hashPassword = await bcrypt.hash(req.body.password, salt);
+            member.password = hashPassword;
+            member.save();
+            return res.status(200).send({ status: true, message: 'รีเซ็ตรหัสผ่านสำเร็จ' });
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, error: error.message });
+    }
+};

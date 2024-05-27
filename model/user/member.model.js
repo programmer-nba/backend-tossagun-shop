@@ -20,7 +20,7 @@ const MemberSchema = new mongoose.Schema({
     fristname: { type: String, required: true }, //ชื่อ
     lastname: { type: String, required: true }, //นามสกุล
     tel: { type: String, required: true }, //เบอร์โทร
-    email: { type: String, required: true }, //อีเมล
+    email: { type: String, required: false, default: "" }, //อีเมล
     password: { type: String, required: true }, //รหัสผ่าน
     address: { type: String, required: true }, //ที่อยู่
     subdistrict: { type: String, required: true }, //ที่อยู่ เเขวน ตำบล
@@ -96,7 +96,7 @@ const validate = (data) => {
         fristname: Joi.string().required().label("กรุณากรอกชื่อ"),
         lastname: Joi.string().required().label("กรุณากรอกนามสกุล"),
         tel: Joi.string().required().label("กรุณากรอกเบอร์โทร"),
-        email: Joi.string().required().label("กรุณากรอกอีเมล"),
+        email: Joi.string().default(""),
         password: passwordComplexity(complexityOptions)
             .required()
             .label("ไม่มีข้อมูลรหัสผ่าน"),

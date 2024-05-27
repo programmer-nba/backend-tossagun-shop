@@ -37,8 +37,9 @@ module.exports.create = async (req, res) => {
     try {
         if (req.body.shop_type === 'One Stop Service') {
             await checkEmployee(req, res);
-        } else {
-            comsole.log('ยังไม่พร้อมใช้งาน')
+        } else if (req.body.shop_type === 'One Stop Platform') {
+            // comsole.log('ยังไม่พร้อมใช้งาน')
+            await checkMember(req, res);
         }
     } catch (error) {
         console.error(error);
@@ -66,7 +67,7 @@ const checkEmployee = async (req, res) => {
                 product_price += net;
             }
             if (shop.shop_wallet < product_price) {
-                return res.status(403).send({ status: false, message: "ยอดเงินในระบบไม่เพียงพอ", });
+                return res.status(403).send({ status: false, message: "ยอดเงินในระบบไม่เพียงพอ" });
             } else {
                 const order = [];
                 const order_office = [];
@@ -237,6 +238,192 @@ const checkEmployee = async (req, res) => {
     }
 };
 
+const checkMember = async (req, res) => {
+    try {
+        const member = await Members.findOne({ _id: req.body.maker_id });
+        if (!member) {
+            return res.status(403).send({ message: "ไม่พบข้อมูลสมาชิก" });
+        } else {
+            let product_price = 0;
+            for (let item of req.body.product_detail) {
+                const artwork = await PriceArtworks.findOne({
+                    _id: item.priceid,
+                    product_id: item.packageid
+                });
+                const total = artwork.price + artwork.freight;
+                const net = total * item.quantity;
+                product_price += net;
+            }
+            if (member.wallet < product_price) {
+                return res.status(403).send({ status: false, message: "ยอดเงินในระบบไม่เพียงพอ" });
+            } else {
+                const order = [];
+                const order_office = [];
+                let packagedetail;
+                let total_price = 0;
+                let total_cost = 0;
+                let total_freight = 0;
+                let total_platfrom = 0;
+                for (let item of req.body.product_detail) {
+                    const artwork = await PriceArtworks.findOne({ _id: item.priceid, product_id: item.packageid });
+                    if (artwork) {
+                        const product = await ProductArtworks.findOne({ _id: item.packageid });
+                        if (product) {
+                            if (product.detail === 'ราคาต่อตารางเมตร') {
+                                packagedetail = `${item.width} * ${item.height}, ${product.description}, ${item.packagedetail}`;
+                                const data = (item.width / 100) * (item.height / 100);
+                                const result = Math.round(data);
+                                if (result < 1) {
+                                    total_price = artwork.price * item.quantity;
+                                    total_cost = artwork.cost * item.quantity;
+                                    total_freight = artwork.freight * item.quantity;
+                                    total_platfrom = artwork.platform.platform * item.quantity;
+                                } else {
+                                    total_price = (artwork.price * result) * item.quantity;
+                                    total_cost = (artwork.cost * result) * item.quantity;
+                                    total_freight = artwork.freight + ((result - 1) * 10) * item.quantity;
+                                    total_platfrom = (artwork.platform.platform * result) * item.quantity;
+                                }
+                                // } 
+                                // else if (product.detail === 'ราคาต่อชิ้น') {
+                                // packagedetail = `${product.description}, ${item.packagedetail}`
+                                // total_price = artwork.price * item.quantity;
+                                // total_cost = artwork.cost * item.quantity;
+                                // total_platfrom = artwork.service.platform * item.quantity;
+                                // total_freight = artwork.freight * item.quantity;
+                            } else if (product.detail === 'ราคาต่อชุด' || product.detail === 'ราคาต่อชิ้น') {
+                                packagedetail = `${product.description}, ${item.packagedetail}`
+                                total_price = artwork.price * item.quantity;
+                                total_cost = artwork.cost * item.quantity;
+                                total_platfrom = artwork.platform.platform * item.quantity;
+                                if (item.quantity > 5) {
+                                    const value = item.quantity / 5;
+                                    const result_value = Math.trunc(value);
+                                    const total_value = result_value * 10;
+                                    total_freight = artwork.freight + total_value;
+                                } else {
+                                    total_freight = artwork.freight;
+                                }
+                            }
+                            order.push({
+                                packageid: artwork.product_id,
+                                priceid: artwork._id,
+                                packagename: product.name,
+                                packagedetail: packagedetail,
+                                quantity: item.quantity,
+                                price: total_price,
+                                cost: total_cost,
+                                freight: total_freight,
+                                platform: total_platfrom,
+                            });
+                            order_office.push({
+                                packagename: product.name,
+                                packagedetail: packagedetail,
+                                quantity: item.quantity,
+                            })
+                        } else {
+                            return res.status(403).send({ status: false, message: 'ไม่พบข้อมูลสินค้า' });
+                        }
+                    }
+                }
+                const totalprice = order.reduce((accumulator, currentValue) => accumulator + currentValue.price, 0);
+                const totalcost = order.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0);
+                const totalfreight = order.reduce((accumulator, currentValue) => accumulator + currentValue.freight, 0);
+                const totalplatform = order.reduce((accumulator, currentValue) => accumulator + currentValue.platform, 0);
+
+                const invoice = await GenerateRiceiptNumber(req.body.shop_type, '', '');
+
+                const data = {
+                    invoice: invoice,
+                    maker_id: req.body.maker_id,
+                    platform: req.body.platform,
+                    customer_name: req.body.customer_name,
+                    customer_tel: req.body.customer_tel,
+                    customer_address: req.body.customer_address,
+                    customer_iden: req.body.customer_iden,
+                    customer_line: req.body.customer_line,
+                    product_detail: order,
+                    shop_type: req.body.shop_type,
+                    paymenttype: req.body.paymenttype,
+                    servicename: "Artwork",
+                    cost: totalcost,
+                    price: totalprice,
+                    freight: totalfreight,
+                    net: totalprice + totalfreight,
+                    totalplatform: totalplatform,
+                    moneyreceive: req.body.moneyreceive,
+                    employee: req.body.employee,
+                    change: req.body.moneyreceive - (totalprice + totalfreight),
+                    status: {
+                        name: "รอดำเนินการ",
+                        timestamp: dayjs(Date.now()).format(""),
+                    },
+                    timestamp: dayjs(Date.now()).format(""),
+                };
+                const new_order = new OrderServiceModels(data);
+                const formOrderOffice = {
+                    receiptnumber: invoice,
+                    detail: "Graphics",
+                    customer: {
+                        customer_iden: req.body.customer_iden,
+                        customer_name: req.body.customer_name,
+                        customer_tel: req.body.customer_tel,
+                        customer_address: req.body.customer_address,
+                        customer_line: req.body.customer_line,
+                    },
+                    product_detail: order_office,
+                };
+                const getteammember = await GetTeamMember(req.body.platform);
+                if (!getteammember) {
+                    return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
+                } else {
+                    new_order.save();
+                    await office.OrderOfficeCreate(formOrderOffice);
+                    // ตัดเงิน
+                    const newwallet = member.wallet - (totalprice + totalfreight);
+                    await Members.findByIdAndUpdate(member._id, { wallet: newwallet }, { useFindAndModify: false });
+
+                    // จ่ายค่าคอมมิชชั่น
+                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Artwork');
+                    const commission = new Commission(commissionData);
+                    if (!commission) {
+                        return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
+                    } else {
+                        commission.save();
+                        const wallethistory = {
+                            maker_id: req.body.maker_id,
+                            orderid: new_order._id,
+                            name: `รายการสั่งซื้อ Artwork ใบเสร็จเลขที่ ${new_order.invoice}`,
+                            type: "เงินออก",
+                            category: 'Wallet',
+                            before: member.wallet,
+                            after: newwallet,
+                            amount: new_order.net,
+                        };
+                        const walletHistory = new WalletHistory(wallethistory);
+                        if (!walletHistory) {
+                            return res.status(403).send({ status: false, message: 'ไม่สามารถบันทึกประวัติการเงินได้' });
+                        } else {
+                            walletHistory.save();
+                            const message = `
+แจ้งงานเข้า : ${new_order.servicename}
+เลขที่ทำรายการ : ${new_order.invoice}
+ตรวจสอบได้ที่ : https://office.ddscservices.com/
+                                    
+*ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
+                            await line.linenotify(message);
+                            return res.status(200).send({ status: true, data: data, ยอดเงินคงเหลือ: newwallet });
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
 async function GenerateRiceiptNumber(shop_type, id, number) {
     if (shop_type === 'One Stop Shop') {
         const pipelint = [
@@ -267,9 +454,7 @@ async function GenerateRiceiptNumber(shop_type, id, number) {
         ];
         const count = await OrderServiceModels.aggregate(pipelint);
         const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TGS${dayjs(Date.now()).format("YYMM")}${countValue
-            .toString()
-            .padStart(3, "0")}`;
+        const data = `TGS${dayjs(Date.now()).format("YYMM")}${countValue.toString().padStart(3, "0")}`;
         return data;
     }
 };
