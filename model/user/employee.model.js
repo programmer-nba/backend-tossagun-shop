@@ -22,7 +22,11 @@ const EmployeeSchema = new mongoose.Schema({
   employee_password: { type: String, required: true }, //รหัส
   employee_phone: { type: String, required: true },
   employee_email: { type: String, required: true },
-  employee_position: { type: String, required: false, default: "general" },
+  employee_position: {
+    type: String,
+    enum: ["manager", "cashier", "general"],
+    required: true,
+  },
   employee_status: { type: Boolean, required: false, default: true },
   employee_date_start: { type: Date, required: false, default: Date.now() }, // เริ่ม
 });
