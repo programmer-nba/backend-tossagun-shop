@@ -248,7 +248,7 @@ booking = async (req, res) => {
         }
         const value = {
             api_key: process.env.SHIPPOP_API_KEY,
-            email: "nbadigitalservice@gmail.com",
+            email: "tossagundigitalnewgeneration@gmail.com",
             url: {
                 "success": "http://shippop.com/?success",
                 "fail": "http://shippop.com/?fail"
