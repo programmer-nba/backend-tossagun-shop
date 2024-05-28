@@ -8,7 +8,8 @@ exports.create = async (req, res) => {
         .status(400)
         .send({ status: false, message: error.details[0].message });
     }
-    const checkcategory = await Categorys.find({ name: req.body.name });
+    const checkcategory = await Categorys.findOne({ name: req.body.name });
+    console.log(checkcategory)
     if (checkcategory) {
       return res
         .status(400)
