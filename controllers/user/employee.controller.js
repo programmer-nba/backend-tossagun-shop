@@ -16,7 +16,7 @@ exports.create = async (req, res) => {
     if (user)
       return res.status(409).send({
         status: false,
-        message: "มีชื่อผู้ใช้งานนี้ในระบบเเล้ว",
+        message: "Username ดังกล่าวไม่สามารถใช้งานได้",
       });
 
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
