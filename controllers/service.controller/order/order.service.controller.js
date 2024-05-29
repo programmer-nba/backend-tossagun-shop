@@ -519,7 +519,7 @@ async function GetTeamMember(tel) {
 
 module.exports.confirmOrder = async (req, res) => {
     try {
-        const updateStatus = await OrderServiceModels.findOne({ _id: req.params.id });
+        const updateStatus = await OrderServiceModels.findOne({ invoice: req.params.id });
         if (!updateStatus) {
             return res.status(403).send({ status: false, message: 'ไม่พบข้อมูลรายการออเดอร์' });
         } else {
@@ -538,7 +538,7 @@ module.exports.confirmOrder = async (req, res) => {
 
 module.exports.submitOrder = async (req, res) => {
     try {
-        const updateStatus = await OrderServiceModels.findOne({ _id: req.params.id });
+        const updateStatus = await OrderServiceModels.findOne({ invoice: req.params.id });
         if (!updateStatus) {
             return res.status(403).send({ status: false, message: 'ไม่พบข้อมูลรายการออเดอร์' });
         } else {
