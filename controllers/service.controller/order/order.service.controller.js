@@ -557,7 +557,7 @@ module.exports.submitOrder = async (req, res) => {
         console.error(error);
         return res.status(500).send({ message: "Internal Server Error" });
     }
-}
+};
 
 module.exports.getOrderList = async (req, res) => {
     try {
