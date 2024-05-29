@@ -282,6 +282,7 @@ booking = async (req, res) => {
                 employee_id: req.body.employee,
                 type_payment: req.body.paymenttype,
                 tossagun_tel: req.body.platform,
+                timestamp: dayjs(Date.now()).format(),
             };
             new_data.push(v);
             cost_tg += percel.cost_tg;

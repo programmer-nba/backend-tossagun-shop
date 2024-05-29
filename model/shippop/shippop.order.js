@@ -33,6 +33,7 @@ const shippopSchema = new Schema({
         order_status: { type: String, default: "booking", required: false },
         package_detail: { type: Object, default: null, required: false }, // กรณีมีการเรียกเก็บเพิ่มเติม
         package_detail_status: { type: Boolean, default: false, required: false }, //สถานะการหักเงินของรpartner กรณีมีการหักส่วนต่าง
+        timestamp: { type: Date, required: true }
 }, { timestamps: true })
 
 const shippopBooking = mongoose.model("shippop_booking", shippopSchema);
