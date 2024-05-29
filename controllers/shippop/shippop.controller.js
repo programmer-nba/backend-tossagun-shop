@@ -270,6 +270,7 @@ booking = async (req, res) => {
         let cod = 0;
         let cod_charge = 0;
         let cod_vat = 0;
+
         Object.keys(obj).forEach(async (ob) => {
             const percel = req.body.product_detail[ob];
             const v = {
@@ -323,9 +324,7 @@ booking = async (req, res) => {
 
         // ตัดเงิน
         const findShop = await Shops.findByIdAndUpdate(req.body.shop_id, {
-            $inc: {
-                shop_wallet: -total
-            }
+            $inc: { shop_wallet: -cost }
         }, { new: true })
         if (!findShop) {
             return res.status(404).send({ status: false, message: "ไม่สามารถค้นหาร้านที่ท่านระบุได้" })
@@ -341,7 +340,8 @@ booking = async (req, res) => {
             // await confirmOrder(String(resp.data.purchase_id), findShop._id);
 
             // บันทึกการเงิน
-            let before = findShop.shop_wallet + total
+            let profit = total - cost;
+            let before = findShop.shop_wallet + total - profit;
             let doto = {
                 shop_id: findShop._id,
                 maker_id: req.body.maker_id,
@@ -351,16 +351,35 @@ booking = async (req, res) => {
                 category: 'Wallet',
                 amount: total,
                 before: before,
+                after: findShop.shop_wallet - profit,
+                timestamp: dayjs(Date.now()).format(""),
+            }
+
+            const record = await WalletHistory.create(doto)
+            if (!record) {
+                return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติเงินออกได้" })
+            }
+
+            let doto1 = {
+                shop_id: findShop._id,
+                maker_id: req.body.maker_id,
+                orderid: createOrder._id,
+                name: `รายการขนส่งหมายเลขที่ ${invoice}`,
+                type: `เงินเข้า`,
+                category: 'Wallet',
+                amount: profit,
+                before: findShop.shop_wallet - profit,
                 after: findShop.shop_wallet,
                 timestamp: dayjs(Date.now()).format(""),
             }
-            const record = await WalletHistory.create(doto)
-            if (!record) {
-                return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติการเงินได้" })
+
+            const record1 = await WalletHistory.create(doto1)
+            if (!record1) {
+                return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติเงินเข้าได้" })
             }
 
             // จ่ายค่าคอมมิชชั่น
-            const commissionData = await commissions.Commission(createOrder, total_platform, getteammember, 'Express');
+            const commissionData = await commissions.Commission(createOrder, total_platform, getteammember, 'Express', total);
             const commission = new Commission(commissionData);
             if (!commission) {
                 return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });

@@ -21,6 +21,7 @@ const validate_commission = (data) => {
 			allsale: Joi.number().required().label("ไม่พบยอด all sale"),
 		},
 		emp_bonus: Joi.number().required().label("ไม่พบยอดโบนัสพนักงาน"),
+		happypoint: Joi.number().required().label("ไม่พบยอด Happy Point"),
 	});
 	return schema.validate(data);
 };
@@ -54,7 +55,8 @@ async function GiveCommission(packageData) {
 
 		await Members.findByIdAndUpdate(member._id, {
 			commission: new_money_owner,
-			allsale: new_allsale
+			allsale: new_allsale,
+			happy_point: packageData.happypoint,
 		}, { useFindAndModify: false, });
 
 		//history
@@ -178,7 +180,7 @@ async function GiveCommission(packageData) {
 	}
 };
 
-async function Commission(order, total_platfrom, getteammember, codeOrder) {
+async function Commission(order, total_platfrom, getteammember, codeOrder, happypoint) {
 	try {
 		const percent = await Percents.findOne({ code: 'Service' });
 
@@ -214,6 +216,7 @@ async function Commission(order, total_platfrom, getteammember, codeOrder) {
 				central: (allSale * percent.percent_central.central) / 100,
 			},
 			emp_bonus: bonus,
+			happypoint: happypoint
 		};
 
 		await GiveCommission(givecommission);
