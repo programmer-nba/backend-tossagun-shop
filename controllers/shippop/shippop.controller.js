@@ -398,50 +398,111 @@ booking = async (req, res) => {
 
 cancelOrder = async (req, res) => {
     try {
-        const tracking_code = req.params.tracking_code
-        const valueCheck = {
-            api_key: process.env.SHIPPOP_API_KEY,
-            tracking_code: tracking_code,
-        };
-        const findStatus = await shippopBooking.findOne({ tracking_code: tracking_code });
-        if (!findStatus) {
-            return res
-                .status(400)
-                .send({ status: false, message: "ไม่มีหมายเลขที่ท่านกรอก" });
-        } else if (findStatus.order_status == 'cancel') {
-            return res
-                .status(404)
-                .send({ status: false, message: "หมายเลขสินค้านี้ถูก cancel ไปแล้ว" })
+        const { purchase_id, shop_id, maker_id } = req.body;
+        if (!purchase_id || !shop_id) {
+            return res.status(400).send({ status: false, message: "ไม่พบข้อมูล" });
         }
 
-        const respStatus = await axios.post(`${process.env.SHIPPOP_URL}/cancel/`, valueCheck, {
-            headers: {
-                "Accept-Encoding": "gzip,deflate,compress",
-                "Content-Type": "application/json"
-            },
-        })
-        if (respStatus.data.status != true) {
-            return res
-                .status(400)
-                .send({
-                    status: false,
-                    message: "ไม่สามารถทำการยกเลิกสินค้าได้",
-                    data: respStatus.data
+        //ค้นหา order express
+        const order_express = await OrderExpress.findOne({
+            purchase_id: purchase_id,
+            shop_id: shop_id,
+        });
+
+        if (!order_express) {
+            return res.status(400).send({ message: "ไม่มีใบสั่งซื้อที่ต้องการยกเลิก" });
+        }
+        console.log("Order Express : ", order_express);
+
+        const shop = await Shops.findById(order_express.shop_id);
+
+        const booking = await shippopBooking.find({
+            shop_id: shop_id,
+            purchase_id: purchase_id,
+            order_status: "booking",
+        });
+
+        if (booking.length === 0) {
+            return res.status(400).send({
+                status: true,
+                message:
+                    "ไม่สามารถยกเลิกได้ เนื่องจากพัสดุถูกยกเลิกหรือขนส่งรับพัสดุไปแล้ว",
+            });
+        }
+
+        //ตรวจสอบสถานะของพัสดุว่าสามารถยกเลิกได้ไหม
+        // const cost = booking.reduce((sum, booking) => sum + booking.cost, 0);
+        let cost = 0;
+
+        console.log("ยกเลิกพัสดุ ต้นทุน : ", cost);
+        if (booking.length > 0) {
+            for (let i = 0; i < booking.length; i++) {
+                await axios.post(`${process.env.SHIPPOP_URL}/cancel/`, {
+                    api_key: process.env.SHIPPOP_API_KEY,
+                    tracking_code: booking.tracking_code,
+                }, {
+                    headers: { "Accept-Encoding": "gzip,deflate,compress" },
+                }).then(async () => {
+                    console.log(
+                        "/---ยกเลิกเลขพัสดุ " + booking[i].tracking_code + " เรียบร้อย"
+                    );
+
+                    const parcel = await shippopBooking.findOne({
+                        tracking_code: booking[i].tracking_code,
+                    });
+
+                    if (parcel) {
+                        console.log(
+                            "---ถูกยกเลิกพัสดุ tracking_code : " + booking[i].tracking_code
+                        );
+                        await shippopBooking.findByIdAndUpdate(parcel._id, {
+                            order_status: "cancel",
+                        }).then(() => {
+                            cost = booking[i].cost + cost;
+                        });
+                    }
                 })
+            } // end loop for
+
+            console.log("ต้นทุนคืนกระเป๋าพาร์ทเนอร์ร้านค้า : ", cost);
+            // อัพเดต สถานะ order express
+            console.log("อัพเดตสถานะ Order Express");
+            const new_status = {
+                name: "ยกเลิก",
+                timestamp: dayjs(Date.now()).format(),
+            };
+            order_express.status.push(new_status);
+            console.log("New Status", new_status);
+
+            await OrderExpress.findByIdAndUpdate(order_express._id, {
+                status: order_express.status,
+            });
+
+            // คืนเงินเข้ากระเป๋า
+            console.log("คืนเงินเข้ากระเป๋า");
+            const new_money = shop.shop_wallet + cost;
+            await Shops.findByIdAndUpdate(shop._id, {
+                shop_wallet: new_money
+            });
+
+            console.log("บันทึกประวัติเงินเข้า-ออก");
+            const money_history = {
+                shop_id: order_express.shop_id,
+                maker_id: maker_id,
+                orderid: order_express.invoice,
+                name: `ยกเลิกพัสดุหมายเลขที่ ${order_express.purchase_id}`,
+                type: "เงินเข้า",
+                category: 'Wallet',
+                amount: cost,
+                before: shop.shop_wallet,
+                after: new_money,
+                timestamp: dayjs(Date.now()).format(),
+            };
+            await WalletHistory.create(money_history);
+            console.log("---เสร็จสิ้น---");
+            return res.status(200).send({ status: true, message: "ยกเลิกพัสดุเรียบร้อย" });
         } else {
-            const findPno = await shippopBooking.findOneAndUpdate(
-                { tracking_code: tracking_code },
-                { $set: { order_status: 'cancel' } },
-                { new: true }
-            );
-            if (!findPno) {
-                return res
-                    .status(400)
-                    .send({ status: false, message: "ไม่สามารถค้นหาหมายเลข tracking_code หรืออัพเดทข้อมูลได้" })
-            }
-            return res
-                .status(200)
-                .send({ status: false, data: findPno })
+            return res.status(400).send({ status: false, messgae: "ดึงข้อมูลไม่สำเร็จ" });
         }
     } catch (err) {
         console.log(err)

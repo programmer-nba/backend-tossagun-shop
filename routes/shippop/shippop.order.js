@@ -5,7 +5,7 @@ const auth = require("../../lib/auth");
 
 router.post("/price/list", auth, shippop.priceList);
 router.post("/booking", auth, shippop.booking);
-router.post("/cancel/:tracking_code", auth, shippop.cancelOrder);
+router.post("/cancel", auth, shippop.cancelOrder);
 router.post("/tracking/:id", auth, shippop.tracking);
 
 router.post("/label", auth, shippop.labelHtml);
