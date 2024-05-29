@@ -123,13 +123,14 @@ priceList = async (req, res) => {
         };
         const resp = await axios.post(`${process.env.SHIPPOP_URL}/pricelist/`, value, {
             headers: { "Accept-Encoding": "gzip,deflate,compress" },
-        })
+        });
         if (!resp.data.status) {
             return res
                 .status(400)
                 .send({ status: false, message: resp.data.message });
         }
         const obj = resp.data.data[0];
+        // return res.status(200).send({ status: true, message: obj });
         const new_data = [];
 
         const findinsured = await insuredExpress.findOne({ express: "SHIPPOP" })
@@ -222,14 +223,7 @@ priceList = async (req, res) => {
             }
         }
 
-        return res
-            .status(200)
-            .send({
-                status: true,
-                origin_data: req.body,
-                new: new_data,
-                sender: infoSender
-            });
+        return res.status(200).send({ status: true, origin_data: req.body, new: new_data, sender: infoSender });
     } catch (err) {
         console.log(err)
         return res
