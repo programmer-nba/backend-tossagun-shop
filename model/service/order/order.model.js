@@ -37,6 +37,8 @@ const OrderServiceSchema = new mongoose.Schema({
         required: true,
     },
     servicename: { type: String, required: false },
+    profit: { type: Number, required: false, default: 0 },
+    profit_shop: { type: Number, required: false, default: 0 },
     cost: { type: Number, required: false, default: 0 },
     price: { type: Number, required: false, default: 0 },
     freight: { type: Number, required: false, default: 0 },

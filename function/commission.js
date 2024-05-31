@@ -52,11 +52,12 @@ async function GiveCommission(packageData) {
 		const vat_owner = vat3percent(packageData.platform.owner);
 		const new_money_owner = member.commission + vat_owner.amount;
 		const new_allsale = member.allsale + packageData.platform.owner;
+		const new_happypoint = member.happy_point + packageData.happypoint;
 
 		await Members.findByIdAndUpdate(member._id, {
 			commission: new_money_owner,
 			allsale: new_allsale,
-			happy_point: packageData.happypoint,
+			happy_point: new_happypoint,
 		}, { useFindAndModify: false, });
 
 		//history

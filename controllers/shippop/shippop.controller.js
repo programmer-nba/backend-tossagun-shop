@@ -387,7 +387,7 @@ booking = async (req, res) => {
             } else {
                 commission.save();
             }
-            return res.status(200).send({ status: true, data: new_data, record: record, shop: findShop.shop_wallet, invoice: invoice })
+            return res.status(200).send({ status: true, data: o, record: record, shop: findShop.shop_wallet, invoice: invoice })
         }
     } catch (err) {
         console.log(err)

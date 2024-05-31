@@ -76,6 +76,8 @@ const checkEmployee = async (req, res) => {
                 let total_cost = 0;
                 let total_freight = 0;
                 let total_platfrom = 0;
+                let profit = 0;
+                let profit_shop = 0;
                 for (let item of req.body.product_detail) {
                     const artwork = await PriceArtworks.findOne({ _id: item.priceid, product_id: item.packageid });
                     if (artwork) {
@@ -90,11 +92,15 @@ const checkEmployee = async (req, res) => {
                                     total_cost = artwork.cost * item.quantity;
                                     total_freight = artwork.freight * item.quantity;
                                     total_platfrom = artwork.service.platform * item.quantity;
+                                    profit = artwork.service.profit_TG * item.quantity;
+                                    profit_shop = artwork.service.profit_shop * item.quantity;
                                 } else {
                                     total_price = (artwork.price * result) * item.quantity;
                                     total_cost = (artwork.cost * result) * item.quantity;
                                     total_freight = artwork.freight + ((result - 1) * 10) * item.quantity;
                                     total_platfrom = (artwork.service.platform * result) * item.quantity;
+                                    profit = (artwork.service.profit_TG * result) * item.quantity;
+                                    profit_shop = (artwork.service.profit_shop * result) * item.quantity;
                                 }
                                 // } 
                                 // else if (product.detail === 'ราคาต่อชิ้น') {
@@ -108,6 +114,8 @@ const checkEmployee = async (req, res) => {
                                 total_price = artwork.price * item.quantity;
                                 total_cost = artwork.cost * item.quantity;
                                 total_platfrom = artwork.service.platform * item.quantity;
+                                profit = artwork.service.profit_TG * item.quantity;
+                                profit_shop = artwork.service.profit_shop * item.quantity;
                                 if (item.quantity > 5) {
                                     const value = item.quantity / 5;
                                     const result_value = Math.trunc(value);
@@ -127,6 +135,8 @@ const checkEmployee = async (req, res) => {
                                 cost: total_cost,
                                 freight: total_freight,
                                 platform: total_platfrom,
+                                profit: profit,
+                                profit_shop: profit_shop,
                             });
                             order_office.push({
                                 packagename: product.name,
@@ -142,6 +152,8 @@ const checkEmployee = async (req, res) => {
                 const totalcost = order.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0);
                 const totalfreight = order.reduce((accumulator, currentValue) => accumulator + currentValue.freight, 0);
                 const totalplatform = order.reduce((accumulator, currentValue) => accumulator + currentValue.platform, 0);
+                const totalprofit = order.reduce((accumulator, currentValue) => accumulator + currentValue.profit, 0);
+                const totalprofitshop = order.reduce((accumulator, currentValue) => accumulator + currentValue.profit_shop, 0);
 
                 const invoice = await GenerateRiceiptNumber(req.body.shop_type, req.body.shop_id, shop.shop_number);
                 const data = {
@@ -158,6 +170,8 @@ const checkEmployee = async (req, res) => {
                     shop_type: req.body.shop_type,
                     paymenttype: req.body.paymenttype,
                     servicename: "Artwork",
+                    profit: totalprofit,
+                    profit_shop: totalprofitshop,
                     cost: totalcost,
                     price: totalprice,
                     freight: totalfreight,
@@ -190,14 +204,14 @@ const checkEmployee = async (req, res) => {
                     return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
                 } else {
                     new_order.save();
-                    await office.OrderOfficeCreate(formOrderOffice);
+                    // await office.OrderOfficeCreate(formOrderOffice);
 
                     // ตัดเงิน
-                    const newwallet = shop.shop_wallet - (totalprice + totalfreight);
+                    const newwallet = shop.shop_wallet - ((totalprice - totalprofitshop) + totalfreight);
                     await Shops.findByIdAndUpdate(shop._id, { shop_wallet: newwallet }, { useFindAndModify: false });
 
                     // จ่ายค่าคอมมิชชั่น
-                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Artwork');
+                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Artwork', (totalprice + totalfreight));
                     const commission = new Commission(commissionData);
                     if (!commission) {
                         return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
@@ -210,15 +224,30 @@ const checkEmployee = async (req, res) => {
                             name: `รายการสั่งซื้อ Artwork ใบเสร็จเลขที่ ${new_order.invoice}`,
                             type: "เงินออก",
                             category: 'Wallet',
-                            before: shop.shop_wallet,
-                            after: newwallet,
+                            before: shop.shop_wallet, // ก่อน
+                            after: shop.shop_wallet - new_order.net, // หลัง
                             amount: new_order.net,
                         };
+                        const wallethistoryone = {
+                            maker_id: req.body.maker_id,
+                            shop_id: shop._id,
+                            orderid: new_order._id,
+                            name: `รายการสั่งซื้อ Artwork ใบเสร็จเลขที่ ${new_order.invoice}`,
+                            type: "เงินเข้า",
+                            category: 'Wallet',
+                            before: shop.shop_wallet - new_order.net,
+                            after: (shop.shop_wallet - new_order.net) + totalprofitshop,
+                            amount: totalprofitshop,
+                        };
                         const walletHistory = new WalletHistory(wallethistory);
-                        if (!walletHistory) {
+                        const walletHistoryone = new WalletHistory(wallethistoryone);
+                        if (!walletHistory && !walletHistoryone) {
                             return res.status(403).send({ status: false, message: 'ไม่สามารถบันทึกประวัติการเงินได้' });
                         } else {
                             walletHistory.save();
+                            console.log('- - บันทึกประวัติเงินออกสำเร็จ - -')
+                            walletHistoryone.save();
+                            console.log('- - บันทึกประวัติเงินเข้าสำเร็จ - -')
                             const message = `
 แจ้งงานเข้า : ${new_order.servicename}
 เลขที่ทำรายการ : ${new_order.invoice}
@@ -264,6 +293,8 @@ const checkMember = async (req, res) => {
                 let total_cost = 0;
                 let total_freight = 0;
                 let total_platfrom = 0;
+                let profit = 0;
+                let profit_shop = 0;
                 for (let item of req.body.product_detail) {
                     const artwork = await PriceArtworks.findOne({ _id: item.priceid, product_id: item.packageid });
                     if (artwork) {
@@ -278,11 +309,15 @@ const checkMember = async (req, res) => {
                                     total_cost = artwork.cost * item.quantity;
                                     total_freight = artwork.freight * item.quantity;
                                     total_platfrom = artwork.platform.platform * item.quantity;
+                                    profit = artwork.platform.profit_TG * item.quantity;
+                                    profit_shop = artwork.platform.profit_shop * item.quantity;
                                 } else {
                                     total_price = (artwork.price * result) * item.quantity;
                                     total_cost = (artwork.cost * result) * item.quantity;
                                     total_freight = artwork.freight + ((result - 1) * 10) * item.quantity;
                                     total_platfrom = (artwork.platform.platform * result) * item.quantity;
+                                    profit = (artwork.platform.profit_TG * result) * item.quantity;
+                                    profit_shop = (artwork.platform.profit_shop * result) * item.quantity;
                                 }
                                 // } 
                                 // else if (product.detail === 'ราคาต่อชิ้น') {
@@ -296,6 +331,8 @@ const checkMember = async (req, res) => {
                                 total_price = artwork.price * item.quantity;
                                 total_cost = artwork.cost * item.quantity;
                                 total_platfrom = artwork.platform.platform * item.quantity;
+                                profit = artwork.platform.profit_TG * item.quantity;
+                                profit_shop = artwork.platform.profit_shop * item.quantity;
                                 if (item.quantity > 5) {
                                     const value = item.quantity / 5;
                                     const result_value = Math.trunc(value);
@@ -315,6 +352,8 @@ const checkMember = async (req, res) => {
                                 cost: total_cost,
                                 freight: total_freight,
                                 platform: total_platfrom,
+                                profit: profit,
+                                profit_shop: profit_shop,
                             });
                             order_office.push({
                                 packagename: product.name,
@@ -330,6 +369,8 @@ const checkMember = async (req, res) => {
                 const totalcost = order.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0);
                 const totalfreight = order.reduce((accumulator, currentValue) => accumulator + currentValue.freight, 0);
                 const totalplatform = order.reduce((accumulator, currentValue) => accumulator + currentValue.platform, 0);
+                const totalprofit = order.reduce((accumulator, currentValue) => accumulator + currentValue.profit, 0);
+                const totalprofitshop = order.reduce((accumulator, currentValue) => accumulator + currentValue.profit_shop, 0);
 
                 const invoice = await GenerateRiceiptNumber(req.body.shop_type, '', '');
 
@@ -346,6 +387,8 @@ const checkMember = async (req, res) => {
                     shop_type: req.body.shop_type,
                     paymenttype: req.body.paymenttype,
                     servicename: "Artwork",
+                    profit: totalprofit,
+                    profit_shop: totalprofitshop,
                     cost: totalcost,
                     price: totalprice,
                     freight: totalfreight,
@@ -378,13 +421,13 @@ const checkMember = async (req, res) => {
                     return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
                 } else {
                     new_order.save();
-                    await office.OrderOfficeCreate(formOrderOffice);
+                    // await office.OrderOfficeCreate(formOrderOffice);
                     // ตัดเงิน
-                    const newwallet = member.wallet - (totalprice + totalfreight);
+                    const newwallet = member.wallet - ((totalprice - totalprofitshop) + totalfreight);
                     await Members.findByIdAndUpdate(member._id, { wallet: newwallet }, { useFindAndModify: false });
 
                     // จ่ายค่าคอมมิชชั่น
-                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Artwork');
+                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Artwork', (totalprice + totalfreight));
                     const commission = new Commission(commissionData);
                     if (!commission) {
                         return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
@@ -397,14 +440,28 @@ const checkMember = async (req, res) => {
                             type: "เงินออก",
                             category: 'Wallet',
                             before: member.wallet,
-                            after: newwallet,
+                            after: member.wallet - new_order.net,
                             amount: new_order.net,
                         };
+                        const wallethistoryone = {
+                            maker_id: req.body.maker_id,
+                            orderid: new_order._id,
+                            name: `รายการสั่งซื้อ Artwork ใบเสร็จเลขที่ ${new_order.invoice}`,
+                            type: "เงินเข้า",
+                            category: 'Wallet',
+                            before: member.wallet - new_order.net,
+                            after: (member.wallet - new_order.net) + totalprofitshop,
+                            amount: totalprofitshop,
+                        };
                         const walletHistory = new WalletHistory(wallethistory);
+                        const walletHistoryone = new WalletHistory(wallethistoryone);
                         if (!walletHistory) {
                             return res.status(403).send({ status: false, message: 'ไม่สามารถบันทึกประวัติการเงินได้' });
                         } else {
                             walletHistory.save();
+                            console.log('- - บันทึกประวัติเงินออกสำเร็จ - -')
+                            walletHistoryone.save();
+                            console.log('- - บันทึกประวัติเงินเข้าสำเร็จ - -')
                             const message = `
 แจ้งงานเข้า : ${new_order.servicename}
 เลขที่ทำรายการ : ${new_order.invoice}
