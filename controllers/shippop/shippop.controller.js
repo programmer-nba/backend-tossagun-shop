@@ -171,13 +171,16 @@ priceList = async (req, res) => {
                 let cost_tg = Number(obj[ob].price);
                 let cost = Math.ceil(((cost_tg * p.profit_tg) / 100) + cost_tg);
                 let price = Math.ceil(((cost * p.profit_shop) / 100) + cost);
-                let total_platform = Math.ceil((cost - cost_tg) * (p.platform / 100));
+                let profit = cost - cost_tg;
+                let vat = (profit * 7) / 107;
+                let total_platform = Number((profit - vat) * (p.platform / 100));
 
                 v = {
                     ...obj[ob],
                     price_remote_area: 0,
                     cost_tg: cost_tg,
                     cost: cost,
+                    profit: profit,
                     total_platform: total_platform,
                     cod_amount: Number(cod_amount.toFixed()),
                     fee_cod: 0,

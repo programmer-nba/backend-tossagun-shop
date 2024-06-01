@@ -4,7 +4,7 @@ const Joi = require("joi")
 const wallethistory = new mongoose.Schema({
     form: { type: String, required: false, default: "" },
     shop_id: { type: String, default: "", required: false },
-    maker_id: { type: String, default: "", required: false, },
+    maker_id: { type: String, default: "", required: false },
     orderid: { type: String },
     category: { type: String, enum: ['Wallet', 'Commission'], required: false },
     name: { type: String, required: true },
