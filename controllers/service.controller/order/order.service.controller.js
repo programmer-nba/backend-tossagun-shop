@@ -204,7 +204,7 @@ const checkEmployee = async (req, res) => {
                     return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
                 } else {
                     new_order.save();
-                    // await office.OrderOfficeCreate(formOrderOffice);
+                    await office.OrderOfficeCreate(formOrderOffice);
 
                     // ตัดเงิน
                     const newwallet = shop.shop_wallet - ((totalprice - totalprofitshop) + totalfreight);
@@ -421,7 +421,7 @@ const checkMember = async (req, res) => {
                     return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
                 } else {
                     new_order.save();
-                    // await office.OrderOfficeCreate(formOrderOffice);
+                    await office.OrderOfficeCreate(formOrderOffice);
                     // ตัดเงิน
                     const newwallet = member.wallet - ((totalprice - totalprofitshop) + totalfreight);
                     await Members.findByIdAndUpdate(member._id, { wallet: newwallet }, { useFindAndModify: false });
