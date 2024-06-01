@@ -560,7 +560,7 @@ labelHtml = async (req, res) => { //ใบแปะหน้าโดย purchas
                 tracking_code.push(booking[i].tracking_code);
             }
             option[booking[i].tracking_code] = {
-                replaceOrigin: { ...booking[i].from },
+                replaceOrigin: { ...booking[i].origin },
             };
         }
         const value = {
