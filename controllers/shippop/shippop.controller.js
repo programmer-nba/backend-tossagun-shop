@@ -585,22 +585,34 @@ labelHtml = async (req, res) => { //ใบแปะหน้าโดย purchas
 }
 
 async function invoiceNumber() {
-    data = `TSP`
-    let random = Math.floor(Math.random() * 100000000000)
-    const combinedData = data + random;
-    const findInvoice = await shippopBooking.find({ invoice: combinedData })
+    // data = `TSP`
+    // let random = Math.floor(Math.random() * 100000000000)
+    // const combinedData = data + random;
+    // const findInvoice = await shippopBooking.find({ invoice: combinedData })
 
-    while (findInvoice && findInvoice.length > 0) {
-        // สุ่ม random ใหม่
-        random = Math.floor(Math.random() * 100000000000);
-        combinedData = data + random;
+    // while (findInvoice && findInvoice.length > 0) {
+    // สุ่ม random ใหม่
+    // random = Math.floor(Math.random() * 100000000000);
+    // combinedData = data + random;
 
-        // เช็คใหม่
-        findInvoice = await shippopBooking.find({ invoice: combinedData });
-    }
+    // เช็คใหม่
+    // findInvoice = await shippopBooking.find({ invoice: combinedData });
+    // }
 
-    console.log(combinedData);
-    return combinedData;
+    // console.log(combinedData);
+    // return combinedData;
+    const pipelint = [
+        // {
+        // $match: { shop_type: shop_type },
+        // },
+        {
+            $group: { _id: 0, count: { $sum: 1 } },
+        },
+    ];
+    const count = await OrderExpress.aggregate(pipelint);
+    const countValue = count.length > 0 ? count[0].count + 1 : 1;
+    const data = `TSP${dayjs(Date.now()).format("YYMMDD")}${countValue.toString().padStart(3, "0")}`;
+    return data;
 }
 
 async function GetTeamMember(tel) {
