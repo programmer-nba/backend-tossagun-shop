@@ -47,15 +47,20 @@ delend = async (req, res) => {
 
 getAll = async (req, res) => {
     try {
-        const find = await shippopBooking.find()
-        if (find.length == 0) {
-            return res
-                .status(200)
-                .send({ status: true, data: [] })
+        const booking = await shippopBooking.find();
+        for (let i = 0; i < booking.length; i++) {
+            if (booking[i].order_status !== 'complete' || booking[i].order_status !== 'cancel') {
+                const value = {
+                    tracking_code: booking[i].tracking_code,
+                };
+                const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking/`, value, {
+                    headers: { "Accept-Encoding": "gzip,deflate,compress" },
+                });
+                booking[i].order_status = resp.data.order_status;
+                shippopBooking.findByIdAndUpdate(booking[i]._id, { order_status: resp.data.order_status }, { useFindAndModify: false });
+            }
         }
-        return res
-            .status(200)
-            .send({ status: true, data: find })
+        return res.status(200).send({ status: true, data: booking })
     } catch (err) {
         return res
             .status(500)
@@ -129,6 +134,7 @@ callToPickup = async (req, res) => {
             api_key: process.env.SHIPPOP_API_KEY,
             tracking_code: String(req.body.courier_tracking_code),
         });
+        console.log(shippop)
         if (shippop.data.status) {
             return res.status(200).json(shippop.data);
         } else {

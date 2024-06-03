@@ -519,6 +519,7 @@ cancelOrder = async (req, res) => {
 tracking = async (req, res) => {
     try {
         const tracking = req.params.id
+        console.log(tracking)
         const valueCheck = {
             api_key: process.env.SHIPPOP_API_KEY,
             tracking_code: tracking,
@@ -534,7 +535,6 @@ tracking = async (req, res) => {
                 .status(400)
                 .send({ status: false, message: "ไม่สามารถหาหมายเลข Tracking ได้" })
         }
-        // console.log(resp.data.order_status)
         return res
             .status(200)
             .send({ status: true, data: resp.data })
