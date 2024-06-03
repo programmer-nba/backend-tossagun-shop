@@ -1,5 +1,6 @@
 const { default: axios } = require("axios");
 const { shippopBooking } = require("../../model/shippop/shippop.order");
+const { string } = require("joi");
 
 update = async (req, res) => {
     try {
@@ -50,6 +51,8 @@ getAll = async (req, res) => {
         const booking = await shippopBooking.find();
         for (let i = 0; i < booking.length; i++) {
             if (booking[i].order_status !== 'complete' || booking[i].order_status !== 'cancel') {
+                // const id = string(booking[i]._id);
+                // console.log(id);
                 const value = {
                     tracking_code: booking[i].tracking_code,
                 };
@@ -57,14 +60,13 @@ getAll = async (req, res) => {
                     headers: { "Accept-Encoding": "gzip,deflate,compress" },
                 });
                 booking[i].order_status = resp.data.order_status;
-                shippopBooking.findByIdAndUpdate(booking[i]._id, { order_status: resp.data.order_status }, { useFindAndModify: false });
+                // shippopBooking.findByIdAndUpdate(booking[i]._id, { order_status: resp.data.order_status }, { useFindAndModify: false });
+                booking[i].save();
             }
         }
         return res.status(200).send({ status: true, data: booking })
     } catch (err) {
-        return res
-            .status(500)
-            .send({ status: false, message: err })
+        return res.status(500).send({ status: false, message: err })
     }
 }
 
