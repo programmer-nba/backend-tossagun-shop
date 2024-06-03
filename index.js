@@ -89,6 +89,7 @@ app.use(prefix + "/aoc/airline/code", require("./routes/AOC/airline.code"));
 app.use(prefix + "/express/customer", require("./routes/shippop/customer")); // ลูกค้า
 app.use(prefix + "/express/insured", require("./routes/shippop/insured")); // ประกัน
 app.use(prefix + "/express/name", require("./routes/shippop/name")); //ชื่อสินค้า
+app.use(prefix + "/express/box", require("./routes/shippop/box")); //กล่องพัสดุ
 app.use(prefix + "/express/shippop", require("./routes/shippop/shippop.order"));
 app.use(prefix + "/express/booking", require("./routes/shippop/shippop.manage"));
 app.use(prefix + "/express/shippop/percent", require("./routes/shippop/percent"));

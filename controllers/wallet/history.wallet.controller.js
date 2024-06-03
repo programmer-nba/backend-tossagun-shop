@@ -19,7 +19,7 @@ exports.getHistory = async (req, res) => {
                 $match: { category: 'Wallet' },
             },
             // {
-                // $group: { _id: 0, count: { $sum: 1 } },
+            // $group: { _id: 0, count: { $sum: 1 } },
             // },
         ];
         const history = await WalletHistory.aggregate(pipelint);
@@ -40,7 +40,7 @@ exports.getByMakerId = async (req, res) => {
                 $match: { category: 'Wallet', maker_id: id },
             },
             // {
-                // $group: { _id: 0, count: { $sum: 1 } },
+            // $group: { _id: 0, count: { $sum: 1 } },
             // },
         ];
         const history = await WalletHistory.aggregate(pipelint);
@@ -58,10 +58,15 @@ exports.getByShopId = async (req, res) => {
         const id = req.params.shopid;
         const pipelint = [
             {
-                $match: { category: 'Wallet', shop_id: id },
+                $match: {
+                    $and: [
+                        { category: 'Wallet' },
+                        { shop_id: id }
+                    ]
+                },
             },
             // {
-                // $group: { _id: 0, count: { $sum: 1 } },
+            // $group: { _id: 0, count: { $sum: 1 } },
             // },
         ];
         const history = await WalletHistory.aggregate(pipelint);

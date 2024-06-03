@@ -136,7 +136,6 @@ callToPickup = async (req, res) => {
             api_key: process.env.SHIPPOP_API_KEY,
             tracking_code: String(req.body.courier_tracking_code),
         });
-        console.log(shippop)
         if (shippop.data.status) {
             return res.status(200).json(shippop.data);
         } else {

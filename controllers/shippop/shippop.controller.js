@@ -370,7 +370,7 @@ booking = async (req, res) => {
                 orderid: createOrder._id,
                 name: `รายการขนส่งหมายเลขที่ ${invoice}`,
                 type: `เงินเข้า`,
-                category: 'Wallet',
+                category: 'Income',
                 amount: profit,
                 before: findShop.shop_wallet - profit,
                 after: findShop.shop_wallet,
