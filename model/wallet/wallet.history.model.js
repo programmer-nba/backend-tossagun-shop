@@ -6,7 +6,7 @@ const wallethistory = new mongoose.Schema({
     shop_id: { type: String, default: "", required: false },
     maker_id: { type: String, default: "", required: false },
     orderid: { type: String },
-    category: { type: String, enum: ['Wallet', 'Commission'], required: false },
+    category: { type: String, enum: ['Wallet', 'Commission', 'Income'], required: false },
     name: { type: String, required: true },
     type: { type: String, enum: ['เงินเข้า', 'เงินออก'], required: true },
     vat: { type: Number, required: false, default: 0 },
