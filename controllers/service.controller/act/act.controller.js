@@ -425,7 +425,7 @@ const checkEmployee = async (req, res) => {
 ตรวจสอบได้ที่ : https://office.ddscservices.com/
                
 *ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
-                            // await line.linenotify(message);
+                            await line.linenotify(message);
                             return res.status(200).send({ status: true, data: new_order, ยอดเงินคงเหลือ: newwallet });
                         }
                     }
