@@ -180,10 +180,10 @@ const checkEmployee = async (req, res) => {
                     moneyreceive: req.body.moneyreceive,
                     employee: req.body.employee,
                     change: req.body.change,
-                    status: {
+                    status: [{
                         name: "รอดำเนินการ",
                         timestamp: dayjs(Date.now()).format(""),
-                    },
+                    }],
                     timestamp: dayjs(Date.now()).format(""),
                 };
                 const new_order = new OrderServiceModels(data);
@@ -835,7 +835,7 @@ module.exports.updateOrder = async (req, res) => {
         console.error(error);
         return res.status(500).send({ message: "Internal Server Error" });
     }
-}
+};
 
 module.exports.getOrderByInvoice = async (req, res) => {
     try {

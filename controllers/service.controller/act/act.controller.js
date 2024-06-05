@@ -333,20 +333,20 @@ const checkEmployee = async (req, res) => {
                     moneyreceive: req.body.moneyreceive,
                     employee: req.body.employee,
                     change: req.body.change,
-                    status: {
+                    status: [{
                         name: "รอดำเนินการแนบรูป",
                         timestamp: dayjs(Date.now()).format(""),
-                    },
+                    }],
                     timestamp: dayjs(Date.now()).format(""),
                 };
 
                 const data_ref = {
                     invoice: invoice,
                     employee: req.body.employee,
-                    status: {
+                    status: [{
                         name: "รอดำเนินการแนบรูป",
                         timestamp: dayjs(Date.now()).format(""),
-                    },
+                    }],
                     timestamp: dayjs(Date.now()).format(""),
                 };
 
@@ -372,7 +372,8 @@ const checkEmployee = async (req, res) => {
                     new_order.save();
                     console.log('สร้างรายการออเดอร์สำเร็จ')
                     new_order_ref.save();
-                    await office.OrderOfficeCreate(formOrderOffice);
+                    console.log('สร้างรายการออเดอร์อ้างอิงสำเร็จ')
+                    // await office.OrderOfficeCreate(formOrderOffice);
 
                     // ตัดเงิน
                     const newwallet = shop.shop_wallet - ((totalprice - totalprofit) + totalfreight);
@@ -425,7 +426,7 @@ const checkEmployee = async (req, res) => {
                
 *ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
                             // await line.linenotify(message);
-                            return res.status(200).send({ status: true, data: data, ยอดเงินคงเหลือ: newwallet });
+                            return res.status(200).send({ status: true, data: new_order, ยอดเงินคงเหลือ: newwallet });
                         }
                     }
                 }
