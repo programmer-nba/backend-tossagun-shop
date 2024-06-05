@@ -21,7 +21,16 @@ const storage = multer.diskStorage({
         cb(null, uploadFolder)
     },
     filename: (req, file, cb) => {
-        cb(null, 'act' + "-" + Date.now());
+        cb(null, 'act' + '-' + Date.now());
+    },
+});
+
+const storage1 = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadFolder)
+    },
+    filename: (req, file, cb) => {
+        cb(null, 'order' + Date.now());
     },
 });
 
@@ -257,7 +266,8 @@ const checkEmployee = async (req, res) => {
                 let total_cost = 0;
                 let total_freight = 0;
                 let total_platfrom = 0;
-
+                let profit = 0;
+                let profit_shop = 0;
                 for (let item of req.body.product_detail) {
                     const product = await ProductActs.findOne({ _id: item.packageid });
                     if (product) {
@@ -266,6 +276,8 @@ const checkEmployee = async (req, res) => {
                         total_cost = product.cost * item.quantity;
                         total_freight = product.freight * item.quantity;
                         total_platfrom = product.service.platform * item.quantity;
+                        profit = product.service.profit_TG * item.quantity;
+                        profit_shop = product.service.profit_shop * item.quantity;
                         order.push({
                             packageid: product._id,
                             packagename: product.name,
@@ -275,6 +287,8 @@ const checkEmployee = async (req, res) => {
                             cost: total_cost,
                             freight: total_freight,
                             platform: total_platfrom,
+                            profit: profit,
+                            profit_shop: profit_shop,
                         });
                         order_office.push({
                             packagename: product.name,
@@ -290,6 +304,8 @@ const checkEmployee = async (req, res) => {
                 const totalcost = order.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0);
                 const totalfreight = order.reduce((accumulator, currentValue) => accumulator + currentValue.freight, 0);
                 const totalplatform = order.reduce((accumulator, currentValue) => accumulator + currentValue.platform, 0);
+                const totalprofit = order.reduce((accumulator, currentValue) => accumulator + currentValue.profit, 0);
+                const totalprofitshop = order.reduce((accumulator, currentValue) => accumulator + currentValue.profit_shop, 0);
 
                 const invoice = await GenerateRiceiptNumber(req.body.shop_type, req.body.shop_id, shop.shop_number);
 
@@ -307,6 +323,8 @@ const checkEmployee = async (req, res) => {
                     shop_type: req.body.shop_type,
                     paymenttype: req.body.paymenttype,
                     servicename: "Act",
+                    profit: totalprofit,
+                    profit_shop: totalprofitshop,
                     cost: totalcost,
                     price: totalprice,
                     freight: totalfreight,
@@ -316,7 +334,7 @@ const checkEmployee = async (req, res) => {
                     employee: req.body.employee,
                     change: req.body.change,
                     status: {
-                        name: "รอดำเนินการ",
+                        name: "รอดำเนินการแนบรูป",
                         timestamp: dayjs(Date.now()).format(""),
                     },
                     timestamp: dayjs(Date.now()).format(""),
@@ -352,16 +370,17 @@ const checkEmployee = async (req, res) => {
                     return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
                 } else {
                     new_order.save();
+                    console.log('สร้างรายการออเดอร์สำเร็จ')
                     new_order_ref.save();
                     await office.OrderOfficeCreate(formOrderOffice);
 
                     // ตัดเงิน
-                    const newwallet = shop.shop_wallet - (totalprice);
+                    const newwallet = shop.shop_wallet - ((totalprice - totalprofit) + totalfreight);
                     await Shops.findByIdAndUpdate(shop._id, { shop_wallet: newwallet },
                         { useFindAndModify: false });
 
                     // จ่ายค่าคอมมิชชั่น
-                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Act');
+                    const commissionData = await commissions.Commission(new_order, totalplatform, getteammember, 'Act', (totalprice + totalfreight));
                     const commission = new Commission(commissionData);
 
                     if (!commission) {
@@ -376,21 +395,36 @@ const checkEmployee = async (req, res) => {
                             type: "เงินออก",
                             category: 'Wallet',
                             before: shop.shop_wallet,
-                            after: newwallet,
+                            after: shop.shop_wallet - new_order.net,
                             amount: new_order.net,
                         };
+                        const wallethistoryone = {
+                            maker_id: req.body.maker_id,
+                            shop_id: shop._id,
+                            orderid: new_order._id,
+                            name: `รายการบริการ พ.ร.บ. ใบเสร็จเลขที่ ${new_order.invoice}`,
+                            type: "เงินเข้า",
+                            category: 'Income',
+                            before: shop.shop_wallet - new_order.net,
+                            after: (shop.shop_wallet - new_order.net) + totalprofitshop,
+                            amount: totalprofitshop,
+                        };
                         const walletHistory = new WalletHistory(wallethistory);
-                        if (!walletHistory) {
+                        const walletHistoryone = new WalletHistory(wallethistoryone);
+                        if (!walletHistory && !walletHistoryone) {
                             return res.status(403).send({ status: false, message: 'ไม่สามารถบันทึกประวัติการเงินได้' });
                         } else {
                             walletHistory.save();
+                            console.log('- - บันทึกประวัติเงินออกสำเร็จ - -')
+                            walletHistoryone.save();
+                            console.log('- - บันทึกประวัติเงินเข้าสำเร็จ - -')
                             const message = `
 แจ้งงานเข้า : ${new_order.servicename} (บริการ พ.ร.บ.)
 เลขที่ทำรายการ : ${new_order.invoice}
 ตรวจสอบได้ที่ : https://office.ddscservices.com/
                
 *ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
-                            await line.linenotify(message);
+                            // await line.linenotify(message);
                             return res.status(200).send({ status: true, data: data, ยอดเงินคงเหลือ: newwallet });
                         }
                     }
@@ -404,7 +438,7 @@ const checkEmployee = async (req, res) => {
 };
 
 async function GenerateRiceiptNumber(shop_type, id, number) {
-    if (shop_type === 'One Stop Service') {
+    if (shop_type === 'One Stop Shop') {
         const pipelint = [
             {
                 $match: {
@@ -424,20 +458,15 @@ async function GenerateRiceiptNumber(shop_type, id, number) {
             .toString()
             .padStart(3, "0")}`;
         return data;
-    } else if (shop_type === 'One Stop Platform') {
+    } else {
         const pipelint = [
-            {
-                $match: { shop_type: shop_type },
-            },
             {
                 $group: { _id: 0, count: { $sum: 1 } },
             },
         ];
         const count = await OrderServiceModels.aggregate(pipelint);
         const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `PF${dayjs(Date.now()).format("YYMM")}${countValue
-            .toString()
-            .padStart(5, "0")}`;
+        const data = `TG${dayjs(Date.now()).format("YYMM")}${countValue.toString().padStart(4, "0")}`;
         return data;
     }
 };

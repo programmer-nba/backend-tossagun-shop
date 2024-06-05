@@ -50,9 +50,7 @@ app.use(prefix + "/percent-profit", require("./routes/pos/percent.profit"));
 // Dealer
 app.use(prefix + "/dealer", require("./routes/pos/dealer"));
 app.use(prefix + "/brand", require("./routes/pos/brand"));
-// Image
-app.use(prefix + "/delete/image", require("./routes/image/delete"));
-app.use(prefix + "/collection/image", require("./routes/image/collection"));
+
 // Preorder
 app.use(prefix + "/preorder/tossagun", require("./routes/pos/preorder/preorder.tossagun"));
 app.use(prefix + "/preorder/shop", require("./routes/pos/preorder/preorder.shop"));
@@ -62,6 +60,9 @@ app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 app.use(prefix + "/order/product", require("./routes/pos/order/order.product"));
 app.use(prefix + "/callback", require("./routes/pos/callback"));
 
+// Image
+app.use(prefix + "/delete/image", require("./routes/image/delete"));
+app.use(prefix + "/collection/image", require("./routes/image/collection"));
 // Delete Image
 app.use(prefix + "/delete/image", require("./routes/deleteimage"));
 

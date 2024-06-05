@@ -502,9 +502,6 @@ async function GenerateRiceiptNumber(shop_type, id, number) {
         return data;
     } else {
         const pipelint = [
-            // {
-            // $match: { shop_type: shop_type },
-            // },
             {
                 $group: { _id: 0, count: { $sum: 1 } },
             },
@@ -812,6 +809,33 @@ module.exports.getOrderService = async (req, res) => {
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
+
+module.exports.updateOrder = async (req, res) => {
+    try {
+        const id = req.params.id;
+        OrderServiceModels.findByIdAndUpdate(id, { ...req.body }, { useFindAndModify: false }).then((data) => {
+            if (!data) {
+                return res.status(404).send({
+                    status: false,
+                    message: `อัพเดทข้อมูลไม่สำเร็จ!`,
+                });
+            } else {
+                return res.status(201).send({
+                    message: "อัพเดทข้อมูลสำเร็จ",
+                    status: true,
+                });
+            }
+        }).catch((err) => {
+            return res.status(500).send({
+                message: "มีบ่างอย่างผิดพลาด",
+                status: false,
+            });
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+}
 
 module.exports.getOrderByInvoice = async (req, res) => {
     try {

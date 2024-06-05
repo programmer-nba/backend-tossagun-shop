@@ -27,6 +27,7 @@ router.get("/apppremium/purchase/:id", auth, order.getOrderAppPurchaseId);
 
 // Order
 router.get("/", auth, order.getOrderService);
+router.put("/:id", auth, order.updateOrder);
 router.get("/orderref/:invoice", auth, order.getOrderByInvoice);
 router.put("/orderref/book/:id", auth, order.updateOrderRefBook);
 router.put("/orderref/iden/:id", auth, order.updateOrderRefIden);
