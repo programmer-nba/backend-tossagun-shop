@@ -96,7 +96,9 @@ app.use(prefix + "/express/booking", require("./routes/shippop/shippop.manage"))
 app.use(prefix + "/express/shippop/percent", require("./routes/shippop/percent"));
 
 // topup
-app.use(prefix + "/topup", require("./routes/topup/topup"));
+// app.use(prefix + "/topup", require("./routes/topup/topup"));
+app.use(prefix + "/topup/service", require("./routes/topup/topup.service"));
+app.use(prefix + "/topup/percent", require("./routes/topup/percent"));
 
 //partner
 app.use(prefix + "/emarket", require("./routes/ddscpartner/emarking"));
