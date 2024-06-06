@@ -177,6 +177,7 @@ const checkEmployee = async (req, res) => {
                     freight: totalfreight,
                     net: totalprice + totalfreight,
                     totalplatform: totalplatform,
+                    discount: req.body.discount,
                     moneyreceive: req.body.moneyreceive,
                     employee: req.body.employee,
                     change: req.body.change,
