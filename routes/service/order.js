@@ -23,7 +23,11 @@ router.get("/express/purchase/:id", auth, order.getOrderPurchaseId);
 // Order AppPremium
 router.get("/apppremium", auth, order.getOrderAppPremium);
 router.get("/apppremium/:shopid", auth, order.getOrderAppByShopId);
-router.get("/apppremium/purchase/:id", auth, order.getOrderAppPurchaseId);
+
+// Order Topup
+router.get("/topup", auth, order.getOrderTopup);
+router.get("/topup/:shopid", auth, order.getOrderTopupByShopId);
+router.get("/topup/orderid/:id", auth, order.getOrderByOrderId);
 
 // Order
 router.get("/", auth, order.getOrderService);

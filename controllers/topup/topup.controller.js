@@ -390,14 +390,10 @@ const getorderbyreference_order = async (req, res) => {
 } 
 
 async function runreference_order() {
-
     // สุ่มเลขอ้างอิง 10 หลัก
     let reference_order = Math.floor(1000000000 + Math.random() * 9000000000);
     return reference_order;
-
-    
 }
-
 
 module.exports = {
     gentoken,
