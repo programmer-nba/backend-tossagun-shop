@@ -4,6 +4,7 @@ const AWSSchema = new mongoose.Schema({
 	employee_id: { type: String, required: false },
 	shop_id: { type: String, required: true },
 	invoice: { type: String, required: false },
+	ref_number: { type: Number, required: false },
 	order_id: { type: String, required: false },
 	mobile: { type: String, required: false },
 	branch: { type: String, required: false },

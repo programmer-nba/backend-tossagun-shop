@@ -16,6 +16,7 @@ module.exports.booking = async (req, res) => {
             return res.status(404).send({ status: false, message: 'คุณยังไม่ได้เป็นสมาชิกทศกัณฐ์แฟมิลี่' })
         }
         const invoice = await invoiceNumber();
+        const ref_number = await runreference_order();
         const new_data = [];
         let commission = 0;
         let commission_tg = 0;
@@ -24,8 +25,6 @@ module.exports.booking = async (req, res) => {
         let total_platform = 0;
         for (let item of req.body.product_detail) {
             const percent = await PercentTopup.findOne({ topup_id: item.service_id });
-
-            const ref_number = await runreference_order();
 
             const value = {
                 reference_order: ref_number,
@@ -43,13 +42,12 @@ module.exports.booking = async (req, res) => {
                 },
             });
 
-            console.log(resp)
-
             if (resp.data.status === 'fail') {
                 console.log('แจ้งเติมเงินไม่สำเร็จ')
                 const v = {
                     ...item,
                     invoice: invoice,
+                    ref_number: ref_number,
                     order_id: '',
                     commission: 0,
                     commission_tg: 0,
@@ -73,6 +71,7 @@ module.exports.booking = async (req, res) => {
                 const v = {
                     ...item,
                     invoice: invoice,
+                    ref_number: ref_number,
                     order_id: resp.data.order_id,
                     commission: com,
                     commission_tg: com_tg,
@@ -98,6 +97,7 @@ module.exports.booking = async (req, res) => {
             shop_id: req.body.shop_id,
             platform: req.body.platform,
             invoice: invoice,
+            ref_number: ref_number,
             total: Number(total.toFixed(2)),
             commission: Number(commission.toFixed(2)),
             commission_tg: Number(commission_tg.toFixed(2)),
@@ -186,6 +186,19 @@ module.exports.booking = async (req, res) => {
 module.exports.callback = async (req, res) => {
     try {
         console.log("ตอบกลับจาก AWS Topup");
+        const order = await AWSBooking.findOne({ order_id: req.body.order_id });
+        const order_tg = await OrderTopup.findOne({ ref_number: order.ref_number });
+        if (req.body.transaction_status === 'TOP_SUCCESS') {
+            order_tg.status.push({ name: "ดำเนินการสำเร็จ", timestamp: dayjs(Date.now()).format() })
+        } else if (req.body.transaction_status === 'TOP_FAIL') {
+            order_tg.status.push({ name: "ดำเนินการไม่สำเร็จ", timestamp: dayjs(Date.now()).format() })
+        } else if (req.body.transaction_status === 'TOP_PENDING') {
+            order_tg.status.push({ name: "รอดำเนินการ", timestamp: dayjs(Date.now()).format() })
+        }
+        await AWSBooking.findByIdAndUpdate(order._id, { order_status: req.body.transaction_status }, { useFindAndModify: false, });
+        order_tg.save();
+        console.log('บันทึกข้อมูลจากการตอกกลับ AWS สำเร็จ')
+        return res.status(200).send({ status: true, message: 'ทำรายการสำเร็จ' })
     } catch (error) {
         console.log(error);
         return res.status(500).send({ message: "เกิดข้อผิดพลาดบางอย่าง", data: error.data });
