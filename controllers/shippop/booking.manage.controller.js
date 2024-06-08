@@ -49,14 +49,9 @@ delend = async (req, res) => {
 getAll = async (req, res) => {
     try {
         const booking = await shippopBooking.find();
+        // let order = [];
         for (let i = 0; i < booking.length; i++) {
-            if (booking[i].order_status === 'cancel') {
-                console.log('ออเดอร์นี้ถูกยกเลิก')
-            } else if (booking[i].order_status === 'complete') {
-                console.log('ออเดอร์นี้จัดส่งสำเร็จ')
-            } else {
-                const id = string(booking[i]._id);
-                console.log(id);
+            if (booking[i].order_status !== 'cancel') {
                 const value = {
                     tracking_code: booking[i].tracking_code,
                 };
@@ -64,11 +59,35 @@ getAll = async (req, res) => {
                     headers: { "Accept-Encoding": "gzip,deflate,compress" },
                 });
                 booking[i].order_status = resp.data.order_status;
-                shippopBooking.findByIdAndUpdate(booking[i]._id, { order_status: resp.data.order_status }, { useFindAndModify: false });
                 booking[i].save();
             }
         }
-        return res.status(200).send({ status: true, data: booking })
+        console.log('อัพเดทสถานะสำเร็จ')
+        // if (booking[i].order_status === 'cancel') {
+        // console.log('ออเดอร์นี้ถูกยกเลิก')
+        // } else if (booking[i].order_status === 'complete') {
+        // console.log('ออเดอร์นี้จัดส่งสำเร็จ')
+        // } else {
+        // const id = string(booking[i]._id);
+        // console.log(id);
+        // const value = {
+        // tracking_code: booking[i].tracking_code,
+        // };
+        // const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking/`, value, {
+        // headers: { "Accept-Encoding": "gzip,deflate,compress" },
+        // });
+        // booking[i].order_status = resp.data.order_status;
+        // shippopBooking.findByIdAndUpdate(booking[i]._id, { order_status: resp.data.order_status }, { useFindAndModify: false });
+        // booking[i].save();
+        // }
+        // order.push(booking[i]);
+        // console.log(order)
+        // }
+        if (booking) {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลสำเร็จ', data: booking })
+        } else {
+            return res.status(400).send({ status: false, message: 'มีบางอย่างผิดพลาด' })
+        }
     } catch (err) {
         return res.status(500).send({ status: false, message: err })
     }
