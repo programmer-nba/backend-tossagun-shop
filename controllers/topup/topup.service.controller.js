@@ -203,7 +203,7 @@ module.exports.callback = async (req, res) => {
         console.log(error);
         return res.status(500).send({ message: "เกิดข้อผิดพลาดบางอย่าง", data: error.data });
     }
-}
+};
 
 async function invoiceNumber() {
     const pipelint = [
@@ -221,7 +221,7 @@ async function runreference_order() {
     // สุ่มเลขอ้างอิง 10 หลัก
     let reference_order = Math.floor(1000000000 + Math.random() * 9000000000);
     return reference_order;
-}
+};
 
 async function GetTeamMember(tel) {
     try {
@@ -278,5 +278,19 @@ async function GetTeamMember(tel) {
     } catch (error) {
         console.log(error)
         return res.status(500).send({ status: false, error: error.message });
+    }
+};
+
+module.exports.getBookingAll = async (req, res) => {
+    try {
+        const booking = await AWSBooking.find();
+        if (!booking) {
+            return res.status(403).send({ status: false, message: 'ดึงข้อมูลไม่สำเร็จ' });
+        } else {
+            return res.status(200).send({ status: true, message: 'ดึงข้อมูลสำเร็จ', data: booking });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ message: "เกิดข้อผิดพลาดบางอย่าง", data: error.data });
     }
 };
