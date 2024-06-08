@@ -207,6 +207,7 @@ const checkEmployee = async (req, res) => {
                     return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
                 } else {
                     new_order.save();
+                    console.log('สร้างรายการออเดอร์สำเร็จ')
                     await office.OrderOfficeCreate(formOrderOffice);
 
                     // ตัดเงิน

@@ -50,9 +50,13 @@ getAll = async (req, res) => {
     try {
         const booking = await shippopBooking.find();
         for (let i = 0; i < booking.length; i++) {
-            if (booking[i].order_status !== 'complete' || booking[i].order_status !== 'cancel') {
-                // const id = string(booking[i]._id);
-                // console.log(id);
+            if (booking[i].order_status === 'cancel') {
+                console.log('ออเดอร์นี้ถูกยกเลิก')
+            } else if (booking[i].order_status === 'complete') {
+                console.log('ออเดอร์นี้จัดส่งสำเร็จ')
+            } else {
+                const id = string(booking[i]._id);
+                console.log(id);
                 const value = {
                     tracking_code: booking[i].tracking_code,
                 };
@@ -60,7 +64,7 @@ getAll = async (req, res) => {
                     headers: { "Accept-Encoding": "gzip,deflate,compress" },
                 });
                 booking[i].order_status = resp.data.order_status;
-                // shippopBooking.findByIdAndUpdate(booking[i]._id, { order_status: resp.data.order_status }, { useFindAndModify: false });
+                shippopBooking.findByIdAndUpdate(booking[i]._id, { order_status: resp.data.order_status }, { useFindAndModify: false });
                 booking[i].save();
             }
         }

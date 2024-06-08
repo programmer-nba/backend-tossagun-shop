@@ -373,7 +373,7 @@ const checkEmployee = async (req, res) => {
                     console.log('สร้างรายการออเดอร์สำเร็จ')
                     new_order_ref.save();
                     console.log('สร้างรายการออเดอร์อ้างอิงสำเร็จ')
-                    // await office.OrderOfficeCreate(formOrderOffice);
+                    await office.OrderOfficeCreate(formOrderOffice);
 
                     // ตัดเงิน
                     const newwallet = shop.shop_wallet - ((totalprice - totalprofit) + totalfreight);

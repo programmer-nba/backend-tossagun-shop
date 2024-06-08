@@ -101,7 +101,7 @@ app.use(prefix + "/topup/service", require("./routes/topup/topup.service"));
 app.use(prefix + "/topup/percent", require("./routes/topup/percent"));
 
 //partner
-app.use(prefix + "/emarket", require("./routes/ddscpartner/emarking"));
+app.use(prefix + "/e-market", require("./routes/ddscpartner/emarking")); 
 app.use(prefix + "/store", require("./routes/ddscpartner/store"));
 
 //easybook

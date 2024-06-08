@@ -441,20 +441,25 @@ cancelOrder = async (req, res) => {
         console.log("ยกเลิกพัสดุ ต้นทุน : ", cost);
         if (booking.length > 0) {
             for (let i = 0; i < booking.length; i++) {
-                await axios.post(`${process.env.SHIPPOP_URL}/cancel/`, {
+                const value = {
                     api_key: process.env.SHIPPOP_API_KEY,
-                    tracking_code: booking.tracking_code,
-                }, {
-                    headers: { "Accept-Encoding": "gzip,deflate,compress" },
-                }).then(async () => {
+                    tracking_code: booking[i].tracking_code
+                };
+
+                const resp = await axios.post(`${process.env.SHIPPOP_URL}/cancel/`, value, {
+                    headers: {
+                        "Accept-Encoding": "gzip,deflate,compress",
+                        "Content-Type": "application/json"
+                    },
+                });
+
+                if (resp.data.status) {
                     console.log(
                         "/---ยกเลิกเลขพัสดุ " + booking[i].tracking_code + " เรียบร้อย"
                     );
-
                     const parcel = await shippopBooking.findOne({
                         tracking_code: booking[i].tracking_code,
                     });
-
                     if (parcel) {
                         console.log(
                             "---ถูกยกเลิกพัสดุ tracking_code : " + booking[i].tracking_code
@@ -465,7 +470,10 @@ cancelOrder = async (req, res) => {
                             cost = booking[i].cost + cost;
                         });
                     }
-                })
+                } else {
+                    return res.status(400).send({ status: false, message: resp.data.data[0] });
+                }
+
             } // end loop for
 
             console.log("ต้นทุนคืนกระเป๋าพาร์ทเนอร์ร้านค้า : ", cost);
