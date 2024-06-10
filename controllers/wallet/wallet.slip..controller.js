@@ -58,6 +58,7 @@ exports.create = async (req, res) => {
                             invoice: invoice,
                             maker_id: req.decoded._id,
                             detail: req.file.filename,
+                            timestamp: dayjs(Date.now()).format(),
                         }).save();
                         const message = `
 แจ้งเติมเงินเข้าระบบ : 
@@ -76,6 +77,7 @@ exports.create = async (req, res) => {
                             maker_id: req.decoded._id,
                             shop_id: req.decoded.shop_id,
                             detail: req.file.filename,
+                            timestamp: dayjs(Date.now()).format(),
                         }).save();
                         const message = `
 แจ้งเติมเงินเข้าระบบ 

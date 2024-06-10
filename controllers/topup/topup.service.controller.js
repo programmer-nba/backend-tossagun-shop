@@ -198,7 +198,7 @@ module.exports.callback = async (req, res) => {
         await AWSBooking.findByIdAndUpdate(order._id, { order_status: req.body.transaction_status }, { useFindAndModify: false, });
         order_tg.save();
         console.log('บันทึกข้อมูลจากการตอกกลับ AWS สำเร็จ')
-        return res.status(200).send({ status: true, message: 'ทำรายการสำเร็จ' })
+        // return res.status(200).send({ status: true, message: 'ทำรายการสำเร็จ' })
     } catch (error) {
         console.log(error);
         return res.status(500).send({ message: "เกิดข้อผิดพลาดบางอย่าง", data: error.data });

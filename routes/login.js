@@ -20,6 +20,8 @@ const validate = (data) => {
     username: Joi.string().required().label("username"),
     password: Joi.string().required().label("password"),
     ip_address: Joi.string().required().label("ip_address"),
+    latitude: Joi.string().required().label("latitude"),
+    longitude: Joi.string().required().label("longitude"),
   });
   return schema.validate(data);
 };
@@ -197,6 +199,8 @@ const checkMember = async (req, res) => {
         name: member.fristname,
         ref: member._id,
         ip_address: req.body.ip_address,
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
         timestamp: dayjs(Date.now()).format(),
       };
       await LoginHistorys.create(login_history);
@@ -256,6 +260,8 @@ const checkEmployee = async (req, res) => {
         name: employee.employee_firstname,
         ref: employee._id,
         ip_address: req.body.ip_address,
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
         timestamp: dayjs(Date.now()).format(),
       };
       await LoginHistorys.create(login_history);
