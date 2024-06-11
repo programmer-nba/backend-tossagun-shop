@@ -255,7 +255,7 @@ const checkEmployee = async (req, res) => {
                             const message = `
 แจ้งงานเข้า : ${new_order.servicename}
 เลขที่ทำรายการ : ${new_order.invoice}
-ตรวจสอบได้ที่ : https://office.ddscservices.com/
+ตรวจสอบได้ที่ : https://office.tossaguns.com/
                 
 *ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
                             await line.linenotify(message);
@@ -469,7 +469,7 @@ const checkMember = async (req, res) => {
                             const message = `
 แจ้งงานเข้า : ${new_order.servicename}
 เลขที่ทำรายการ : ${new_order.invoice}
-ตรวจสอบได้ที่ : https://office.ddscservices.com/
+ตรวจสอบได้ที่ : https://office.tossaguns.com/
                                     
 *ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
                             await line.linenotify(message);
@@ -617,6 +617,29 @@ module.exports.submitOrder = async (req, res) => {
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
+
+module.exports.trackingOrder = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const order = await OrderServiceModels.findOne({ _id: id });
+        if (order) {
+            order.tracking = req.body.tracking;
+            const status = {
+                name: "จัดส่งสำเร็จ",
+                timestamp: dayjs(Date.now()).format(""),
+            };
+            order.status.push(status);
+            order.save();
+            console.log('แก้ไขข้อมูลสำเร็จ')
+            return res.status(200).send({ status: true, message: 'อัพเดทเลขแทรคกิ้งสำเร็จ' })
+        } else {
+            return res.status(403).send({ status: false, message: 'ไม่พบรายการที่ต้องการอัพเดท' })
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+}
 
 module.exports.getOrderList = async (req, res) => {
     try {
@@ -995,7 +1018,7 @@ module.exports.getOrderByOrderId = async (req, res) => {
         const id = req.params.id;
         const pipelint = [
             {
-                $match: { order_id: id },
+                $match: { ref_number: Number(id) },
             }
         ];
         const order = await AWSBooking.aggregate(pipelint);

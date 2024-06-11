@@ -467,7 +467,7 @@ cancelOrder = async (req, res) => {
                         await shippopBooking.findByIdAndUpdate(parcel._id, {
                             order_status: "cancel",
                         }).then(() => {
-                            cost = booking[i].cost + cost;
+                            cost += (booking[i].total / 2);
                         });
                     }
                 } else {

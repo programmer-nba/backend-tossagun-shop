@@ -9,6 +9,7 @@ const authAdmin = require("../../lib/auth.admin");
 // Confirm Order
 router.put("/confirm/:id", order.confirmOrder);
 router.put("/submit/:id", order.submitOrder);
+router.put("/tracking/:id", authAdmin, order.trackingOrder);
 
 // Order Tricket AOC
 router.get("/aoc", auth, order.getOrderAoc);

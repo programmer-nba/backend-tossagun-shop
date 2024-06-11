@@ -64,10 +64,21 @@ module.exports.booking = async (req, res) => {
             }
 
             if (resp.data.status === 'success') {
-                const com = item.amount * (percent.percent / 100);
-                const com_tg = com * (percent.profit_tg / 100);
-                const com_shop = com * (percent.profit_shop / 100);
-                const platform = com_tg * (percent.platform / 100);
+                let com = 0;
+                let com_tg = 0;
+                let com_shop = 0;
+                let platform = 0;
+                if (item.type === 'WALLET') {
+                    com = item.fee;
+                    com_tg = com * (percent.profit_tg / 100);
+                    com_shop = com * (percent.profit_shop / 100);
+                    platform = com_tg * (percent.platform / 100);
+                } else {
+                    com = item.amount * (percent.percent / 100);
+                    com_tg = com * (percent.profit_tg / 100);
+                    com_shop = com * (percent.profit_shop / 100);
+                    platform = com_tg * (percent.platform / 100);
+                }
                 const v = {
                     ...item,
                     invoice: invoice,
@@ -85,7 +96,7 @@ module.exports.booking = async (req, res) => {
                     timestamp: dayjs(Date.now()).format(),
                 };
                 new_data.push(v);
-                total += item.amount;
+                total += item.total;
                 commission += com;
                 commission_tg += com_tg;
                 commission_shop += com_shop;

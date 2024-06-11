@@ -1,13 +1,13 @@
-const {Percents, validate} = require("../../model/pos/commission/percent.model");
+const { Percents, validate } = require("../../model/pos/commission/percent.model");
 
 exports.create = async (req, res) => {
   try {
-    const {error} = validate(req.body);
+    const { error } = validate(req.body);
 
     if (error)
       return res
         .status(400)
-        .send({message: error.details[0].message, status: false});
+        .send({ message: error.details[0].message, status: false });
     const result = await new Percents({
       ...req.body,
     })
@@ -19,7 +19,7 @@ exports.create = async (req, res) => {
       result: result,
     });
   } catch (error) {
-    res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
 
@@ -27,7 +27,7 @@ exports.findAll = async (req, res) => {
   try {
     Percents.find()
       .then(async (data) => {
-        res.send({data: data, message: "success", status: true});
+        res.send({ data: data, message: "success", status: true });
       })
       .catch((err) => {
         res.status(500).send({
@@ -35,7 +35,7 @@ exports.findAll = async (req, res) => {
         });
       });
   } catch (error) {
-    res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
 
@@ -47,8 +47,8 @@ exports.findOne = async (req, res) => {
         if (!data)
           res
             .status(404)
-            .send({message: "ไม่สามารถหารายการนี้ได้", status: false});
-        else res.send({data, status: true});
+            .send({ message: "ไม่สามารถหารายการนี้ได้", status: false });
+        else res.send({ data, status: true });
       })
       .catch((err) => {
         res.status(500).send({
@@ -67,13 +67,13 @@ exports.findOne = async (req, res) => {
 exports.findCode = async (req, res) => {
   const code = req.params.id;
   try {
-    Percents.findOne({code: code})
+    Percents.findOne({ code: code })
       .then((data) => {
         if (!data)
           res
             .status(404)
-            .send({message: "ไม่สามารถหารายการนี้ได้", status: false});
-        else res.send({data, status: true});
+            .send({ message: "ไม่สามารถหารายการนี้ได้", status: false });
+        else res.send({ data, status: true });
       })
       .catch((err) => {
         res.status(500).send({
@@ -98,7 +98,7 @@ exports.update = async (req, res) => {
     }
     const id = req.params.id;
 
-    Percents.findByIdAndUpdate(id, req.body, {useFindAndModify: false})
+    Percents.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
       .then((data) => {
         if (!data) {
           res.status(404).send({
@@ -118,6 +118,6 @@ exports.update = async (req, res) => {
         });
       });
   } catch (error) {
-    res.status(500).send({message: "มีบางอย่างผิดพลาด", status: false});
+    res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };

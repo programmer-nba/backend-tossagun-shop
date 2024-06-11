@@ -140,13 +140,15 @@ exports.create = async (req, res) => {
                 .status(400)
                 .send({ message: error.details[0].message, status: false });
         }
-        const member = await Members.findOne({ tel: req.body.tel });
+        let tel = req.body.tel;
+        tel = tel.replace("-", "");
+        const member = await Members.findOne({ tel: tel });
         if (member) {
             return res
                 .status(400)
                 .send({ status: false, message: "เบอร์โทรศัพท์เป็นสมาชิกอยู่แล้ว" });
         }
-        const card_number = `888${req.body.tel}`;
+        const card_number = `888${tel}`;
         const salt = await bcrypt.genSalt(Number(process.env.SALT));
         const hashPassword = await bcrypt.hash(req.body.password, salt);
         // let data;
@@ -162,6 +164,7 @@ exports.create = async (req, res) => {
                 };
                 const data = {
                     ...req.body,
+                    tel: tel,
                     card_number: card_number,
                     password: hashPassword,
                     upline: upline,
@@ -181,6 +184,7 @@ exports.create = async (req, res) => {
         } else {
             const data = {
                 ...req.body,
+                tel: tel,
                 card_number: card_number,
                 password: hashPassword,
                 // upline: upline,

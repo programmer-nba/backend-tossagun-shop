@@ -422,7 +422,7 @@ const checkEmployee = async (req, res) => {
                             const message = `
 แจ้งงานเข้า : ${new_order.servicename} (บริการ พ.ร.บ.)
 เลขที่ทำรายการ : ${new_order.invoice}
-ตรวจสอบได้ที่ : https://office.ddscservices.com/
+ตรวจสอบได้ที่ : https://office.tossaguns.com/
                
 *ฝากรบกวนตรวจสอบด้วยนะคะ/ครับ*`;
                             await line.linenotify(message);
