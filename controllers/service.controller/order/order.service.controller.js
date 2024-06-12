@@ -612,11 +612,62 @@ module.exports.submitOrder = async (req, res) => {
             updateStatus.save();
             return res.status(200).send({ status: true, message: 'ยืนยันรับงานสำเร็จ' });
         }
-    } catch (err) {
+    } catch (error) {
         console.error(error);
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
+
+module.exports.cancelOrder = async (req, res) => {
+    try {
+        const { id, shop_id, maker_id } = req.body;
+        const order = await OrderServiceModels.findOne({ _id: id, shop_id: shop_id });
+
+        const shop = await Shops.findOne({ _id: order.shop_id });
+
+        const new_status = {
+            name: "ยกเลิก",
+            timestamp: dayjs(Date.now()).format(),
+        };
+        order.status.push(new_status);
+        order.save();
+        console.log('อัพเดทสถานะสำเร็จ');
+
+        const cancel_office = {
+            invoice: order.invoice
+        };
+
+        console.log('สร้างรายการออเดอร์สำเร็จ')
+        await office.OrderOfficeCancel(cancel_office);
+
+        const cost = order.net / 2;
+        const new_money = shop.shop_wallet + cost;
+
+        await Shops.findByIdAndUpdate(shop._id, {
+            shop_wallet: new_money
+        });
+
+        console.log("บันทึกประวัติเงินเข้า-ออก");
+        const money_history = {
+            shop_id: order.shop_id,
+            maker_id: maker_id,
+            orderid: order.invoice,
+            name: `ยกเลิกรายการเซอณ์วิสหมายเลขที่ ${order.invoice}`,
+            type: "เงินเข้า",
+            category: 'Wallet',
+            amount: cost,
+            before: shop.shop_wallet,
+            after: new_money,
+            timestamp: dayjs(Date.now()).format(),
+        };
+        await WalletHistory.create(money_history);
+        console.log("---เสร็จสิ้น---");
+        return res.status(200).send({ status: true, message: "ยกเลิกรายการสำเร็จ" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+}
 
 module.exports.trackingOrder = async (req, res) => {
     try {
