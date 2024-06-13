@@ -334,6 +334,46 @@ exports.getbooking = async(req,res)=>{
     }
 }
 //ดึงออเดอร์รถบัส
+exports.getorder = async(req,res)=>{
+    try{
+        console.log("Test2")
+        //เช็คว่า token ยัง null อยู่ไหม และ หมดอายุหรือยัง
+        if(tokeneasybook == null || tokenexpire == null || new Date() > tokenexpire){
+            const newtoken = await getNewToken()
+            if(newtoken == "ไม่สามารถเชื่อมต่อกับ api ได้"){
+                return res.status(500).send({status:false, message:"ไม่สามารถเชื่อมต่อกับ api ได้"})
+            }
+            tokeneasybook = newtoken?.tokeneasybook
+            tokenexpire = newtoken?.tokenexpire
+            console.log("new token")
+        }
+        //ดึงข้อมูล ออเดอร์รถบัส
+        const data = {
+            ReserveReference: req.body.OrderNumber,
+            Currency:"THB",
+        };
+        const api ={
+            url: `${process.env.EASYBOOK_URL}/api/bus/agent/getorder?sign=${process.env.EASYBOOK_SIGNATURE}&language=th&reserveReference=${req.body.OrderNumber}&returnOrderSummaryHtml=false`,
+            method: 'get',
+            headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokeneasybook}`
+            },
+        }
+        
+        const response = await axios(api).catch((err) => {
+            return "ไม่สามารถเชื่อมต่อกับ api ได้"
+        });
+        if(response?.status == 200){
+            return res.status(200).send({status:true, data:response?.data})
+        }else{
+            return res.status(500).send({status:false, message:response})
+        }
+
+    }catch(err){
+        return res.status(500).send({status:false, message:err.message})
+    }
+}
 
 exports.signature = async(req, res)=>{
     try{

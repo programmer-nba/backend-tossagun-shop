@@ -19,5 +19,8 @@ router.post("/bus/checkprice", easybook.getbookingfare);
 
 //จองที่นั่งรถบัส
 router.post("/bus/booking", easybook.getbooking);
+// ดึงออเดอร์การจองรถบัส
+router.get("/bus/getorder", easybook.getorder);
+
 
 module.exports = router;
