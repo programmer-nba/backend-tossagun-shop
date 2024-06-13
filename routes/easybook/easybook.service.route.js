@@ -3,17 +3,21 @@ const easybook = require("../../controllers/easybook/easybook.service")
 const auth = require("../../lib/auth");
 const authAdmin = require("../../lib/auth.admin")
 
-router.get("/get/token", auth, easybook.getToken);
+// router.get("/get/token", auth, easybook.getToken);
 router.get("/get/signature", easybook.signature);
-// router.post("/booking", BookingShippop.booking);
-// router.post('/label', auth, BookingShippop.label);
-// router.post("/confirm", auth, BookingShippop.confirm);
-// router.post("/cancel", auth, BookingShippop.cancel);
-// router.get("/booking/:shop_id", auth, BookingShippop.getBooking);
-// router.get('/booking', authAdmin, BookingShippop.getAllBooking);
-// router.post("/shippop/callback", BookingShippop.callback);
-// router.post('/tracking', auth, BookingShippop.checkTrackingCode);
-// router.post('/tracking/update/courier_tracking_code', authAdmin, BookingShippop.updateCourierTrackingCode);
-// router.post('/calltopickup', authAdmin, BookingShippop.callToPickup);
+//รถบัส
+// จังหวัด รถบัส
+router.get("/bus/province", easybook.getProvince);
+// สถานีรถบัส
+router.get("/bus/subplaces", easybook.getBusStation);
+//เช็คเที่ยวรถบัส
+router.post("/bus/checktrip", easybook.gettrips);
+//เรียกดูที่นั่ง
+router.post("/bus/checkseat", easybook.getseat);
+//เช็คราคา 
+router.post("/bus/checkprice", easybook.getbookingfare);
+
+//จองที่นั่งรถบัส
+router.post("/bus/booking", easybook.getbooking);
 
 module.exports = router;
