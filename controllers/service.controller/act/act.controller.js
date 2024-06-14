@@ -330,6 +330,7 @@ const checkEmployee = async (req, res) => {
                     freight: totalfreight,
                     net: totalprice + totalfreight,
                     totalplatform: totalplatform,
+                    discount: req.body.discount,
                     moneyreceive: req.body.moneyreceive,
                     employee: req.body.employee,
                     change: req.body.change,
@@ -376,7 +377,7 @@ const checkEmployee = async (req, res) => {
                     await office.OrderOfficeCreate(formOrderOffice);
 
                     // ตัดเงิน
-                    const newwallet = shop.shop_wallet - ((totalprice - totalprofit) + totalfreight);
+                    const newwallet = shop.shop_wallet - (((totalprice + totalfreight) - totalprofitshop));
                     await Shops.findByIdAndUpdate(shop._id, { shop_wallet: newwallet },
                         { useFindAndModify: false });
 

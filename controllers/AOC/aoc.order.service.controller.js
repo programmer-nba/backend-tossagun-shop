@@ -59,17 +59,14 @@ exports.getFlightTicket = async (req, res) => {
   try {
     // console.log(Token)
     const ticketFlight = await axios.post(
-      process.env.AOC_URL + "FlightSearchMultiTicket",
-      {
-        ...req.body,
+      process.env.AOC_URL + "FlightSearchMultiTicket", {
+      ...req.body,
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Token}`,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Token}`,
-        },
-      }
-    );
+    });
     // console.log(ticketFlight)
     const ticketFlight_data = ticketFlight.data.flights;
     if (ticketFlight_data) {
@@ -109,28 +106,19 @@ exports.getFlightTicket = async (req, res) => {
 exports.getPriceTicket = async (req, res) => {
   try {
     const ticketPrice = await axios.post(
-      process.env.AOC_URL + "FlightMultiTicketPricing",
-      {
-        ...req.body,
+      process.env.AOC_URL + "FlightMultiTicketPricing", {
+      ...req.body,
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Token}`,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Token}`,
-        },
-      }
-    );
+    });
     const ticketPrice_data = ticketPrice.data;
     if (ticketPrice_data) {
-      return res.status(200).send({
-        message: "ดึงข้อมูลราคาเที่ยวบินสำเร็จ",
-        status: true,
-        data: ticketPrice_data,
-      });
+      return res.status(200).send({ message: "ดึงข้อมูลราคาเที่ยวบินสำเร็จ", status: true, data: ticketPrice_data });
     } else {
-      return res
-        .status(400)
-        .send({ message: "ดึงข้อมูลเที่ยวบินไม่สำเร็จ", status: false });
+      return res.status(400).send({ message: "ดึงข้อมูลเที่ยวบินไม่สำเร็จ", status: false });
     }
   } catch (err) {
     console.log(err);
@@ -141,21 +129,16 @@ exports.getPriceTicket = async (req, res) => {
 exports.getBooking = async (req, res) => {
   try {
     const flight_booking = await axios.post(
-      process.env.AOC_URL + "FlightBooking",
-      {
-        ...req.body.aoc,
+      process.env.AOC_URL + "FlightBooking", {
+      ...req.body.aoc,
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Token}`,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Token}`,
-        },
-      }
-    );
+    });
     if (!flight_booking.data.TransactionID) {
-      return res
-        .status(401)
-        .send({ status: false, message: "จองตั๋วไม่สำเร็จ" });
+      return res.status(401).send({ status: false, message: "จองตั๋วไม่สำเร็จ" });
     }
     const invoice = await GenerateRiceiptNumber();
     let data;

@@ -502,7 +502,7 @@ cancelOrder = async (req, res) => {
                 shop_id: order_express.shop_id,
                 maker_id: maker_id,
                 orderid: order_express.invoice,
-                name: `ยกเลิกพัสดุหมายเลขที่ ${order_express.purchase_id}`,
+                name: `ยกเลิกพัสดุหมายเลขที่ ${order_express.invoice}`,
                 type: "เงินเข้า",
                 category: 'Wallet',
                 amount: cost,

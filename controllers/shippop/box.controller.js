@@ -42,6 +42,26 @@ module.exports.getById = async (req, res) => {
 	}
 };
 
+module.exports.getByShopId = async (req, res) => {
+	try {
+		const shopid = req.params.shopid;
+		const pipelint = [
+			{
+				$match: { shop_id: shopid },
+			}
+		];
+		const box = await BoxExpress.aggregate(pipelint);
+		if (box) {
+			return res.status(200).send({ status: true, message: 'ดึงข้อมูลรายการสินค้าสำเร็จ', data: box })
+		} else {
+			return res.status(403).send({ status: false, message: 'ดึงข้อมูลรายการสินค้าไม่สำเร็จ' });
+		}
+	} catch (error) {
+		console.error(error);
+		return res.status(500).send({ message: "Internal Server Error" });
+	}
+}
+
 module.exports.update = async (req, res) => {
 	try {
 		const id = req.params.id;

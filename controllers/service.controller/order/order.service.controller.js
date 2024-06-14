@@ -640,8 +640,11 @@ module.exports.cancelOrder = async (req, res) => {
         console.log('สร้างรายการออเดอร์สำเร็จ')
         await office.OrderOfficeCancel(cancel_office);
 
-        const cost = order.net / 2;
-        const new_money = shop.shop_wallet + cost;
+        const cost = order.price / 2;
+        const freight = order.freight;
+        const net = cost + freight;
+
+        const new_money = shop.shop_wallet + net;
 
         await Shops.findByIdAndUpdate(shop._id, {
             shop_wallet: new_money
@@ -655,7 +658,7 @@ module.exports.cancelOrder = async (req, res) => {
             name: `ยกเลิกรายการเซอณ์วิสหมายเลขที่ ${order.invoice}`,
             type: "เงินเข้า",
             category: 'Wallet',
-            amount: cost,
+            amount: net,
             before: shop.shop_wallet,
             after: new_money,
             timestamp: dayjs(Date.now()).format(),
