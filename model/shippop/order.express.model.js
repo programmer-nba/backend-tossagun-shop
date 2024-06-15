@@ -16,6 +16,7 @@ const OrderExpressSchema = new mongoose.Schema({
     total_box: { type: Number, required: false, default: 0 },
     moneyreceive: { type: Number, required: true, default: 0 },
     change: { type: Number, required: true, default: 0 },
+    discount: { type: Number, required: true, default: 0 },
     payment_type: { type: String, required: true },
     purchase_id: { type: String, required: true, default: "ไม่มี" },
     product: { type: Array, default: [] },

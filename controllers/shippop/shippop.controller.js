@@ -327,6 +327,7 @@ booking = async (req, res) => {
             payment_type: req.body.paymenttype,
             moneyreceive: req.body.moneyreceive,
             change: req.body.change,
+            discount: req.body.discount,
             purchase_id: String(resp.data.purchase_id),
             product: new_dataFull,
             employee: req.body.employee,
