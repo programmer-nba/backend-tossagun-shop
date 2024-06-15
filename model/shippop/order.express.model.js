@@ -13,6 +13,7 @@ const OrderExpressSchema = new mongoose.Schema({
     total_cod: { type: Number, required: false, default: 0 },
     total_cod_charge: { type: Number, required: false, default: 0 },
     total_cod_vat: { type: Number, required: false, default: 0 },
+    total_box: { type: Number, required: false, default: 0 },
     moneyreceive: { type: Number, required: true, default: 0 },
     change: { type: Number, required: true, default: 0 },
     payment_type: { type: String, required: true },

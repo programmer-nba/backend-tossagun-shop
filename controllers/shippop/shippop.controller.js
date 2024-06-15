@@ -10,6 +10,7 @@ const { Members } = require("../../model/user/member.model");
 const dayjs = require("dayjs");
 const commissions = require("../../function/commission");
 const { Commission } = require("../../model/pos/commission/commission.model");
+const { OrderBoxExpress } = require("../../model/shippop/order.box.model");
 
 priceList = async (req, res) => {
     try {
@@ -265,7 +266,9 @@ booking = async (req, res) => {
         }
 
         const obj = resp.data.data;
+        const new_dataFull = [];
         const new_data = [];
+        const new_dataBox = [];
         let cost_tg = 0;
         let cost = 0;
         let total = 0;
@@ -273,6 +276,17 @@ booking = async (req, res) => {
         let cod = 0;
         let cod_charge = 0;
         let cod_vat = 0;
+        let total_box = 0;
+
+        for (let item of req.body.box_detail) {
+            const b = {
+                ...item,
+            };
+            new_dataFull.push(b);
+            new_dataBox.push(b);
+            total += item.total;
+            total_box += item.total;
+        }
 
         Object.keys(obj).forEach(async (ob) => {
             const percel = req.body.product_detail[ob];
@@ -288,6 +302,7 @@ booking = async (req, res) => {
                 timestamp: dayjs(Date.now()).format(),
             };
             new_data.push(v);
+            new_dataFull.push(v);
             cost_tg += percel.cost_tg;
             cost += percel.cost;
             total += percel.total;
@@ -308,11 +323,12 @@ booking = async (req, res) => {
             total_cod: Number(cod.toFixed(2)),
             total_cod_charge: Number(cod_charge.toFixed(2)),
             total_cod_vat: Number(cod_vat.toFixed(2)),
+            total_box: Number(total_box.toFixed(2)),
             payment_type: req.body.paymenttype,
             moneyreceive: req.body.moneyreceive,
             change: req.body.change,
             purchase_id: String(resp.data.purchase_id),
-            product: new_data,
+            product: new_dataFull,
             employee: req.body.employee,
             status: [
                 { name: "ชำระเงิน", timestamp: dayjs(Date.now()).format() }
@@ -322,14 +338,21 @@ booking = async (req, res) => {
 
         const createOrder = await OrderExpress.create(o);
         const createOrderShippop = await shippopBooking.insertMany(new_data);
-        if (!createOrderShippop && !createOrder) {
+        const createOrderBox = await OrderBoxExpress.insertMany(new_dataBox);
+        if (!createOrderShippop && !createOrder && !createOrderBox) {
             console.log("ไม่สามารถสร้างข้อมูล booking ได้")
         }
 
         // ตัดเงิน
-        const findShop = await Shops.findByIdAndUpdate(req.body.shop_id, {
-            $inc: { shop_wallet: -cost }
-        }, { new: true })
+        const shop = await Shops.findOne({ _id: req.body.shop_id });
+        // const findShop = await Shops.findByIdAndUpdate(req.body.shop_id, {
+        // $inc: { shop_wallet: -cost }
+        // }, { new: true })
+
+        const wallet1 = shop.shop_wallet - cost;
+        const wallet2 = wallet1 + total_box;
+
+        const findShop = await Shops.findByIdAndUpdate(req.body.shop_id, { shop_wallet: wallet2 }, { useFindAndModify: false });
         if (!findShop) {
             return res.status(404).send({ status: false, message: "ไม่สามารถค้นหาร้านที่ท่านระบุได้" })
         }
@@ -338,24 +361,19 @@ booking = async (req, res) => {
         if (!getteammember) {
             return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
         } else {
-            // createOrder.save();
-            // createOrderShippop.save();
-
-            // await confirmOrder(String(resp.data.purchase_id), findShop._id);
 
             // บันทึกการเงิน
-            let profit = total - cost;
-            let before = findShop.shop_wallet + total - profit;
+            let profit = (total - cost) - total_box;
             let doto = {
-                shop_id: findShop._id,
+                shop_id: shop._id,
                 maker_id: req.body.maker_id,
                 orderid: createOrder._id,
                 name: `รายการขนส่งหมายเลขที่ ${invoice}`,
                 type: `เงินออก`,
                 category: 'Wallet',
                 amount: total,
-                before: before,
-                after: findShop.shop_wallet - profit,
+                before: shop.shop_wallet,
+                after: shop.shop_wallet - total,
                 timestamp: dayjs(Date.now()).format(""),
             }
 
@@ -365,15 +383,15 @@ booking = async (req, res) => {
             }
 
             let doto1 = {
-                shop_id: findShop._id,
+                shop_id: shop._id,
                 maker_id: req.body.maker_id,
                 orderid: createOrder._id,
                 name: `รายการขนส่งหมายเลขที่ ${invoice}`,
                 type: `เงินเข้า`,
                 category: 'Income',
                 amount: profit,
-                before: findShop.shop_wallet - profit,
-                after: findShop.shop_wallet,
+                before: shop.shop_wallet - total,
+                after: (shop.shop_wallet - total) + profit,
                 timestamp: dayjs(Date.now()).format(""),
             }
 
@@ -382,8 +400,26 @@ booking = async (req, res) => {
                 return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติเงินเข้าได้" })
             }
 
+            let doto2 = {
+                shop_id: shop._id,
+                maker_id: req.body.maker_id,
+                orderid: createOrder._id,
+                name: `รายการขายกล่องพัสดุหมายเลขที่ ${invoice}`,
+                type: `เงินเข้า`,
+                category: 'Income',
+                amount: total_box,
+                before: (shop.shop_wallet - total) + profit,
+                after: ((shop.shop_wallet - total) + profit) + total_box,
+                timestamp: dayjs(Date.now()).format(""),
+            }
+
+            const record2 = await WalletHistory.create(doto2)
+            if (!record2) {
+                return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติเงินเข้าได้" })
+            }
+
             // จ่ายค่าคอมมิชชั่น
-            const commissionData = await commissions.Commission(createOrder, total_platform, getteammember, 'Express', total);
+            const commissionData = await commissions.Commission(createOrder, total_platform, getteammember, 'Express', (total - total_box));
             const commission = new Commission(commissionData);
             if (!commission) {
                 return res.status(403).send({ status: false, message: 'ไม่สามารถจ่ายค่าคอมมิชชั่นได้' });
