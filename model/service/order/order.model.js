@@ -47,6 +47,7 @@ const OrderServiceSchema = new mongoose.Schema({
     discount: { type: Number, required: true },
     moneyreceive: { type: Number, required: true },
     change: { type: Number, required: true },
+    transport: { type: String, required: false, default: "" },
     tracking: { type: String, required: false, default: "" },
     employee: { type: String, required: false, default: "ไม่มี" },
     status: { type: Array, required: false, default: [] },
