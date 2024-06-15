@@ -16,7 +16,6 @@ router.get("/partner/category/all", category.getAll);
 router.put("/partner/:id", updateProduct.update);
 router.delete("/partner/:id", products.delete);
 
-
 router.post("/", authAdmin, createProduct.create);
 router.get("/", authAdmin, products.findAll);
 router.get("/:id", auth, products.findOne);
