@@ -6,7 +6,7 @@ module.exports.create = async (req, res) => {
 		if (percent) {
 			return res.status(401).send({ status: false, message: "รหัสเปอร์เซ็นต์ดังกล่าวมีอยู่ในระบบแล้ว" });
 		} else {
-			const new_percent = new PercentTopup(req.body);
+			const new_percent = new PercentApppremium(req.body);
 			if (!new_percent) {
 				return res.status(403).send({ status: false, message: "เพิ่มข้อมูลไม่สำเร็จ กรุณาทำรายอีกครั้ง" });
 			} else {
