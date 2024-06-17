@@ -18,31 +18,18 @@ const prefix = "/tossagun-shop";
 // Login
 app.use(prefix + "/login", require("./routes/login"));
 
-// Register
-app.use(prefix + "/register", require("./routes/register"));
-
 // Me
 app.use(prefix + "/me", require("./routes/me"));
 
 // Admin
 app.use(prefix + "/admin", require("./routes/user/admin"));
 
-// Landlord
-app.use(prefix + "/landlord", require("./routes/user/landlord"));
-app.use(prefix + "/landlord/invesment", require("./routes/landlord/shop"));
-
-// Invertor
-app.use(prefix + "/investor", require("./routes/user/invertor"));
-app.use(prefix + "/investor/invesment", require("./routes/invesment/slip"));
-
-// Outlay
-app.use(prefix + "/outlay", require("./routes/user/ouylay"));
-
 // Member (Platform)
 app.use(prefix + "/member", require("./routes/user/member"));
 
 // Shop
 app.use(prefix + "/partner", require("./routes/partner/shop"));
+app.use(prefix + "/partner/invest", require("./routes/partner/invest"));
 app.use(prefix + "/shop", require("./routes/pos/shop"));
 app.use(prefix + "/employee", require("./routes/user/employee"));
 

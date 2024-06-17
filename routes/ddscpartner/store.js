@@ -14,6 +14,7 @@ router.get("/getStoreById/:id", store.getStoreById);
 
 //ดึงข้อมูลสินค้า by shopid
 router.get("/getProductByShopId/:id", store.getProductByShopId);
+
 //ดึงข้อมูลสินค้า by id
 router.get("/getProductById/:id", store.getProductById);
 

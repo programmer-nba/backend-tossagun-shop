@@ -1,7 +1,5 @@
 const router = require("express").Router();
 const { Admins } = require("../model/user/admin.model");
-const { Investors } = require("../model/user/investor.model");
-const { Landlords } = require("../model/user/landlord.model");
 const { LoginHistorys } = require("../model/login.history.model");
 const { Employees } = require("../model/user/employee.model");
 const { Shops } = require("../model/pos/shop.model");

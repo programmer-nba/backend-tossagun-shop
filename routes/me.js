@@ -1,7 +1,5 @@
 const router = require("express").Router();
 const { Admins } = require("../model/user/admin.model");
-const { Investors } = require("../model/user/investor.model");
-const { Landlords } = require("../model/user/landlord.model");
 const { Employees } = require("../model/user/employee.model");
 const { Members } = require("../model/user/member.model");
 require("dotenv").config();
