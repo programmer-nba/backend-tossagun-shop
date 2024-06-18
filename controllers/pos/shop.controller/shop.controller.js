@@ -39,29 +39,37 @@ module.exports.create = async (req, res) => {
             return res.status(409).send({ status: false, message: "รหัสร้าน หรือ ชื่อร้านค้าซ้ำในระบบ", });
           } else {
             const shop_number = await GenerateNumber(req.body.shop_type);
-            const data = {
-              ...req.body,
-              shop_number: shop_number,
-              shop_status: true,
-            };
-            const new_shop = new Shops(data);
             const updateInvestShop = await Invests.findOne({
-              partner_id: req.body.shop_landlord_id,
+              invoice: req.body.shop_landlord_id,
             });
             updateInvestShop.status.push({
               status: "รายการสำเร็จ",
               timestamp: dayjs(Date.now()).format(""),
             });
-            let updateInvestMoney;
+            let updateInvestMoney = [];
+            let invest = [];
             for (let item of req.body.shop_investor) {
               updateInvestMoney = await Invests.findOne({
-                partner_id: item.invester_id,
+                invoice: item.invester_id,
               });
               updateInvestMoney.status.push({
                 status: "รายการสำเร็จ",
                 timestamp: dayjs(Date.now()).format(""),
               });
+              const e = {
+                invester_id: updateInvestMoney.partner_id,
+                investor_price: updateInvestMoney.money,
+              };
+              invest.push(e);
             }
+            const data = {
+              ...req.body,
+              shop_landlord_id: updateInvestShop.partner_id,
+              shop_investor: invest,
+              shop_number: shop_number,
+              shop_status: true,
+            };
+            const new_shop = new Shops(data);
             if (!new_shop) {
               return res.status(403).send({ status: false, message: 'ไม่สามารถร้านค้าได้' });
             } else {
@@ -75,7 +83,7 @@ module.exports.create = async (req, res) => {
       } else {
         const { error } = validate(req.body);
         if (error) {
-          fs.unlinkSync(req.file.path);
+          // fs.unlinkSync(req.file.path);
           return res
             .status(400)
             .send({ message: error.details[0].message, status: false });
@@ -85,18 +93,65 @@ module.exports.create = async (req, res) => {
             // shop_number: req.body.shop_number,
           });
           if (shop) {
-            fs.unlinkSync(req.file.path);
+            // fs.unlinkSync(req.file.path);
             return res.status(409).send({ status: false, message: "รหัสร้าน หรือ ชื่อร้านค้าซ้ำในระบบ", });
           } else {
-            const shop_number = await GenerateNumber(req.body.shop_type);
+            // const data = {
+            // ...req.body,
+            // shop_logo: req.file.filename,
+            // shop_number: shop_number,
+            // shop_status: true,
+            // };
+            // const new_shop = new Shops(data);
+            const updateInvestShop = await Invests.findOne({
+              invoice: req.body.shop_landlord_id,
+            });
+            updateInvestShop.status.push({
+              status: "รายการสำเร็จ",
+              timestamp: dayjs(Date.now()).format(""),
+            });
+            let updateInvestMoney = [];
+            let invest = [];
+            for (let item of req.body.shop_investor) {
+              updateInvestMoney = await Invests.findOne({
+                invoice: item.invester_id,
+              });
+              updateInvestMoney.status.push({
+                status: "รายการสำเร็จ",
+                timestamp: dayjs(Date.now()).format(""),
+              });
+              const e = {
+                invester_id: updateInvestMoney.partner_id,
+                investor_price: updateInvestMoney.money,
+              };
+              invest.push(e);
+            };
             const data = {
               ...req.body,
+              shop_landlord_id: updateInvestShop.partner_id,
+              shop_investor: invest,
+              shop_logo: req.file[0].filename,
               shop_number: shop_number,
-              shop_logo: req.file.filename,
               shop_status: true,
             };
             const new_shop = new Shops(data);
-            console.log(new_shop)
+            if (!new_shop) {
+              return res.status(403).send({ status: false, message: 'ไม่สามารถร้านค้าได้' });
+            } else {
+              new_shop.save();
+              updateInvestShop.save();
+              updateInvestMoney.save();
+              return res.status(201).send({ message: "เพิ่มร้านค้าสำเร็จ", status: true, data: new_shop });
+            }
+            // const shop_number = await GenerateNumber(req.body.shop_type);
+            // const data = {
+            // ...req.body,
+            // shop_number: shop_number,
+            // shop_logo: req.file.filename,
+            // shop_status: true,
+            // };
+            // const new_shop = new Shops(data);
+            // console.log(new_shop)
             // return res.status(201).send({ message: "เพิ่มร้านค้าสำเร็จ", status: true });
           }
         }
