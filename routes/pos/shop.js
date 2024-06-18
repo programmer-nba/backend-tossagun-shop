@@ -7,6 +7,7 @@ router.get("/landlord/:id", shops.findByLandlord);
 router.get("/investor/:id", shops.findByInvestor);
 router.get("/partner/:id", shops.findByPartnerId);
 
+router.post("/", authAdmin, shops.create);
 router.get("/", authAdmin, shops.findAll);
 router.get("/:id", auth, shops.findOne);
 

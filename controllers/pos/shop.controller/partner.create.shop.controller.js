@@ -79,31 +79,16 @@ module.exports.create = async (req, res) => {
 };
 
 async function GenerateNumber(shop_type) {
-    if (shop_type === 'One Stop Service') {
-        const pipelint = [
-            {
-                $match: { shop_type: shop_type },
-            },
-            {
-                $group: { _id: 0, count: { $sum: 1 } },
-            },
-        ];
-        const count = await Shops.aggregate(pipelint);
-        const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TGSS${countValue.toString().padStart(5, "0")}`;
-        return data;
-    } else if (shop_type === 'One Stop Shop') {
-        const pipelint = [
-            {
-                $match: { shop_type: shop_type },
-            },
-            {
-                $group: { _id: 0, count: { $sum: 1 } },
-            },
-        ];
-        const count = await Shops.aggregate(pipelint);
-        const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TGS${countValue.toString().padStart(5, "0")}`;
-        return data;
-    }
+    const pipelint = [
+        {
+            $match: { shop_type: shop_type },
+        },
+        {
+            $group: { _id: 0, count: { $sum: 1 } },
+        },
+    ];
+    const count = await Shops.aggregate(pipelint);
+    const countValue = count.length > 0 ? count[0].count + 1 : 1;
+    const data = `TGSS${countValue.toString().padStart(5, "0")}`;
+    return data;
 };

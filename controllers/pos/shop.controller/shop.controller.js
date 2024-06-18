@@ -1,4 +1,112 @@
 const { Shops, validate } = require("../../../model/pos/shop.model");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
+const { Invests } = require("../../../model/pos/invest.model");
+const dayjs = require("dayjs");
+
+const uploadFolder = path.join(__dirname, '../../../assets/shop');
+fs.mkdirSync(uploadFolder, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadFolder)
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+module.exports.create = async (req, res) => {
+  try {
+    let upload = multer({ storage: storage }).single("shop_logo");
+    upload(req, res, async function (err) {
+      console.log(req.file)
+      if (!req.file) {
+        const { error } = validate(req.body);
+        if (error) {
+          // fs.unlinkSync(req.file.path);
+          return res
+            .status(400)
+            .send({ message: error.details[0].message, status: false });
+        } else {
+          const shop = await Shops.findOne({
+            shop_name_second: req.body.shop_name_second,
+            // shop_number: req.body.shop_number,
+          });
+          if (shop) {
+            // fs.unlinkSync(req.file.path);
+            return res.status(409).send({ status: false, message: "รหัสร้าน หรือ ชื่อร้านค้าซ้ำในระบบ", });
+          } else {
+            const shop_number = await GenerateNumber(req.body.shop_type);
+            const data = {
+              ...req.body,
+              shop_number: shop_number,
+              shop_status: true,
+            };
+            const new_shop = new Shops(data);
+            const updateInvestShop = await Invests.findOne({
+              partner_id: req.body.shop_landlord_id,
+            });
+            updateInvestShop.status.push({
+              status: "รายการสำเร็จ",
+              timestamp: dayjs(Date.now()).format(""),
+            });
+            let updateInvestMoney;
+            for (let item of req.body.shop_investor) {
+              updateInvestMoney = await Invests.findOne({
+                partner_id: item.invester_id,
+              });
+              updateInvestMoney.status.push({
+                status: "รายการสำเร็จ",
+                timestamp: dayjs(Date.now()).format(""),
+              });
+            }
+            if (!new_shop) {
+              return res.status(403).send({ status: false, message: 'ไม่สามารถร้านค้าได้' });
+            } else {
+              new_shop.save();
+              updateInvestShop.save();
+              updateInvestMoney.save();
+              return res.status(201).send({ message: "เพิ่มร้านค้าสำเร็จ", status: true, data: new_shop });
+            }
+          }
+        }
+      } else {
+        const { error } = validate(req.body);
+        if (error) {
+          fs.unlinkSync(req.file.path);
+          return res
+            .status(400)
+            .send({ message: error.details[0].message, status: false });
+        } else {
+          const shop = await Shops.findOne({
+            shop_name_second: req.body.shop_name_second,
+            // shop_number: req.body.shop_number,
+          });
+          if (shop) {
+            fs.unlinkSync(req.file.path);
+            return res.status(409).send({ status: false, message: "รหัสร้าน หรือ ชื่อร้านค้าซ้ำในระบบ", });
+          } else {
+            const shop_number = await GenerateNumber(req.body.shop_type);
+            const data = {
+              ...req.body,
+              shop_number: shop_number,
+              shop_logo: req.file.filename,
+              shop_status: true,
+            };
+            const new_shop = new Shops(data);
+            console.log(new_shop)
+            // return res.status(201).send({ message: "เพิ่มร้านค้าสำเร็จ", status: true });
+          }
+        }
+      }
+    })
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+}
 
 exports.findAll = async (req, res, next) => {
   try {
@@ -141,4 +249,19 @@ exports.delete = async (req, res) => {
       status: false,
     });
   }
+};
+
+async function GenerateNumber(shop_type) {
+  const pipelint = [
+    {
+      $match: { shop_type: shop_type },
+    },
+    {
+      $group: { _id: 0, count: { $sum: 1 } },
+    },
+  ];
+  const count = await Shops.aggregate(pipelint);
+  const countValue = count.length > 0 ? count[0].count + 1 : 1;
+  const data = `TGS${countValue.toString().padStart(5, "0")}`;
+  return data;
 };

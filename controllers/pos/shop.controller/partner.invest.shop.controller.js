@@ -89,6 +89,48 @@ async function invoiceNumber() {
 	return combinedData;
 };
 
+module.exports.approve = async (req, res) => {
+	try {
+		const id = req.params.id;
+		const invest = await Invests.findById(id);
+		if (!invest) {
+			return res.status(403).send({ status: false, message: 'ไม่พบรายการดังกล่าว' });
+		} else {
+			const status = {
+				status: 'ผ่านการอนุมัติ',
+				timestamp: dayjs(Date.now()).format(""),
+			};
+			invest.status.push(status);
+			invest.save();
+			return res.status(200).send({ status: true, message: 'อนุมัติผู้ลงทุนสำเร็จ' })
+		}
+	} catch (error) {
+		console.error(error);
+		return res.status(500).send({ message: "Internal Server Error" });
+	}
+};
+
+module.exports.cancel = async (req, res) => {
+	try {
+		const id = req.params.id;
+		const invest = await Invests.findById(id);
+		if (!invest) {
+			return res.status(403).send({ status: false, message: 'ไม่พบรายการดังกล่าว' });
+		} else {
+			const status = {
+				status: 'ไม่ผ่านการอนุมัติ',
+				timestamp: dayjs(Date.now()).format(""),
+			};
+			invest.status.push(status);
+			invest.save();
+			return res.status(200).send({ status: true, message: 'ไม่อนุมัติผู้ลงทุนสำเร็จ' })
+		}
+	} catch (error) {
+		console.error(error);
+		return res.status(500).send({ message: "Internal Server Error" });
+	}
+}
+
 module.exports.getInvestAll = async (req, res) => {
 	try {
 		const invest = await Invests.find();
@@ -112,6 +154,26 @@ module.exports.getInvestById = async (req, res) => {
 		return res.status(500).send({ message: "Internal Server Error" });
 	}
 };
+
+module.exports.getInvestByPartnerId = async (req, res) => {
+	try {
+		const id = req.params.partnerid;
+		const pipelint = [
+			{
+				$match: { partner_id: id },
+			},
+		];
+		const invest = await Invests.aggregate(pipelint);
+		if (!invest) {
+			return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
+		} else {
+			return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: invest });
+		}
+	} catch (error) {
+		console.error(error);
+		return res.status(500).send({ message: "Internal Server Error" });
+	}
+}
 
 module.exports.getImage = async (req, res) => {
 	try {
