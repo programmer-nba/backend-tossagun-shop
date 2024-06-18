@@ -96,13 +96,18 @@ module.exports.approve = async (req, res) => {
 		if (!invest) {
 			return res.status(403).send({ status: false, message: 'ไม่พบรายการดังกล่าว' });
 		} else {
-			const status = {
-				status: 'ผ่านการอนุมัติ',
-				timestamp: dayjs(Date.now()).format(""),
-			};
-			invest.status.push(status);
-			invest.save();
-			return res.status(200).send({ status: true, message: 'อนุมัติผู้ลงทุนสำเร็จ' })
+			const e = invest.status[invest.status.length - 1].status;
+			if (e === 'รอตรวจสอบ') {
+				const status = {
+					status: 'ผ่านการอนุมัติ',
+					timestamp: dayjs(Date.now()).format(""),
+				};
+				invest.status.push(status);
+				invest.save();
+				return res.status(200).send({ status: true, message: 'อนุมัติผู้ลงทุนสำเร็จ' })
+			} else {
+				return res.status(403).send({ status: false, message: 'รายการดังกล่าวไม่สามารถอนุมัติได้ หรือรายการดังกล่าวผ่านการอนุมัติแล้ว' })
+			}
 		}
 	} catch (error) {
 		console.error(error);
@@ -117,13 +122,18 @@ module.exports.cancel = async (req, res) => {
 		if (!invest) {
 			return res.status(403).send({ status: false, message: 'ไม่พบรายการดังกล่าว' });
 		} else {
-			const status = {
-				status: 'ไม่ผ่านการอนุมัติ',
-				timestamp: dayjs(Date.now()).format(""),
-			};
-			invest.status.push(status);
-			invest.save();
-			return res.status(200).send({ status: true, message: 'ไม่อนุมัติผู้ลงทุนสำเร็จ' })
+			const e = invest.status[invest.status.length - 1].status;
+			if (e === 'รอตรวจสอบ') {
+				const status = {
+					status: 'ไม่ผ่านการอนุมัติ',
+					timestamp: dayjs(Date.now()).format(""),
+				};
+				invest.status.push(status);
+				invest.save();
+				return res.status(200).send({ status: true, message: 'ไม่อนุมัติผู้ลงทุนสำเร็จ' })
+			} else {
+				return res.status(403).send({ status: false, message: 'รายการดังกล่าวไม่สามารถยกเลิกได้ หรือรายการดังกล่าวผ่านการอนุมัติแล้ว' })
+			}
 		}
 	} catch (error) {
 		console.error(error);
