@@ -6,7 +6,7 @@ const changeStock = require("../../../controllers/pos/product.shop.controller/ch
 const auth = require("../../../lib/auth");
 const authAdmin = require("../../../lib/auth.admin");
 
-router.get("/shop-id/:id", auth, product.findByShopId);
+router.get("/shop/:shopid", auth, product.findByShopId);
 router.get("/barcode/:shop_id/:barcode", authAdmin, product.getByBarcode);
 router.post("/", auth, createProduct.create);
 router.post("/change-stock", auth, changeStock.createChangeStock);

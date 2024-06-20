@@ -12,7 +12,7 @@ const commissions = require("../../function/commission");
 const { Commission } = require("../../model/pos/commission/commission.model");
 const { OrderBoxExpress } = require("../../model/shippop/order.box.model");
 
-priceList = async (req, res) => {
+module.exports.priceList = async (req, res) => {
     try {
         const percent = await PercentCourier.find();
         const id = req.decoded.userid
@@ -236,7 +236,7 @@ priceList = async (req, res) => {
     }
 }
 
-booking = async (req, res) => {
+module.exports.booking = async (req, res) => {
     try {
         const invoice = await invoiceNumber();
         // console.log(invoice)
@@ -437,7 +437,7 @@ booking = async (req, res) => {
     }
 }
 
-cancelOrder = async (req, res) => {
+module.exports.cancelOrder = async (req, res) => {
     try {
         const { purchase_id, shop_id, maker_id } = req.body;
         if (!purchase_id || !shop_id) {
@@ -561,7 +561,7 @@ cancelOrder = async (req, res) => {
     }
 }
 
-tracking = async (req, res) => {
+module.exports.tracking = async (req, res) => {
     try {
         const tracking = req.params.id
         console.log(tracking)
@@ -591,7 +591,7 @@ tracking = async (req, res) => {
     }
 }
 
-labelHtml = async (req, res) => { //ใบแปะหน้าโดย purchase(html)
+module.exports.labelHtml = async (req, res) => { //ใบแปะหน้าโดย purchase(html)
     try {
         const { shop_id, purchase_id } = req.body;
         if (shop_id === undefined || purchase_id === undefined) {
@@ -765,7 +765,7 @@ async function confirmOrder(purchase_id, shop_id, res) {
 };
 
 
-order = async (req, res) => {
+module.exports.order = async (req, res) => {
     try {
         const { error } = validate(req.body);
         if (error) {
@@ -789,5 +789,5 @@ order = async (req, res) => {
     }
 }
 
-module.exports = { priceList, booking, cancelOrder, tracking, labelHtml }
+// module.exports = { priceList, booking, cancelOrder, tracking, labelHtml }
 

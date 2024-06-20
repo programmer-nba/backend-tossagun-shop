@@ -75,7 +75,7 @@ exports.delete = async (req, res) => {
 };
 
 exports.findByShopId = async (req, res) => {
-  const id = req.params.id;
+  const id = req.params.shopid;
   try {
     ProductShops.find({productShop_id: id})
       .then((data) => {
