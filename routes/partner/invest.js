@@ -10,7 +10,7 @@ router.post("/", invset.invset);
 // อนุมัติ
 router.post("/approve/:id", invset.approve);
 router.post("/cancel/:id", invset.cancel);
-
+ 
 router.get("/", invset.getInvestAll);
 router.get("/:id", invset.getInvestById);
 router.get("/partner/:partnerid", invset.getInvestByPartnerId);

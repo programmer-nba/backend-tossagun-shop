@@ -103,6 +103,7 @@ module.exports.approve = async (req, res) => {
 					timestamp: dayjs(Date.now()).format(""),
 				};
 				invest.status.push(status);
+				invest.employee = req.body.employee;
 				invest.save();
 				return res.status(200).send({ status: true, message: 'อนุมัติผู้ลงทุนสำเร็จ' })
 			} else {
