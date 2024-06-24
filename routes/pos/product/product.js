@@ -19,7 +19,7 @@ router.delete("/partner/:id", products.delete);
 router.post("/", authAdmin, createProduct.create);
 router.get("/", authAdmin, products.findAll);
 router.get("/:id", auth, products.findOne);
-router.get("/barcode/:barcode", auth, products.getByBarcode);
+router.get("/barcode/:barcode", products.getByBarcode);
 router.put("/:id", auth, updateProduct.update);
 router.get("/by/credit", auth, products.findByCredit);
 router.delete("/:id", authAdmin, products.delete);
