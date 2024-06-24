@@ -17,16 +17,16 @@ exports.findAll = async (req, res) => {
 };
 
 exports.getbydealer = async (req, res) => {
-  try{
+  try {
     const dealer = req.params.id;
-    const product = await ProductTG.find({productTG_dealer_id: dealer});
-    if(product){
-      return res.status(200).send({data: product, status: true});
-    }else{
-      return res.status(400).send({status: false, message: "ดึงข้อมูลไม่สำเร็จ"});
+    const product = await ProductTG.find({ productTG_dealer_id: dealer });
+    if (product) {
+      return res.status(200).send({ data: product, status: true });
+    } else {
+      return res.status(400).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
     }
 
-  }catch(error){
+  } catch (error) {
     return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 }
@@ -61,11 +61,9 @@ exports.getByBarcode = async (req, res) => {
     const barcode = req.params.barcode;
     const product = await ProductTG.findOne({ productTG_barcode: barcode });
     if (product) {
-      return res.status(200).send({ status: true, data: product });
+      return res.status(403).send({ status: false, message: "บาร์โค๊ดสินค้าดังกล่าวถูกใช้แล้ว", data: product });
     } else {
-      return res
-        .status(400)
-        .send({ status: false, message: "ไม่พบข้อมูลสินค้า" });
+      return res.status(200).send({ status: true, message: 'บาร์โค๊ดสินค้าดังกล่าวสามารถใช้งานได้' });
     }
   } catch (err) {
     return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
