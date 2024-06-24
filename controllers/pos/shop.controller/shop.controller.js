@@ -207,20 +207,26 @@ exports.findOne = async (req, res) => {
 exports.findByPartnerId = async (req, res) => {
   const id = req.params.partnerid;
   try {
-    Shops.find()
-      .then(async (data) => {
-        const shops = data.filter(
-          (el) => el.shop_partner_id === id
-        );
-        if (!shops)
-          return res.status(403).send({ status: false, message: "ดึงข้อมูลร้านไม่สำเร็จ" });
-        return res.status(200).send({ status: true, message: "ดึงข้อมูลร้านสำเร็จ", data: shops });
-      })
-      .catch((err) => {
-        return res.status(500).send({
-          message: err.message || "มีบางอย่างผิดพลาด",
-        });
-      });
+    let shop_partner = [];
+    const shop = await Shops.find();
+    if (!shop) {
+      return res.status(403).send({ status: false, message: 'ดึงข้อมูลร้านไม่สำเร็จ' });
+    } else {
+      const shops = shop.filter(
+        (el) => el.shop_partner_id === id
+      );
+      for (let item of shops) {
+        shop_partner.push(item)
+      }
+
+      const shop_land = shop.filter(
+        (el) => el.shop_landlord_id === id
+      );
+      for (let item1 of shop_land) {
+        shop_partner.push(item1)
+      }
+      return res.status(200).send({ status: true, message: "ดึงข้อมูลร้านสำเร็จ", data: shop_partner });
+    }
   } catch {
     return res.status(500).send({
       message: "มีบางอย่างผิดพลาด",
