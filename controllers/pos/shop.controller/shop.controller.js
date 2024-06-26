@@ -281,6 +281,33 @@ exports.findByInvestor = async (req, res) => {
   }
 };
 
+module.exports.update = async (req, res) => {
+  try {
+    const id = req.params.id;
+    Shops.findByIdAndUpdate(id, req.body, { useFindAndModify: false }).then((data) => {
+      if (!data) {
+        return res.status(404).send({
+          message: 'ไม่สามารถแก้ไขข้อมูลร้านค้าได้',
+          status: false,
+        });
+      } else {
+        return res.send({
+          message: 'แก้ไขข้อมูลร้านค้าสำเร็จ',
+          status: true,
+        });
+      }
+    }).catch((err) => {
+      return res.status(500).send({
+        message: err.response.data.message,
+        status: false,
+      });
+    })
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+}
+
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {

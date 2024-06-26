@@ -10,7 +10,7 @@ router.get("/partner/:id", shops.findByPartnerId);
 router.post("/", authAdmin, shops.create);
 router.get("/", authAdmin, shops.findAll);
 router.get("/:id", auth, shops.findOne);
-
+router.put("/:id", authAdmin, shops.update);
 router.delete("/:id", authAdmin, shops.delete);
 
 module.exports = router;
