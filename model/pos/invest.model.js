@@ -14,7 +14,7 @@ const InvestSchema = new mongoose.Schema({
 	},
 	size: {
 		type: String,
-		enum: ["S", "M", "L", "XL", "ไม่มี"],
+		enum: ["S", "M", "L", "XL", "ลงทุนอิสระ"],
 		required: true,
 	},
 	position: {
