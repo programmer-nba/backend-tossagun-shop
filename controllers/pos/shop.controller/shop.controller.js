@@ -5,6 +5,7 @@ const path = require("path");
 const { Invests } = require("../../../model/pos/invest.model");
 const dayjs = require("dayjs");
 const { WalletHistory } = require("../../../model/wallet/wallet.history.model");
+const { shippopBooking } = require("../../../model/shippop/shippop.order");
 
 const uploadFolder = path.join(__dirname, '../../../assets/shop');
 fs.mkdirSync(uploadFolder, { recursive: true });
@@ -376,3 +377,25 @@ exports.getWalletHistory = async (req, res) => {
     return res.status(500).send({ message: "Internal Server Error" });
   }
 };
+
+exports.getExpressAll = async (req, res) => {
+  try {
+    const id = req.params.shopid;
+    const pipelint = [
+      {
+        $match: {
+          $and: [
+            { shop_id: id }
+          ]
+        },
+      },
+    ];
+    const express = await shippopBooking.aggregate(pipelint);
+    if (!express)
+      return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
+    return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: express });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+}

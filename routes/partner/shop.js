@@ -18,5 +18,6 @@ router.put("/shop/employee/:id", employees.update);
 router.delete("/shop/employee/:id", employees.delete);
 
 router.get("/shop/wallet/:shopid", shops.getWalletHistory);
+router.get("/shop/express/:shopid", shops.getExpressAll);
 
 module.exports = router;
