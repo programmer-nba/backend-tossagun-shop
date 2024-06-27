@@ -355,7 +355,7 @@ async function GenerateNumber(shop_type) {
   return data;
 };
 
-module.exports.getWalletHistory = async (res, res) => {
+exports.getWalletHistory = async (req, res) => {
   try {
     const id = req.params.shopid;
     const pipelint = [
@@ -375,4 +375,4 @@ module.exports.getWalletHistory = async (res, res) => {
     console.log(error)
     return res.status(500).send({ message: "Internal Server Error" });
   }
-}
+};
