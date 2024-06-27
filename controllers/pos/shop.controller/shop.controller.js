@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { Invests } = require("../../../model/pos/invest.model");
 const dayjs = require("dayjs");
+const { WalletHistory } = require("../../../model/wallet/wallet.history.model");
 
 const uploadFolder = path.join(__dirname, '../../../assets/shop');
 fs.mkdirSync(uploadFolder, { recursive: true });
@@ -353,3 +354,25 @@ async function GenerateNumber(shop_type) {
   const data = `TGS${countValue.toString().padStart(5, "0")}`;
   return data;
 };
+
+module.exports.getWalletHistory = async (res, res) => {
+  try {
+    const id = req.params.shopid;
+    const pipelint = [
+      {
+        $match: {
+          $and: [
+            { shop_id: id }
+          ]
+        },
+      },
+    ];
+    const wallet = await WalletHistory.aggregate(pipelint);
+    if (!wallet)
+      return res.status(403).send({ status: false, message: "ดึงข้อมูลไม่สำเร็จ" });
+    return res.status(200).send({ status: true, message: "ดึงข้อมูลสำเร็จ", data: wallet });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+}
