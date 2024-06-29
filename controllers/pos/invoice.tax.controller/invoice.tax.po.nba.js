@@ -7,11 +7,11 @@ const {
 exports.create = async (req, res) => {
   try {
     PreOrderTossaguns.find().then((value) => {
-      console.log(value);
+      // console.log(value);
       if (!value) {
         res.status(404);
       } else {
-        console.log("ค่าที่รีเทอนกลับมา =>>>>>>> ", value);
+        // console.log("ค่าที่รีเทอนกลับมา =>>>>>>> ", value);
         const findDate = value.filter(
           (item) =>
             dayjs(item.ponba_timestamp[0].timestamp).format("MM/YYYY") ===

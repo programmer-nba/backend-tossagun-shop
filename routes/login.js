@@ -64,106 +64,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-const checkInvestor = async (req, res) => {
-  try {
-    let investor = await Investors.findOne({
-      investor_username: req.body.username,
-    });
-    if (!investor) {
-      await checkLandLord(req, res);
-    } else {
-      const validPasswordPartner = await bcrypt.compare(
-        req.body.password,
-        investor.investor_password
-      );
-      if (!validPasswordPartner)
-        // รหัสไม่ตรง
-        return res.status(401).send({
-          message: "รหัสผ่านไม่ถูกต้อง",
-          status: false,
-        });
-      // let isShop = await Shops.findOne({
-      //   shop_investor: investor._id,
-      //   shop_status: true,
-      // });
-      // if (!isShop)
-      //   return res.status(401).send({
-      //     message: "ไม่มีสาขาที่ออนไลน์อยู่",
-      //     status: false,
-      //   });
-      const token = investor.generateAuthToken();
-      const ResponesData = {
-        name: investor.investor_name,
-        username: investor.investor_iden,
-        phone: investor.investor_phone,
-        // shop_id: isShop._id,
-        // shop_number: isShop.shop_number,
-      };
-      return res.status(200).send({
-        token: token,
-        message: "เข้าสู่ระบบสำเร็จ",
-        result: ResponesData,
-        level: "investor",
-        status: true,
-      });
-    }
-  } catch (error) {
-    return res.status(500).send({ message: "Internal Server Error" });
-  }
-};
-
-const checkLandLord = async (req, res) => {
-  try {
-    let landlord = await Landlords.findOne({
-      landlord_username: req.body.username,
-    });
-    if (!landlord) {
-      // return res.status(401).send({
-      //   message: "username is not find",
-      //   status: false,
-      // });
-      await checkEmployee(req, res);
-    } else {
-      const validPasswordPartner = await bcrypt.compare(
-        req.body.password,
-        landlord.landlord_password
-      );
-      if (!validPasswordPartner)
-        // รหัสไม่ตรง
-        return res.status(401).send({
-          message: "รหัสผ่านไม่ถูกต้อง",
-          status: false,
-        });
-      // let isShop = await Shops.findOne({
-      //   shop_landlord_id: landlord._id,
-      //   shop_status: true,
-      // });
-      // if (!isShop)
-      //   return res.status(401).send({
-      //     message: "ไม่มีสาขาที่ออนไลน์อยู่",
-      //     status: false,
-      //   });
-      const token = landlord.generateAuthToken();
-      const ResponesData = {
-        name: landlord.landlord_name,
-        username: landlord.landlord_iden,
-        phone: landlord.landlord_phone,
-        // shop_id: isShop._id,
-        // shop_number: isShop.shop_number,
-      };
-      return res.status(200).send({
-        token: token,
-        message: "เข้าสู่ระบบสำเร็จ",
-        result: ResponesData,
-        level: "landlord",
-        status: true,
-      });
-    }
-  } catch (error) {
-    return res.status(500).send({ message: "Internal Server Error" });
-  }
-};
-
 const checkMember = async (req, res) => {
   try {
     let member = await Members.findOne({
@@ -253,6 +153,7 @@ const checkEmployee = async (req, res) => {
         position: isShop.shop_type,
         shop_id: isShop._id,
         shop_number: isShop.shop_number,
+        status: employee.employee_status,
       };
       const login_history = {
         name: employee.employee_firstname,

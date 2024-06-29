@@ -7,6 +7,7 @@ const PreOrderTossagunSchema = new mongoose.Schema({
   ponba_detail: {type: Array, required: false, default: []},
   ponba_total: {type: Number, required: true},
   ponba_status: {type: String, required: false, default: "รอตรวจสอบ"},
+  ponba_date: {type: Date, required: false, default: Date.now()},
   ponba_timestamp: {type: Array, required: false, default: []},
   ponba_emp: {type: String, required: false, default: "ไม่มี"},
 });
@@ -26,6 +27,7 @@ const validate = (data) => {
     ponba_total: Joi.number().required().label("กรุณากรอกยอดคำสั่งซื้อด้วย"),
     ponba_status: Joi.string().default("รอตรวจสอบ"),
     ponba_timestamp: Joi.array().default([]),
+    ponba_date: Joi.date().raw().default(Date.now()),
     ponba_emp: Joi.string().default("ไม่มี"),
   });
   return schema.validate(data);

@@ -2,15 +2,15 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 
 const OrderSchema = new mongoose.Schema({
-  ponba_id: {type: String, required: true},
-  dealer_id: {type: String, default: "ไม่มี"},
-  tracking_code: {type: String, default: "ไม่มี"},
-  tracking_number: {type: String, default: "ไม่มี"},
-  barcode: {type: String, required: true},
-  shop_id: {type: String, default: "ไม่มี"},
-  product_detail: {type: Array, required: true},
-  store_id: {type: String, default: "ไม่มี"},
-  status: {type: Array, required: true},
+  ponba_id: { type: String, required: true },
+  dealer_id: { type: String, default: "ไม่มี" },
+  tracking_code: { type: String, default: "ไม่มี" },
+  tracking_number: { type: String, default: "ไม่มี" },
+  barcode: { type: String, required: true },
+  shop_id: { type: String, default: "ไม่มี" },
+  product_detail: { type: Array, required: true },
+  store_id: { type: String, default: "ไม่มี" },
+  status: { type: Array, required: true },
 });
 
 const Orders = mongoose.model("order", OrderSchema);
@@ -31,4 +31,4 @@ const validate = (data) => {
   return schema.validate(data);
 };
 
-module.exports = {Orders, validate};
+module.exports = { Orders, validate };
