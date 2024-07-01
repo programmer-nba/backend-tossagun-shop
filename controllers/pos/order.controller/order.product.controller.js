@@ -1,11 +1,14 @@
 const dayjs = require("dayjs");
-const {
-  Orders,
+const { Orders,
   validate,
 } = require("../../../model/pos/order/order.product.model");
+const { PreOrderTossaguns } = require("../../../model/pos/preorder/preorder.tossagun.model");
 
 exports.create = async (req, res) => {
   try {
+    const preorder = await PreOrderTossaguns.findOne({ _id: req.body._id });
+    if (!preorder)
+      return res.status(401).send({ stauts: false, message: 'ไม่พบรายการสั่งซื้อสินค้า' })
     const product_tg = req.body.ponba_detail.filter((el) => el.productTG_store === 'tossagun');
     if (product_tg.length > 0) {
       const order_tg = {
@@ -56,6 +59,15 @@ exports.create = async (req, res) => {
     } else {
       console.log('ไม่มีรายการสินค้าของ Dealer')
     }
+
+    preorder.ponba_status = "ยืนยันการสั่งสินค้า";
+    const data_time = {
+      name: "ยืนยันการสั่งสินค้า",
+      timestamp: dayjs(Date.now()).format(),
+    };
+    preorder.ponba_timestamp.push(data_time);
+    preorder.save();
+
     return res.status(201).send({ message: "เพิ่มข้อมูลสำเร็จ", status: true });
   } catch (err) {
     console.log(err);
