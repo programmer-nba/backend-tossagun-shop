@@ -17,7 +17,7 @@ router.put("/partner/:id", updateProduct.update);
 router.delete("/partner/:id", products.delete);
 
 router.post("/", authAdmin, createProduct.create);
-router.get("/", authAdmin, products.findAll);
+router.get("/", auth, products.findAll);
 router.get("/:id", auth, products.findOne);
 router.get("/barcode/:barcode", products.getByBarcode);
 router.put("/:id", auth, updateProduct.update);

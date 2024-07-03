@@ -3,6 +3,9 @@ const { Orders,
   validate,
 } = require("../../../model/pos/order/order.product.model");
 const { PreOrderTossaguns } = require("../../../model/pos/preorder/preorder.tossagun.model");
+const { ProductShops } = require("../../../model/pos/product/product.shop.model");
+const { ProductTG } = require("../../../model/pos/product/product.tossagun.model");
+const { string } = require("joi");
 
 exports.create = async (req, res) => {
   try {
@@ -105,8 +108,8 @@ exports.findById = async (req, res) => {
 
 exports.findByShopId = async (req, res) => {
   try {
-    const shop_id = req.params.shop_id;
-    const order = await Orders.find({ shop_id: shop_id });
+    const id = req.params.shopid;
+    const order = await Orders.find({ shop_id: id });
     if (order) {
       return res.status(200).send({ status: true, data: order });
     } else {
@@ -120,8 +123,8 @@ exports.findByShopId = async (req, res) => {
 
 exports.findByDealerId = async (req, res) => {
   try {
-    const dealer_id = req.params.dealer_id;
-    const order = await Orders.find({ dealer_id: dealer_id });
+    const id = req.params.dealerid;
+    const order = await Orders.find({ dealer_id: id });
     if (order) {
       return res.status(200).send({ status: true, data: order });
     } else {
@@ -132,6 +135,7 @@ exports.findByDealerId = async (req, res) => {
     return res.status(500).send({ message: err._message });
   }
 };
+
 exports.findByPoNbaId = async (req, res) => {
   try {
     const ponba_id = req.params.ponba_id;
@@ -195,3 +199,144 @@ exports.update = async (req, res) => {
     return res.status(500).send({ message: err._message });
   }
 };
+
+module.exports.confrimOrder = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const order = await Orders.findOne({ _id: id });
+    if (!order)
+      return res.status(403).send({ status: false, message: 'ไม่พบรายการออเดอร์สินค้า' });
+
+    const status = {
+      name: 'ยืนยันการสั่งซื้อ',
+      timestamp: dayjs(Date.now()).format(),
+    };
+    order.status.push(status);
+    order.save();
+    return res.status(200).send({ status: true, message: 'ยืนยันรายการออเดอร์สำเร็จ' });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+module.exports.confrimTracking = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const order = await Orders.findOne({ _id: id });
+    if (!order)
+      return res.status(403).send({ status: false, message: 'ไม่พบรายการออเดอร์สินค้า' });
+
+    order.tracking_code = req.body.tracking_code;
+    order.tracking_number = req.body.tracking_number;
+    const status = {
+      name: 'ระหว่างจัดส่ง',
+      timestamp: dayjs(Date.now()).format(),
+    };
+    order.status.push(status);
+    order.save();
+    return res.status(200).send({ status: true, message: 'จัดส่งสินค้าสำเร็จ' });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+module.exports.ImportProduct = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const order = await Orders.findOne({ _id: id });
+    if (!order)
+      return res.status(403).send({ status: false, message: 'ไม่พบรายการออเดอร์สินค้า' });
+
+    order.product_detail.forEach(async (el) => {
+      let value = "";
+      let data = [];
+      const product_tg = await ProductTG.findOne({ _id: el._id });
+      if (product_tg.productTG_unit_ref.barcode === '') {
+        value = {
+          productShop_id: order.shop_id,
+          productShop_barcode: el.productTG_barcode,
+          productShop_stock: el.amount,
+          productShop_type: true,
+          productShop_pack_name: el.productTG_pack_name,
+          productShop_unit_ref: el.productTG_unit_ref,
+          productShop_tossagun_id: el._id,
+        };
+
+        const product_shop = await ProductShops.findOne({ productShop_tossagun_id: value.productShop_tossagun_id });
+        if (product_shop) {
+          product_shop.productShop_stock += value.productShop_stock;
+          product_shop.save()
+        } else {
+          const new_product_shop = new ProductShops(item);
+          new_product_shop.save();
+        }
+
+      } else {
+        value = {
+          productShop_id: order.shop_id,
+          productShop_barcode: el.productTG_barcode,
+          productShop_stock: el.amount,
+          productShop_type: true,
+          productShop_pack_name: el.productTG_pack_name,
+          productShop_unit_ref: el.productTG_unit_ref,
+          productShop_tossagun_id: el._id,
+        };
+
+        data.push(value);
+
+        let i = 0;
+        while (i < data.length) {
+          if (data[i].productShop_unit_ref.barcode !== '') {
+            const resp = await productRef(data[i].productShop_unit_ref.barcode, data, order.shop_id);
+            data.push(resp)
+          }
+          i++;
+        };
+
+        for (let item of data) {
+          const product_shop = await ProductShops.findOne({ productShop_tossagun_id: item.productShop_tossagun_id });
+          if (product_shop) {
+            product_shop.productShop_stock += item.productShop_stock;
+            product_shop.save()
+          } else {
+            const new_product_shop = new ProductShops(item);
+            new_product_shop.save();
+          }
+        }
+      };
+    });
+
+    const new_status = {
+      name: "นำเข้าสต๊อก",
+      timestamp: dayjs(Date.now()).format(),
+    };
+
+    order.status.push(new_status);
+    order.save();
+
+    return res.status(200).send({ status: true, message: 'นำสินเค้าเข้าสต๊อกร้านสำเร็จ' })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+async function productRef(barcode, data, shopid) {
+  let value = "";
+  const productUnit = await ProductTG.findOne({ productTG_barcode: barcode });
+  if (productUnit) {
+    value = {
+      productShop_id: shopid,
+      productShop_barcode: productUnit.productTG_barcode,
+      productShop_stock: 0,
+      productShop_type: true,
+      productShop_pack_name: productUnit.productTG_pack_name,
+      productShop_unit_ref: productUnit.productTG_unit_ref,
+      productShop_tossagun_id: productUnit._id.toString(),
+    };
+  }
+  return value;
+};
+

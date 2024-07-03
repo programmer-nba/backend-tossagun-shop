@@ -105,7 +105,8 @@ exports.findByCredit = async (req, res) => {
   try {
     const product = await ProductTG.find();
     const products = product.filter(
-      (el) => el.productTG_status_type === 'เครดิต'
+      (el) => el.productTG_status_type === 'เครดิต' &&
+        el.productTG_status === true
     );
     if (products) {
       return res.status(200).send({ status: true, data: products });
