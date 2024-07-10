@@ -13,10 +13,10 @@ exports.create = async (req, res) => {
   try {
     const shop = await Shops.findOne({ _id: req.body.poshop_shop_id });
     if (!shop) {
-      return res.status(403).send({ message: "ไม่พบข้อมูลร้านค้า" });
+      return res.status(403).send({ status: false, message: "ไม่พบข้อมูลร้านค้า" });
     } else {
       if (shop.shop_status === false) {
-        return res.status(403).send({ message: "ร้านค้าดังกล่าวไม่สามารถทำรายการได้" });
+        return res.status(403).send({ status: false, message: "ร้านค้าดังกล่าวไม่สามารถทำรายการได้" });
       }
 
       // เช็คสต๊อกสินค้า
@@ -28,33 +28,55 @@ exports.create = async (req, res) => {
           await updateProduct(product_shop, item);
           // console.log(res)
           product_shop = await ProductShops.findOne({ productShop_barcode: item.productShop_barcode });
-          const position = req.body.poshop_detail.findIndex((el) => el.productShop_barcode === product_shop.productShop_barcode);
+          await delay(1000);
+        }
+      };
+
+      // ตรวจสอบสินค้าอีกครั้ง
+      for (let item of req.body.poshop_detail) {
+        const product = await ProductShops.findOne({ productShop_barcode: item.productShop_barcode });
+        if (product.productShop_stock < item.amount) {
+          return res.status(401).send({ status: false, message: "จำนวนสินค้าไม่เพียงพอ" });
+        } else {
+          const position = req.body.poshop_detail.findIndex((el) => el.productShop_barcode === product.productShop_barcode);
           const new_data = {
             ...item,
-            productShop_stock: product_shop.productShop_stock
+            productShop_stock: product.productShop_stock
           };
           req.body.poshop_detail.splice(position, 1, new_data);
-          await delay(1000);
         }
       };
 
       const order = [];
 
-      let cost_tg = 0;
-      let cost = 0;
-      let total = 0;
-      let profit_tg = 0;
-      let profit_shop = 0;
+      // คำนวนยอด
+      for (let item of req.body.poshop_detail) {
+        const v = {
+          ...item,
+          cost_tg: (item.product_ref.productTG_cost_tg.cost_tg * item.amount),
+          cost: (item.product_ref.productTG_cost.cost_net * item.amount),
+          total: (item.product_ref.productTG_price.price * item.amount),
+          profit_tg: (item.product_ref.productTG_profit * item.amount),
+          profit_shop: (item.product_ref.productTG_profit_shop * item.amount),
+        };
+        order.push(v);
+      };
 
-      Object.keys(req.body.poshop_detail).forEach(async (ob) => {
-        const item = req.body.poshop_detail[ob];
-        order.push(item);
-        cost_tg += item.product_ref.productTG_cost_tg.cost_tg;
-        cost += item.product_ref.productTG_cost.cost_net;
-        total += item.product_ref.productTG_price.price;
-        profit_tg += item.product_ref.productTG_profit;
-        profit_shop += item.product_ref.productTG_profit_shop;
-      });
+      // Object.keys(req.body.poshop_detail).forEach(async (ob) => {
+      // const item = req.body.poshop_detail[ob];
+      // order.push(item);
+      // cost_tg += item.product_ref.productTG_cost_tg.cost_tg;
+      // cost += item.product_ref.productTG_cost.cost_net;
+      // total += item.product_ref.productTG_price.price;
+      // profit_tg += item.product_ref.productTG_profit;
+      // profit_shop += item.product_ref.productTG_profit_shop;
+      // });
+
+      const cost_tg = order.reduce((sum, el) => sum + el.cost_tg, 0);
+      const cost = order.reduce((sum, el) => sum + el.cost, 0);
+      const total = order.reduce((sum, el) => sum + el.total, 0);
+      const profit_tg = order.reduce((sum, el) => sum + el.profit_tg, 0);
+      const profit_shop = order.reduce((sum, el) => sum + el.profit_shop, 0);
 
       const profit = total - cost;
 
@@ -72,6 +94,8 @@ exports.create = async (req, res) => {
         poshop_cost: Number(cost.toFixed(2)),
         poshop_total: Number(total.toFixed(2)),
         poshop_total_platform: Number(total_platform.toFixed(2)),
+        poshop_profit_tg: Number(profit_tg.toFixed(2)),
+        poshop_profit_shop: Number(profit_shop.toFixed(2)),
         poshop_discount: req.body.poshop_discount,
         poshop_moneyreceive: req.body.poshop_moneyreceive,
         poshop_change: req.body.poshop_change,
@@ -91,6 +115,14 @@ exports.create = async (req, res) => {
       const getteammember = await GetTeamMember(req.body.poshop_platform);
       if (!getteammember)
         return res.status(403).send({ message: "ไม่พบข้อมมูลลูกค้า" });
+
+      // ตัดสต๊อกสินค้า
+      for (let item of req.body.poshop_detail) {
+        const product = await ProductShops.findOne({ productShop_barcode: item.productShop_barcode });
+        product.productShop_stock -= item.amount;
+        product.save();
+        await delay(1000);
+      };
 
       new_poshop.save();
 

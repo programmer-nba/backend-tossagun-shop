@@ -17,6 +17,8 @@ const PreOrderShopSchema = new mongoose.Schema({
   poshop_total: { type: Number, required: false, default: 0 },
   // poshop_total_price: { type: Number, required: true },
   poshop_total_platform: { type: Number, required: false, default: 0 },
+  poshop_profit_tg: { type: Number, required: false, default: 0 },
+  poshop_profit_shop: { type: Number, required: false, default: 0 },
   poshop_discount: { type: Number, required: true },
   poshop_moneyreceive: { type: Number, required: true },
   poshop_change: { type: Number, required: true },
