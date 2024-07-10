@@ -261,6 +261,7 @@ module.exports.ImportProduct = async (req, res) => {
           productShop_type: true,
           productShop_pack_name: el.productTG_pack_name,
           productShop_unit_ref: el.productTG_unit_ref,
+          productShop_ref: el.productTG_ref,
           productShop_tossagun_id: el._id,
         };
 
@@ -281,6 +282,7 @@ module.exports.ImportProduct = async (req, res) => {
           productShop_type: true,
           productShop_pack_name: el.productTG_pack_name,
           productShop_unit_ref: el.productTG_unit_ref,
+          productShop_ref: el.productTG_ref,
           productShop_tossagun_id: el._id,
         };
 
@@ -334,6 +336,7 @@ async function productRef(barcode, data, shopid) {
       productShop_type: true,
       productShop_pack_name: productUnit.productTG_pack_name,
       productShop_unit_ref: productUnit.productTG_unit_ref,
+      productShop_ref: productUnit.productTG_ref,
       productShop_tossagun_id: productUnit._id.toString(),
     };
   }

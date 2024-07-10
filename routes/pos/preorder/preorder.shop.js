@@ -9,6 +9,7 @@ router.post("/commission", poshop.createCommission);
 
 router.get("/", auth, poshop.findAll);
 router.get("/:id", auth, poshop.findOne);
+// router.get("/shop/:shopid", auth, poshop.findByShopId);
 
 router.delete("/:id", auth, poshop.delete);
 router.put("/:id", auth, poshop.update);

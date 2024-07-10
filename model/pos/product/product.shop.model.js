@@ -17,6 +17,7 @@ const ProductShopSchema = new mongoose.Schema({
     barcode: { type: String, required: false, default: "" },
     amount: { type: Number, required: false, default: 0 },
   },
+  productShop_ref: { type: String, required: false, default: "" },
   productShop_tossagun_id: { type: String, required: false, default: "ไม่มี" },
   productShop_vat_status: { type: Boolean, required: false, default: true },
   productShop_emp: { type: String, required: false, default: "ไม่มี" },
@@ -39,6 +40,7 @@ const validate = (data) => {
       barcode: Joi.string().default(""),
       amount: Joi.number().default(0),
     }),
+    productShop_ref: Joi.string().default(""),
     productShop_vat_status: Joi.boolean().default(true), // เพิม
     productShop_emp: Joi.string().default("ไม่มี"),
   });

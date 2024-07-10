@@ -67,11 +67,11 @@ async function GiveCommission(packageData) {
 			orderid: packageData.invoice,
 			type: "เงินเข้า",
 			category: 'Commission',
-			amount: packageData.platform.owner,
-			vat: vat_owner.vat,
-			total: vat_owner.amount,
-			before: member.commission,
-			after: new_money_owner,
+			amount: Number(packageData.platform.owner.toFixed(2)),
+			vat: Number(vat_owner.vat.toFixed(2)),
+			total: Number(vat_owner.amount.toFixed(2)),
+			before: Number(member.commission.toFixed(2)),
+			after: Number(new_money_owner.toFixed(2)),
 			name: `คอมมิชชั่นจากใบเสร็จเลขที่ ${packageData.invoice} (หักภาษี ณ ที่จ่ายเรียบร้อยแล้ว)`,
 			timestamp: dayjs(Date.now()).format(),
 		};
@@ -94,12 +94,12 @@ async function GiveCommission(packageData) {
 				orderid: packageData.invoice,
 				type: "เงินเข้า",
 				category: 'Commission',
-				amount: packageData.platform.lv1,
+				amount: Number(packageData.platform.lv1.toFixed(2)),
 				name: `ส่วนแบ่งค่าคอมมิชชั่นจากผู้ใช้ที่เราแนะนำ ใบเสร็จเลขที่ ${packageData.invoice} (หักภาษี ณ ที่จ่ายเรียบร้อยแล้ว)`,
-				vat: vat_lv1.vat,
-				total: vat_lv1.amount,
-				before: mem_lv1.commission,
-				after: new_money_lv1,
+				vat: Number(vat_lv1.vat.toFixed(2)),
+				total: Number(vat_lv1.amount.toFixed(2)),
+				before: Number(mem_lv1.commission.toFixed(2)),
+				after: Number(new_money_lv1.toFixed(2)),
 				timestamp: dayjs(Date.now()).format(),
 			};
 			await WalletHistory.create(lv1_history);
@@ -124,12 +124,12 @@ async function GiveCommission(packageData) {
 				orderid: packageData.invoice,
 				type: "เงินเข้า",
 				category: 'Commission',
-				amount: packageData.platform.lv2,
+				amount: Number(packageData.platform.lv2.toFixed(2)),
 				detail: `ส่วนแบ่งค่าคอมมิชชั่นจากผู้ใช้ที่เราแนะนำ ใบเสร็จเลขที่ ${packageData.invoice} (หักภาษี ณ ที่จ่ายเรียบร้อยแล้ว)`,
-				vat: vat_lv2.vat,
-				total: vat_lv2.amount,
-				before: mem_lv2.commission,
-				after: new_money_lv2,
+				vat: Number(vat_lv2.vat.toFixed(2)),
+				total: Number(vat_lv2.amount.toFixed(2)),
+				before: Number(mem_lv2.commission.toFixed(2)),
+				after: Number(new_money_lv2.toFixed(2)),
 				timestamp: dayjs(Date.now()).format(),
 			};
 			await WalletHistory.create(lv2_history);
@@ -154,12 +154,12 @@ async function GiveCommission(packageData) {
 				orderid: packageData.invoice,
 				type: "เงินเข้า",
 				category: 'Commission',
-				amount: packageData.platform.lv3,
+				amount: Number(packageData.platform.lv3.toFixed(2)),
 				detail: `ส่วนแบ่งค่าคอมมิชชั่นจากผู้ใช้ที่เราแนะนำ ใบเสร็จเลขที่ ${packageData.invoice} (หักภาษี ณ ที่จ่ายเรียบร้อยแล้ว)`,
-				vat: vat_lv3.vat,
-				total: vat_lv3.amount,
-				before: mem_lv3.commission,
-				after: new_allsale_lv3,
+				vat: Number(vat_lv3.vat.toFixed(2)),
+				total: Number(vat_lv3.amount.toFixed(2)),
+				before: Number(mem_lv3.commission.toFixed(2)),
+				after: Number(new_allsale_lv3.toFixed(2)),
 				timestamp: dayjs(Date.now()).format(),
 			};
 			await WalletHistory.create(lv3_history);
@@ -169,10 +169,10 @@ async function GiveCommission(packageData) {
 
 		//บันทึกข้อมูลลง money saving เพื่อสะสม
 		const saving = {
-			allsale: packageData.central.allsale,
-			central: packageData.central.central,
-			profit: profit,
-			emp_bonus: packageData.emp_bonus,
+			allsale: Number(packageData.central.allsale.toFixed(2)),
+			central: Number(packageData.central.central.toFixed(2)),
+			profit: Number(profit.toFixed(2)),
+			emp_bonus: Number(packageData.emp_bonus.toFixed(2)),
 			timestamp: dayjs(Date.now()).format(),
 		};
 		await MoneySavings.create(saving);
@@ -236,9 +236,9 @@ async function Commission(order, total_platfrom, getteammember, codeOrder, happy
 					name: TeamMemberData.name,
 					address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
 					tel: TeamMemberData.tel,
-					commission_amount: owner,
-					vat3percent: ownervat,
-					remainding_commission: ownercommission,
+					commission_amount: Number(owner.toFixed(2)),
+					vat3percent: Number(ownervat.toFixed(2)),
+					remainding_commission: Number(ownercommission.toFixed(2)),
 				};
 			} else if (TeamMemberData.level == "1") {
 				integratedData = {
@@ -247,9 +247,9 @@ async function Commission(order, total_platfrom, getteammember, codeOrder, happy
 					name: TeamMemberData.name,
 					address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
 					tel: TeamMemberData.tel,
-					commission_amount: lv1,
-					vat3percent: lv1vat,
-					remainding_commission: lv1commission,
+					commission_amount: Number(lv1.toFixed(2)),
+					vat3percent: Number(lv1vat.toFixed(2)),
+					remainding_commission: Number(lv1commission.toFixed(2)),
 				};
 			} else if (TeamMemberData.level == "2") {
 				integratedData = {
@@ -258,9 +258,9 @@ async function Commission(order, total_platfrom, getteammember, codeOrder, happy
 					name: TeamMemberData.name,
 					address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
 					tel: TeamMemberData.tel,
-					commission_amount: lv2,
-					vat3percent: lv2vat,
-					remainding_commission: lv2commission,
+					commission_amount: Number(lv2.toFixed(2)),
+					vat3percent: Number(lv2vat.toFixed(2)),
+					remainding_commission: Number(lv2commission.toFixed(2)),
 				};
 			} else if (TeamMemberData.level == "3") {
 				integratedData = {
@@ -269,9 +269,9 @@ async function Commission(order, total_platfrom, getteammember, codeOrder, happy
 					name: TeamMemberData.name,
 					address: `${TeamMemberData.address.address}${TeamMemberData.address.subdistrict}${TeamMemberData.address.district}${TeamMemberData.address.province}${TeamMemberData.address.postcode}`,
 					tel: TeamMemberData.tel,
-					commission_amount: lv3,
-					vat3percent: lv2vat,
-					remainding_commission: lv3commission,
+					commission_amount: Number(lv3.toFixed(2)),
+					vat3percent: Number(lv2vat.toFixed(2)),
+					remainding_commission: Number(lv3commission.toFixed(2)),
 				};
 			}
 
@@ -282,9 +282,9 @@ async function Commission(order, total_platfrom, getteammember, codeOrder, happy
 
 		const commissionData = {
 			data: storeData,
-			platformcommission: platfromcommission,
-			bonus: bonus,
-			allSale: allSale,
+			platform: Number(platfromcommission.toFixed(2)),
+			bonus: Number(bonus.toFixed(2)),
+			allSale: Number(allSale.toFixed(2)),
 			orderid: order._id,
 			code: codeOrder,
 		};

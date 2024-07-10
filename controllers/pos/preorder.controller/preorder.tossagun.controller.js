@@ -1,7 +1,4 @@
-const {
-  PreOrderTossaguns,
-  validate,
-} = require("../../../model/pos/preorder/preorder.tossagun.model");
+const { PreOrderTossaguns, validate, } = require("../../../model/pos/preorder/preorder.tossagun.model");
 const { Shops } = require("../../../model/pos/shop.model");
 
 exports.create = async (req, res) => {
