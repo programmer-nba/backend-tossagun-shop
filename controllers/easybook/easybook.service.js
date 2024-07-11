@@ -207,7 +207,7 @@ exports.getseat = async(req,res)=>{
             return "ไม่สามารถเชื่อมต่อกับ api ได้"
         });
         if(response?.status == 200){
-            return res.status(200).send({status:true, data:response?.data?.BusSeatPlan})
+            return res.status(200).send({status:true, data:response.data})
         }else{
             return res.status(500).send({status:false, message:response})
         }
@@ -300,14 +300,15 @@ exports.getbooking = async(req,res)=>{
         const response = await axios(api).catch((err) => {
             return "ไม่สามารถเชื่อมต่อกับ api ได้"
         });
+        console.log(response.data)
         if(response?.status == 200){
             console.log(response?.data)
             const data2 ={
-                ReserveReference: response?.data?.ReserveReference,
-                FinalAmount: response?.data?.FinalAmount,
+                ReserveReference: response.data.ReserveReference,
+                FinalAmount: response.data.FinalAmount,
                 SendOrderSummaryEmail: true
             }
-            console.log(data2)
+            // console.log(data2)
             const api2 ={
                 url: `${process.env.EASYBOOK_URL}/api/bus/agent/bookseat?sign=${process.env.EASYBOOK_SIGNATURE}&language=th`,
                 method: 'post',
@@ -322,7 +323,7 @@ exports.getbooking = async(req,res)=>{
             });
 
             if(responsecon?.status == 200){
-                return res.status(200).send({status:true, data:responsecon?.data?.OrderNumber})
+                return res.status(200).send({status:true, data:responsecon.data})
             }else{
                 return res.status(500).send({status:false, message:responsecon})
             }
