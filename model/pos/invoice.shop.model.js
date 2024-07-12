@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 
 const InvoiceShopSchema = new mongoose.Schema({
-  invoice_ref: {type: String, required: true},
-  invoice_shop_id: {type: String, required: true},
-  invoice_detail: {type: Array, required: false, default: []},
-  invoice_status: {type: String, required: false, default: "ค้างชำระ"},
-  invoice_image: {type: String, required: false, default: ""},
-  invoice_timestamp: {type: Date, required: false, default: Date.now()},
-  invoice_emp: {type: String, required: false, default: "ไม่มี"},
-  invoice_poshop: {type: Array, required: false, default: []},
+  invoice_ref: { type: String, required: true },
+  invoice_shop_id: { type: String, required: true },
+  invoice_detail: { type: Array, required: false, default: [] }, // สินค้าที่ขาย
+  invoice_status: { type: String, required: false, default: "ค้างชำระ" },
+  invoice_image: { type: String, required: false, default: "" },
+  invoice_timestamp: { type: Date, required: false, default: Date.now() },
+  invoice_emp: { type: String, required: false, default: "ไม่มี" },
+  invoice_poshop: { type: Array, required: false, default: [] }, // บิลที่ออก
   // --------------------------------
 });
 
@@ -29,4 +29,4 @@ const validate = (data) => {
   return schema.validate(data);
 };
 
-module.exports = {InvoiceShop, validate};
+module.exports = { InvoiceShop, validate };

@@ -62,16 +62,6 @@ exports.create = async (req, res) => {
         order.push(v);
       };
 
-      // Object.keys(req.body.poshop_detail).forEach(async (ob) => {
-      // const item = req.body.poshop_detail[ob];
-      // order.push(item);
-      // cost_tg += item.product_ref.productTG_cost_tg.cost_tg;
-      // cost += item.product_ref.productTG_cost.cost_net;
-      // total += item.product_ref.productTG_price.price;
-      // profit_tg += item.product_ref.productTG_profit;
-      // profit_shop += item.product_ref.productTG_profit_shop;
-      // });
-
       const cost_tg = order.reduce((sum, el) => sum + el.cost_tg, 0);
       const cost = order.reduce((sum, el) => sum + el.cost, 0);
       const total = order.reduce((sum, el) => sum + el.total, 0);
@@ -102,6 +92,7 @@ exports.create = async (req, res) => {
         poshop_cutoff: false,
         poshop_timestamp: dayjs(Date.now()).format(),
         poshop_employee: req.body.poshop_employee,
+        poshop_identity: true,
         poshop_status: [
           { name: "ชำระเงิน", timestamp: dayjs(Date.now()).format() }
         ],
@@ -221,20 +212,17 @@ async function GetTeamMember(tel) {
 async function updateProduct(product, item) {
   let data = [];
   let product_shop = product;
-  // let status = false;
   const execute = async () => {
     // while (!status) {
-    while (product_shop.productShop_stock < item.amount) {
+    while ((product_shop.productShop_stock < item.amount)) {
       if (data.length > 0) {
         let index = 0;
         while (index < data.length) {
           const res = await adjusProduct(data[index]);
           if (!res.status) {
-            // const pro = data.find((el) => el.productShop_barcode === res.data.productShop_barcode);
-            // if (pro) {
-            // console.log('test')
+            // if (res.code === 401) {
+            // data = [];
             // status = true;
-            // break;
             // } else {
             data.push(res.data)
             // }
@@ -260,26 +248,27 @@ async function updateProduct(product, item) {
 };
 
 async function adjusProduct(data) {
-  // if (data.productShop_ref !== '') {
-  const product_ref = await ProductShops.findOne({ productShop_barcode: data.productShop_ref });
-  if (product_ref.productShop_stock !== 0) {
-    product_ref.productShop_stock -= 1;
-    const product = await ProductShops.findOne({ productShop_barcode: product_ref.productShop_unit_ref.barcode });
-    product.productShop_stock += product_ref.productShop_unit_ref.amount;
-    product_ref.save();
-    product.save();
-    await delay(1000);
-    console.log('ปรับสต๊อกสำเร็จ')
-    return { status: true, data: product };
+  if (data.productShop_ref !== '') {
+    const product_ref = await ProductShops.findOne({ productShop_barcode: data.productShop_ref });
+    if (product_ref.productShop_stock !== 0) {
+      product_ref.productShop_stock -= 1;
+      const product = await ProductShops.findOne({ productShop_barcode: product_ref.productShop_unit_ref.barcode });
+      product.productShop_stock += product_ref.productShop_unit_ref.amount;
+      product_ref.save();
+      product.save();
+      await delay(1000);
+      console.log('ปรับสต๊อกสำเร็จ')
+      return { status: true, data: product, code: 200 };
+    } else {
+      await delay(1000);
+      console.log('ปรับสต๊อกไม่สำเร็จ')
+      return { status: false, data: product_ref, code: 401 };
+    }
   } else {
     await delay(1000);
     console.log('สินค้าไม่เพียงพอต่อการปรับสต๊อก')
-    return { status: false, data: product_ref };
+    return { status: false, data: data, code: 403 };
   }
-  // } else {
-  // await delay(1000);
-  // return { status: false, data: data };
-  // }
 };
 
 function delay(ms) {
@@ -350,7 +339,6 @@ exports.delete = async (req, res) => {
   try {
     PreOrderShop.findByIdAndDelete(id, { useFindAndModify: false })
       .then((data) => {
-        console.log(data);
         if (!data) {
           res.status(404).send({
             message: `ไม่สามารถลบรายการนี้ได้`,
@@ -378,7 +366,6 @@ exports.delete = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  console.log(req.body);
   try {
     if (!req.body) {
       return res.status(400).send({
@@ -388,7 +375,6 @@ exports.update = async (req, res) => {
     const id = req.params.id;
     PreOrderShop.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
       .then((data) => {
-        console.log(data);
         if (!data) {
           res.status(404).send({
             message: `ไม่สามารถเเก้ไขข้อมูลนี้ได้`,

@@ -58,11 +58,13 @@ app.use(prefix + "/brand", require("./routes/pos/brand"));
 app.use(prefix + "/preorder/tossagun", require("./routes/pos/preorder/preorder.tossagun"));
 app.use(prefix + "/preorder/shop", require("./routes/pos/preorder/preorder.shop"));
 app.use(prefix + "/preorder/shop-full", require("./routes/pos/preorder/preorder.shop.full"));
+// ปิดยอดการขายสินค้า
+app.use(prefix + "/invoice/shop", require("./routes/pos/invoice.shop"));
+app.use(prefix + "/callback", require("./routes/pos/callback")); // ตัดยอดร้านทั้งหมดทีเดียว
 app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 
 // Order Product
 app.use(prefix + "/order/product", require("./routes/pos/order/order.product"));
-app.use(prefix + "/callback", require("./routes/pos/callback"));
 
 // Image
 app.use(prefix + "/delete/image", require("./routes/image/delete"));
@@ -87,6 +89,8 @@ app.use(prefix + "/commission", require("./routes/commission/commission"));
 
 // Wallet
 app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
+// Credit
+app.use(prefix + "/credit", require("./routes/wallet/credit"));
 
 // AOC สายการบิน
 app.use(prefix + "/aoc", require("./routes/AOC/order.aoc"));

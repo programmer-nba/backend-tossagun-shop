@@ -26,6 +26,7 @@ const PreOrderShopSchema = new mongoose.Schema({
   poshop_timestamp: { type: Date, required: false, default: Date.now() },
   poshop_employee: { type: String, required: false, default: "ไม่มี" },
   poshop_status: { type: Array, required: false, default: [] },
+  poshop_identity: { type: Boolean, required: false, default: true },
   // poshop_ref_short_id: { type: String, required: false, default: "ไม่มี" }, // อ้างอิงกรณียกเลิกบิล
 });
 
@@ -46,6 +47,7 @@ const validate = (data) => {
     poshop_detail: Joi.array().default([]),
     poshop_employee: Joi.string().required().label("ไม่พบพนักงานทำรายการ"),
     poshop_status: Joi.array().default([]),
+    poshop_identity: Joi.boolean().default(true),
   });
   return schema.validate(data);
 };
