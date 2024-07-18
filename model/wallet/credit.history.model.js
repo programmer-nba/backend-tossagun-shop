@@ -15,7 +15,7 @@ const CreditSchema = new mongoose.Schema({
     before: { type: Number, required: true },
     after: { type: Number, required: true },
     timestamp: { type: Date, required: false, default: Date.now() }
-}, { timestamps: true })
+});
 
 const CreditHistory = mongoose.model("credit_history", CreditSchema)
 

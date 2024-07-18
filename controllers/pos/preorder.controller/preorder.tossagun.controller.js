@@ -1,4 +1,4 @@
-const { PreOrderTossaguns, validate, } = require("../../../model/pos/preorder/preorder.tossagun.model");
+const { PreOrderTossaguns, validate } = require("../../../model/pos/preorder/preorder.tossagun.model");
 const { Shops } = require("../../../model/pos/shop.model");
 
 exports.create = async (req, res) => {
@@ -77,6 +77,7 @@ exports.findAll = async (req, res) => {
     return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };
+
 exports.findOne = async (req, res) => {
   const id = req.params.id;
   try {
@@ -152,6 +153,7 @@ exports.delete = async (req, res) => {
     });
   }
 };
+
 exports.update = async (req, res) => {
   try {
     if (!req.body) {
@@ -180,6 +182,15 @@ exports.update = async (req, res) => {
         });
       });
   } catch (error) {
+    return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
+  }
+};
+
+module.exports.createRef = async (req, res) => {
+  try {
+    
+  } catch (error) {
+    console.log(error)
     return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
   }
 };

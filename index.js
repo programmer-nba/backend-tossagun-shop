@@ -60,6 +60,7 @@ app.use(prefix + "/preorder/shop", require("./routes/pos/preorder/preorder.shop"
 app.use(prefix + "/preorder/shop-full", require("./routes/pos/preorder/preorder.shop.full"));
 // ปิดยอดการขายสินค้า
 app.use(prefix + "/invoice/shop", require("./routes/pos/invoice.shop"));
+app.use(prefix + "/percent/invest", require("./routes/pos/percent.invest"));
 app.use(prefix + "/callback", require("./routes/pos/callback")); // ตัดยอดร้านทั้งหมดทีเดียว
 app.use(prefix + "/invoice-tax", require("./routes/pos/preorder/invoice.tax"));
 
