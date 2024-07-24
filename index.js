@@ -18,9 +18,6 @@ const prefix = "/tossagun-shop";
 // Login
 app.use(prefix + "/login", require("./routes/login"));
 
-// Token
-app.use(prefix + "/token", require("./routes/token"));
-
 // Register
 app.use(prefix + "/register", require("./routes/register"));
 
@@ -32,6 +29,9 @@ app.use(prefix + "/admin", require("./routes/user/admin"));
 
 // Member (Platform)
 app.use(prefix + "/member", require("./routes/user/member"));
+
+// Customer
+app.use(prefix + "/customer", require("./routes/user/customer"));
 
 // Shop
 app.use(prefix + "/partner/user", require("./routes/partner/partner"));

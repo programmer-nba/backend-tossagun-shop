@@ -10,7 +10,6 @@ const bcrypt = require("bcrypt");
 const Joi = require("joi");
 require("dotenv").config();
 const getmac = require("getmac");
-const { default: axios } = require("axios");
 const MACAddress = getmac.default();
 
 const validate = (data) => {
