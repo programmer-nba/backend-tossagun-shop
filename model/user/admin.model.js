@@ -14,17 +14,17 @@ const complexityOptions = {
 };
 
 const AdminSchema = new mongoose.Schema({
-  admin_name: {type: String, required: true}, //ชื่อ
-  admin_username: {type: String, required: true}, //เลขบัตร
-  admin_password: {type: String, required: true}, //รหัส
-  admin_position: {type: String, required: true},
-  admin_date_start: {type: Date, required: false, default: Date.now()}, //เริ่ม
-  admin_emp: {type: String, required: false, default: "ไม่มี"},
+  admin_name: { type: String, required: true }, //ชื่อ
+  admin_username: { type: String, required: true }, //เลขบัตร
+  admin_password: { type: String, required: true }, //รหัส
+  admin_position: { type: String, required: true },
+  admin_date_start: { type: Date, required: false, default: Date.now() }, //เริ่ม
+  admin_emp: { type: String, required: false, default: "ไม่มี" },
 });
 
 AdminSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
-    {_id: this._id, name: this.admin_name, row: "admin"},
+    { _id: this._id, name: this.admin_name, row: "admin" },
     process.env.JWTPRIVATEKEY,
     {
       expiresIn: "6h",
@@ -39,9 +39,7 @@ const validate = (data) => {
   const schema = Joi.object({
     admin_name: Joi.string().required().label("กรุณากรอกชื่อผู้ใช้ด้วย"),
     admin_username: Joi.string().required().label("กรุณากรอกเลขบัตรผู้ใช้ด้วย"),
-    admin_password: passwordComplexity(complexityOptions)
-      .required()
-      .label("admin_password"),
+    admin_password: passwordComplexity(complexityOptions).required().label("admin_password"),
     admin_position: Joi.string().required().label("กรุณากรอกเลเวลผู้ใช้ด้วย"),
     admin_date_start: Joi.date().raw().default(Date.now()),
     admin_emp: Joi.string().default("ไม่มี"),
@@ -49,4 +47,4 @@ const validate = (data) => {
   return schema.validate(data);
 };
 
-module.exports = {Admins, validate};
+module.exports = { Admins, validate };
