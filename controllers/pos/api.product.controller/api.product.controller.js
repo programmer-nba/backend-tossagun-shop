@@ -49,6 +49,59 @@ module.exports.getProductAll = async (req, res) => {
 	}
 };
 
+module.exports.getProduct = async (req, res) => {
+	try {
+
+		// Develment
+		const api_image = `https://api.tossaguns.com/tossagun-shop/product/api_product/image/`
+		// Production
+		// const api_image = `https://api.tossaguns.com/tossagun-shop/product/api_product/image/`
+
+		const pipeline = [
+			// {
+				// $lookup: {
+					// from: "category",
+					// localField: "productTG_category",
+					// foreignField: "_id",
+					// as: "category_info"
+				// }
+			// },
+			{
+				$project: {
+					_id: 0,
+					createdAt: 1,
+					product_id: `$_id`,
+					product_image: { $concat: [api_image, `$productTG_image`] },
+					product_name: '$productTG_name',
+					product_category: '$productTG_category',
+					product_detail: {
+						$replaceAll: {
+							input: {
+								$replaceAll: {
+									input: "$productTG_detail",
+									find: "<p>",
+									replacement: ""
+								}
+							},
+							find: "</p>",
+							replacement: ""
+						}
+					},
+					product_barcode: '$productTG_barcode',
+					product_price: '$productTG_cost_tg.cost_tg',
+					product_package: '$productTG_pack_name',
+				}
+			}
+		];
+
+		const result = await ProductTG.aggregate(pipeline);
+		return res.status(200).send(result);
+	} catch (error) {
+		console.log(error)
+		return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
+	}
+};
+
 module.exports.getProductImage = async (req, res) => {
 	try {
 		const imgname = req.params.imagename;

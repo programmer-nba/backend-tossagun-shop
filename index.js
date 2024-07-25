@@ -47,6 +47,7 @@ app.use(prefix + "/platform", require("./routes/user/platform"));
 app.use(prefix + "/contract", require("./routes/contract/index"));
 
 // API Product กลาง
+app.use(prefix + "/token", require("./routes/token.js"));
 app.use(prefix + "/product/api_product" , require("./routes/pos/product/api.product"));
 
 // Product
