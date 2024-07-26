@@ -12,7 +12,7 @@ async function GetContractPDPA() {
 }
 
 async function GetContractCondition() {
-  const code = 'TSGWEB'
+  const code = 'RENT-WEB'
   const config = {
     method: 'GET',
     headers: {},
