@@ -58,14 +58,20 @@ module.exports.getProduct = async (req, res) => {
 		// const api_image = `https://api.tossaguns.com/tossagun-shop/product/api_product/image/`
 
 		const pipeline = [
-			// {
-				// $lookup: {
-					// from: "category",
-					// localField: "productTG_category",
-					// foreignField: "_id",
-					// as: "category_info"
-				// }
-			// },
+			{
+				$lookup: {
+					from: "category",
+					localField: "productTG_category",
+					foreignField: "_id",
+					as: "category_info"
+				}
+			},
+			{
+				$unwind: {
+					path: "$category_info", // Unwind the `category_info` array to a single document
+					preserveNullAndEmptyArrays: true // Keep documents that do not have a matching `category_info`
+				}
+			},
 			{
 				$project: {
 					_id: 0,
@@ -73,7 +79,7 @@ module.exports.getProduct = async (req, res) => {
 					product_id: `$_id`,
 					product_image: { $concat: [api_image, `$productTG_image`] },
 					product_name: '$productTG_name',
-					product_category: '$productTG_category',
+					product_category: '$category_info.name',
 					product_detail: {
 						$replaceAll: {
 							input: {
