@@ -50,19 +50,19 @@ getAll = async (req, res) => {
     try {
         const booking = await shippopBooking.find();
         // let order = [];
-        for (let i = 0; i < booking.length; i++) {
-            if (booking[i].order_status !== 'cancel') {
-                const value = {
-                    tracking_code: booking[i].tracking_code,
-                };
-                const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking/`, value, {
-                    headers: { "Accept-Encoding": "gzip,deflate,compress" },
-                });
-                booking[i].order_status = resp.data.order_status;
-                booking[i].save();
-            }
-        }
-        console.log('อัพเดทสถานะสำเร็จ')
+        // for (let i = 0; i < booking.length; i++) {
+            // if (booking[i].order_status !== 'cancel') {
+                // const value = {
+                    // tracking_code: booking[i].tracking_code,
+                // };
+                // const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking/`, value, {
+                    // headers: { "Accept-Encoding": "gzip,deflate,compress" },
+                // });
+                // booking[i].order_status = resp.data.order_status;
+                // booking[i].save();
+            // }
+        // }
+        // console.log('อัพเดทสถานะสำเร็จ')
         // if (booking[i].order_status === 'cancel') {
         // console.log('ออเดอร์นี้ถูกยกเลิก')
         // } else if (booking[i].order_status === 'complete') {
