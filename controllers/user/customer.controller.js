@@ -2,6 +2,33 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Customers, validate } = require("../../model/user/customer.model");
 
+module.exports.getToken = async (req, res) => {
+	try {
+		const token = jwt.sign(
+			{ row: 'Partner', id: req.body.customer_id },
+			process.env.JWTPARTNERKEY
+		);
+		return res.status(200).send({ status: true, token: token });
+	} catch (error) {
+		console.log(error)
+		return res.status(500).send({ message: "Internal Server Error" })
+	}
+};
+
+module.exports.getWalletCus = async (req, res) => {
+	const { decoded } = req;
+	try {
+		const id = decoded.id;
+		const customer = await Customers.findOne({ _id: id });
+		if (!customer)
+			return res.status(407).send({ status: false, message: "ไม่พบข้อมูลลูกค้า" });
+		return res.status(201).send({ status: true, message: 'เช็คยอดเงินคงเหลือ', wallet: customer.cus_wallet })
+	} catch (error) {
+		console.log(error)
+		return res.status(500).send({ message: "Internal Server Error" })
+	}
+};
+
 module.exports.create = async (req, res) => {
 	try {
 		const { error } = validate(req.body);

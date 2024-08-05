@@ -46,10 +46,6 @@ app.use(prefix + "/platform", require("./routes/user/platform"));
 // Contract สัญญา
 app.use(prefix + "/contract", require("./routes/contract/index"));
 
-// API Product กลาง
-app.use(prefix + "/token", require("./routes/token.js"));
-app.use(prefix + "/product/api_product" , require("./routes/pos/product/api.product"));
-
 // Product
 app.use(prefix + "/product/tossagun", require("./routes/pos/product/product"));
 // app.use(prefix + "/product/tossagun", require("./routes/pos/product/product.tossagun"));
@@ -126,6 +122,10 @@ app.use(prefix + "/store", require("./routes/ddscpartner/store"));
 
 // Easybook
 app.use(prefix + "/easybook", require("./routes/easybook/easybook.service.route"))
+
+// API Product กลาง
+app.use(prefix + "/api/api_product" , require("./routes/api/api.product"));
+app.use(prefix + "/api/api_express", require("./routes/api/api.express"));
 
 const port = process.env.PORT || 9999;
 

@@ -19,10 +19,13 @@ const CustomerSchema = new mongoose.Schema({
 	cus_lastname: { type: String, required: true }, // นามสกุล
 	cus_username: { type: String, required: true }, //เลขบัตร
 	cus_password: { type: String, required: true }, //รหัส
+	cus_address: { type: String, required: true }, // ที่อยู่
 	cus_phone: { type: String, required: true },
 	cus_date_start: { type: Date, required: false, default: Date.now() }, //เริ่ม
 	cus_status: { type: Boolean, required: false, detail: true },
+	cus_wallet: { type: Number, require: false, default: 0 },
 	cus_token: { type: String, required: false, default: "" },
+	cus_function: { type: Array, required: false, default: [] },
 	cus_emp: { type: String, required: false, default: "ไม่มี" },
 });
 
@@ -37,8 +40,10 @@ const validate = (data) => {
 		cus_username: Joi.string().required().label("กรุณากรอกชื่อผู้ใช้"),
 		cus_password: passwordComplexity(complexityOptions).required().label("กรุณากรอกรหัสผู้ใช้"),
 		cus_date_start: Joi.date().raw().default(Date.now()),
+		cus_wallet: Joi.number().required().default(0),
 		cus_status: Joi.boolean().default(true),
 		cus_token: Joi.string().default(""),
+		cus_function: Joi.array().default([]), // เปิดการใช้งานบริการ
 		cus_emp: Joi.string().default("ไม่มี"),
 	});
 	return schema.validate(data);

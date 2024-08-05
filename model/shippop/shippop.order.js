@@ -26,6 +26,7 @@ const shippopSchema = new Schema({
         total: { type: Number, required: false },
         net: { type: Number, required: false },
         profit: { type: Number, required: false },
+        profit_cus: { type: Number, required: false },
         total_platform: { type: Number, required: false },
         price_remote_area: { type: Number, required: false },
         type_payment: { type: String, required: false },
