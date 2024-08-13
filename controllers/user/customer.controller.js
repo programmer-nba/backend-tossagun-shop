@@ -16,14 +16,24 @@ module.exports.getToken = async (req, res) => {
 };
 
 module.exports.getWalletCus = async (req, res) => {
-	const { decoded } = req;
+	// const { decoded } = req;
 	try {
-		const id = decoded.id;
-		console.log(id)
-		const customer = await Customers.findOne({ _id: id });
-		if (!customer)
-			return res.status(407).send({ status: false, message: "ไม่พบข้อมูลลูกค้า" });
-		return res.status(201).send({ status: true, message: 'เช็คยอดเงินคงเหลือ', wallet: customer.cus_wallet })
+		let token = req.body.auth_token
+		jwt.verify(token, process.env.JWTPARTNERKEY, async (err, decoded) => {
+			req.user = decoded;
+			if (err)
+				return res.status(408).json({
+					success: false,
+					message: "หมดเวลาใช้งานแล้ว",
+					logout: true,
+					description: "Request Timeout",
+				});
+			const id = decoded.id;
+			const customer = await Customers.findOne({ _id: id });
+			if (!customer)
+				return res.status(407).send({ status: false, message: "ไม่พบข้อมูลลูกค้า" });
+			return res.status(201).send({ status: true, message: 'เช็คยอดเงินคงเหลือ', wallet: customer.cus_wallet })
+		})
 	} catch (error) {
 		console.log(error)
 		return res.status(500).send({ message: "Internal Server Error" })
