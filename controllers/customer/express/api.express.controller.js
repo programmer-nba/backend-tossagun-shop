@@ -4,10 +4,21 @@ const { Customers } = require("../../../model/user/customer.model");
 module.exports.getPrice = async (req, res) => {
 	try {
 		const id = req.decoded.id;
+		const weight = req.body.parcel.weight
+		const declared_value = req.body.declared_value
+		const formData = req.body
+		const cod_amount = req.body.cod_amount
+		const shop = req.body.shop_number
+
+		let data = [];
+		data.push({
+			...req.body,
+			"showall": 1,
+		});
 
 		const value = {
 			api_key: process.env.SHIPPOP_API_KEY,
-			data: req.body,
+			data: data,
 		};
 
 		const resp = await axios.post(`${process.env.SHIPPOP_URL}/pricelist/`, value, {
@@ -33,63 +44,29 @@ module.exports.getPrice = async (req, res) => {
 
 		for (const ob of Object.keys(obj)) {
 			if (obj[ob].available) {
-				if (req.body[0].cod_amount > 0 && obj[ob].courier_code == 'ECP') {
-					console.log('Encountered "ECP". Skipping this iteration.');
-					continue; // ข้ามไปยังรอบถัดไป
-				}
-				// ทำการประมวลผลเฉพาะเมื่อ obj[ob].available เป็น true
+				console.log(obj[ob])
 				let v = null;
-				let p = percent.find(element => element.courier_code == obj[ob].courier_code);
-				// console.log(p)
+				let p = findCustomer.cus_function.find((el) => el.name === 'express');
+				console.log(p)
 				if (!p) {
-					console.log(`ยังไม่มี courier name: ${obj[ob].courier_code}`);
+					console.log(`ยังไม่ได้กำหนดเปอร์เซนต์ให้ลูกค้า`);
 				}
-				// คำนวนต้นทุนของร้านค้า
-				let cost_tg = Number(obj[ob].price);
-				let cost = Math.ceil(((cost_tg * p.customer) / 100) + cost_tg);
-				// let price = Math.ceil(((cost * p.profit_shop) / 100) + cost);
-				let profit = cost - cost_tg;
-				let vat = (profit * 7) / 107;
-				let total_platform = Number((profit - vat) * (p.platform / 100));
+
+				const cost = Number(obj[ob].price);
+				const price = Math.ceil(((cost * p.percent) / 100) + cost);
 
 				v = {
 					...obj[ob],
-					price_remote_area: 0,
-					cost_tg: Number(cost_tg.toFixed(2)),
-					cost: Number(cost.toFixed(2)),
-					profit_tg: Number(profit.toFixed(2)),
-					total_platform: Number(total_platform.toFixed(2)),
-					cod_amount: req.body[0].cod_amount,
-					fee_cod: obj[ob].price_cod,
-					vat_cod: obj[ob].price_cod_vat,
-					price: 0,
-					declared_value: 0,
-					total: 0,
-					status: null
+					price: price
 				};
-
-				let total = 0;
-				if (obj[ob].hasOwnProperty("price_remote_area")) { //เช็คว่ามี ราคา พื้นที่ห่างไกลหรือเปล่า
-					total += obj[ob].price_remote_area
-					v.price_remote_area = obj[ob].price_remote_area
-				}
-
-				v.total = v.price + total;
-
-				if (findCustomer.shop_wallet < v.total) {
-					v.status = "เงินในกระเป๋าของท่านไม่เพียงพอ"
-				} else {
-					v.status = "พร้อมใช้งาน"
-				}
-
 				new_data.push(v);
 			} else {
 				// ทำสิ่งที่คุณต้องการทำเมื่อ obj[ob].available เป็น false
-				// console.log(`Skipping ${obj[ob].courier_code} because available is false`);
+				console.log(`Skipping ${obj[ob].courier_code} because available is false`);
 			}
 		}
 
-		return res.status(200).send({ status: true, origin_data: req.body, new: new_data });
+		return res.status(200).send({ status: true, origin_data: req.body, data: new_data });
 	} catch (error) {
 		console.log(error)
 		return res.status(500).send({ message: "Internal Server Error" })

@@ -32,6 +32,8 @@ app.use(prefix + "/member", require("./routes/user/member"));
 
 // Customer
 app.use(prefix + "/customer", require("./routes/user/customer"));
+app.use(prefix + "/customer/me", require("./routes/user/customer.me"));
+app.use(prefix + "/customer/login", require("./routes/customer.login"));
 
 // Shop
 app.use(prefix + "/partner/user", require("./routes/partner/partner"));

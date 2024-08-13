@@ -35,27 +35,40 @@ module.exports.create = async (req, res) => {
 		if (error)
 			return res.status(400).send({ message: error.details[0].message, status: false });
 
-		const customer = await Customers.findOne({
+		const firstname = await Customers.findOne({
 			cus_firstname: req.body.cus_firstname,
-			cus_lastname: req.body.cus_lastname,
-			cus_username: req.body.cus_username,
 		});
-		if (customer) {
+		const lastname = await Customers.findOne({
+			cus_lastname: req.body.cus_lastname,
+		});
+		const username = await Customers.findOne({
+			cus_username: req.body.cus_username
+		});
+
+		if (firstname || lastname || username) {
 			return res.status(409).send({ status: false, message: "มีชื่อผู้ใช้งานนี้ในระบบเเล้ว" });
 		} else {
 			const salt = await bcrypt.genSalt(Number(process.env.SALT));
 			const hashPassword = await bcrypt.hash(req.body.cus_password, salt);
 
+			const new_cus = new Customers({
+				...req.body,
+				cus_password: hashPassword,
+			});
+
 			const token = jwt.sign(
-				{ row: 'Partner' },
+				{ row: 'Partner', id: new_cus._id },
 				process.env.JWTPARTNERKEY
 			);
 
-			await new Customers({
-				...req.body,
-				cus_password: hashPassword,
-				cus_token: token
-			}).save();
+			new_cus.cus_token = token;
+			new_cus.save();
+
+			// await new Customers({
+			// ...req.body,
+			// cus_password: hashPassword,
+			// cus_token: token
+			// }).save();
 			return res.status(201).send({ message: "สร้างข้อมูลสำเร็จ", status: true });
 		}
 	} catch (error) {
@@ -94,6 +107,19 @@ module.exports.updateCustomer = async (req, res) => {
 module.exports.getCustomerAll = async (req, res) => {
 	try {
 		const customer = await Customers.find();
+		if (!customer)
+			return res.status(401).send({ message: "ดึงข้อมูลไม่าำเร็จ", status: false });
+		return res.status(200).send({ message: "ดึงข้อมูลสำเร็จ", status: true, data: customer });
+	} catch (error) {
+		console.log(error)
+		return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
+	}
+};
+
+module.exports.getCustomerById = async (req, res) => {
+	try {
+		const id = req.params.id;
+		const customer = await Customers.findOne({ _id: id });
 		if (!customer)
 			return res.status(401).send({ message: "ดึงข้อมูลไม่าำเร็จ", status: false });
 		return res.status(200).send({ message: "ดึงข้อมูลสำเร็จ", status: true, data: customer });
