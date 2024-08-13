@@ -19,6 +19,7 @@ module.exports.getWalletCus = async (req, res) => {
 	const { decoded } = req;
 	try {
 		const id = decoded.id;
+		console.log(id)
 		const customer = await Customers.findOne({ _id: id });
 		if (!customer)
 			return res.status(407).send({ status: false, message: "ไม่พบข้อมูลลูกค้า" });
