@@ -7,7 +7,7 @@ router.post("/token", customer.getToken);
 
 // User
 router.post("/", customer.create);
-router.post("/wallet", authCustomer, customer.getWalletCus);
+router.post("/wallet", customer.getWalletCus);
 router.get("/", customer.getCustomerAll);
 router.get("/:id", customer.getCustomerById);
 router.put("/:id", customer.updateCustomer);
