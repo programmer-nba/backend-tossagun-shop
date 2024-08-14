@@ -128,6 +128,7 @@ app.use(prefix + "/easybook", require("./routes/easybook/easybook.service.route"
 // API Product กลาง
 app.use(prefix + "/api/api_product" , require("./routes/api/api.product"));
 app.use(prefix + "/api/api_express", require("./routes/api/api.express"));
+app.use(prefix + "/api/api_service", require("./routes/api/api.service"));
 
 const port = process.env.PORT || 9999;
 
