@@ -6,5 +6,6 @@ const authPartner = require("../../lib/auth.partner");
 router.get("/image/:imagename", artwork.getProductImage);
 
 router.post("/artwork", authPartner, artwork.getProductArtwork);
+router.post("/artwork/price/:id", authPartner, artwork.getProductPrice);
 
 module.exports = router;
