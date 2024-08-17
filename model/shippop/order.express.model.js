@@ -6,6 +6,11 @@ const OrderExpressSchema = new mongoose.Schema({
     platform: { type: String, required: false, default: '' },
     invoice: { type: String, required: false, default: "ไม่มี" },
     invoice_full: { type: String, default: "ไม่มี" },
+    type: {
+        type: String,
+        enum: ["Express", "Drop Off"],
+        required: false, default: "Express",
+    },
     total: { type: Number, required: false },
     total_cost: { type: Number, required: false, default: 0 },
     total_cost_tg: { type: Number, required: false, default: 0 },

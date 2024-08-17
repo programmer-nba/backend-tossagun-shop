@@ -5,5 +5,6 @@ const authCustomer = require("../../lib/auth.customer")
 router.post("/price", authCustomer, express.getPrice);
 router.post("/booking", authCustomer, express.booking);
 router.post("/label", authCustomer, express.labelHtml);
+router.post("/dropoff", authCustomer, express.dropoff);
 
 module.exports = router;

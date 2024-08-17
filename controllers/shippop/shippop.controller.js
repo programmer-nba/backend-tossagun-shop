@@ -316,6 +316,7 @@ module.exports.booking = async (req, res) => {
             shop_id: req.body.shop_id,
             platform: req.body.platform,
             invoice: invoice,
+            type: "Express",
             total: Number(total.toFixed(2)),
             total_cost: Number(cost.toFixed(2)),
             total_cost_tg: Number(cost_tg.toFixed(2)),
@@ -564,7 +565,6 @@ module.exports.cancelOrder = async (req, res) => {
 module.exports.tracking = async (req, res) => {
     try {
         const tracking = req.params.id
-        console.log(tracking)
         const valueCheck = {
             api_key: process.env.SHIPPOP_API_KEY,
             tracking_code: tracking,
@@ -589,7 +589,7 @@ module.exports.tracking = async (req, res) => {
             .status(500)
             .send({ status: false, message: err.message })
     }
-}
+};
 
 module.exports.labelHtml = async (req, res) => { //ใบแปะหน้าโดย purchase(html)
     try {
@@ -630,7 +630,32 @@ module.exports.labelHtml = async (req, res) => { //ใบแปะหน้า�
             .status(500)
             .send({ status: false, message: err.message })
     }
-}
+};
+
+module.exports.dropoff = async (req, res) => {
+    try {
+        const value = {
+            api_key: process.env.SHIPPOP_API_KEY,
+            email: "tossagundigitalnewgeneration@gmail.com",
+            data: req.body,
+        };
+
+        const resp = await axios.post(`${process.env.SHIPPOP_URL}/booking/`, value, {
+            headers: {
+                "Accept-Encoding": "gzip,deflate,compress",
+                "Content-Type": "application/json"
+            },
+        });
+
+        console.log(resp.data)
+
+    } catch (error) {
+        console.log(err)
+        return res
+            .status(500)
+            .send({ status: false, message: err.message })
+    }
+};
 
 async function invoiceNumber() {
     // data = `TSP`

@@ -197,3 +197,25 @@ module.exports.labelHtml = async (req, res) => {
 		return res.status(500).send({ message: "Internal Server Error" })
 	}
 };
+
+module.exports.dropoff = async (req, res) => {
+	try {
+		const value = {
+			api_key: process.env.SHIPPOP_API_KEY,
+			email: "tossagundigitalnewgeneration@gmail.com",
+			data: req.body,
+		};
+
+		const resp = await axios.post(`${process.env.SHIPPOP_URL}/booking/`, value, {
+			headers: {
+				"Accept-Encoding": "gzip,deflate,compress",
+				"Content-Type": "application/json"
+			},
+		});
+
+		return res.status(200).send(resp.data);
+	} catch (error) {
+		console.log(error)
+		return res.status(500).send({ message: "Internal Server Error" })
+	}
+};

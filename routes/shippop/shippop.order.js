@@ -10,4 +10,6 @@ router.post("/tracking/:id", shippop.tracking);
 
 router.post("/label", auth, shippop.labelHtml);
 
+// router.post("/dropoff", shippop.dropoff);
+
 module.exports = router
