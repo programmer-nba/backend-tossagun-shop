@@ -134,12 +134,32 @@ app.use(prefix + "/api/api_express", require("./routes/api/api.express"));
 app.use(prefix + "/api/api_service", require("./routes/api/api.service"));
 app.use(prefix + "/api/api_topup", require("./routes/api/api.topup"));
 
+// Backup ข้อมูล
+app.use(prefix + "/backup", require("./routes/backup"));
+
 // ฟังก์ชั่นเรียกใช้ API อัตโนมัติ
 cron.schedule('0 */3 * * *', () => {
-  console.log('Running a job every 1 minute');
+  console.log('Running a job every 3 hours');
 
   // Deverlop
   axios.post("https:/api.tossaguns.online/tossagun-shop/express/booking/updatestatus").then((res) => {
+    console.log("API Response : ", res.data.message);
+  }).catch((err) => {
+    console.error('Error calling API : ', err.response.data.message);
+  })
+
+  // Production
+  // axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
+  // console.log("API Response : ", res.data);
+  // }).catch((err) => {
+  // console.error('Error calling API : ', err);
+  // })
+  // app.use(prefix + "/express/updatestatus", require("./routes/shippop/shippop.update"));
+});
+
+cron.schedule('* * * * *', () => {
+  // Deverlop
+  axios.post("https:/api.tossaguns.online/tossagun-shop/backup").then((res) => {
     console.log("API Response : ", res.data.message);
   }).catch((err) => {
     console.error('Error calling API : ', err.response.data.message);
