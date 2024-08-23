@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+const cron = require('node-cron');
+const axios = require('axios');
+
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
@@ -119,16 +122,37 @@ app.use(prefix + "/topup/service", require("./routes/topup/topup.service"));
 app.use(prefix + "/topup/percent", require("./routes/topup/percent"));
 
 // Partner
-app.use(prefix + "/e-market", require("./routes/ddscpartner/emarking")); 
+app.use(prefix + "/e-market", require("./routes/ddscpartner/emarking"));
 app.use(prefix + "/store", require("./routes/ddscpartner/store"));
 
 // Easybook
 app.use(prefix + "/easybook", require("./routes/easybook/easybook.service.route"))
 
 // API Product กลาง
-app.use(prefix + "/api/api_product" , require("./routes/api/api.product"));
+app.use(prefix + "/api/api_product", require("./routes/api/api.product"));
 app.use(prefix + "/api/api_express", require("./routes/api/api.express"));
 app.use(prefix + "/api/api_service", require("./routes/api/api.service"));
+app.use(prefix + "/api/api_topup", require("./routes/api/api.topup"));
+
+// ฟังก์ชั่นเรียกใช้ API อัตโนมัติ
+cron.schedule('* * * * *', () => {
+  console.log('Running a job every 1 minute');
+
+  // Deverlop
+  axios.post("https:/api.tossaguns.online/tossagun-shop/express/booking/updatestatus").then((res) => {
+    console.log("API Response : ", res.data);
+  }).catch((err) => {
+    console.error('Error calling API : ', err);
+  })
+
+  // Production
+  // axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
+  // console.log("API Response : ", res.data);
+  // }).catch((err) => {
+  // console.error('Error calling API : ', err);
+  // })
+  // app.use(prefix + "/express/updatestatus", require("./routes/shippop/shippop.update"));
+})
 
 const port = process.env.PORT || 9999;
 

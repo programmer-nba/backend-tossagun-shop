@@ -5,6 +5,7 @@ const auth = require("../../lib/auth");
 
 router.post('/tracking/update/courier_tracking_code', authAdmin, manage.updateCourierTrackingCode);
 router.post("/calltopickup", authAdmin, manage.callToPickup);
+router.post("/updatestatus", manage.updateStatus);
 
 router.put("/update/:id", auth, manage.update);
 router.delete("/delete/:id", auth, manage.delend);

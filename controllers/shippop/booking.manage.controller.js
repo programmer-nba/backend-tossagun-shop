@@ -2,7 +2,7 @@ const { default: axios } = require("axios");
 const { shippopBooking } = require("../../model/shippop/shippop.order");
 const { string } = require("joi");
 
-update = async (req, res) => {
+module.exports.update = async (req, res) => {
     try {
         const id = req.params.id
         const formData = req.body
@@ -27,7 +27,7 @@ update = async (req, res) => {
     }
 }
 
-delend = async (req, res) => {
+module.exports.delend = async (req, res) => {
     try {
         const id = req.params.id
         const del = await shippopBooking.findByIdAndDelete(id)
@@ -46,22 +46,22 @@ delend = async (req, res) => {
     }
 }
 
-getAll = async (req, res) => {
+module.exports.getAll = async (req, res) => {
     try {
         const booking = await shippopBooking.find();
         // let order = [];
         // for (let i = 0; i < booking.length; i++) {
-            // if (booking[i].order_status !== 'cancel') {
-                // const value = {
-                    // tracking_code: booking[i].tracking_code,
-                // };
-                // const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking/`, value, {
-                    // headers: { "Accept-Encoding": "gzip,deflate,compress" },
-                // });
-                // booking[i].order_status = resp.data.order_status;
-                // booking[i].save();
-            // }
+        // if (booking[i].order_status !== 'cancel') {
+        // const value = {
+        // tracking_code: booking[i].tracking_code,
+        // };
+        // const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking/`, value, {
+        // headers: { "Accept-Encoding": "gzip,deflate,compress" },
+        // });
+        // booking[i].order_status = resp.data.order_status;
+        // booking[i].save();
         // }
+
         // console.log('อัพเดทสถานะสำเร็จ')
         // if (booking[i].order_status === 'cancel') {
         // console.log('ออเดอร์นี้ถูกยกเลิก')
@@ -81,8 +81,11 @@ getAll = async (req, res) => {
         // booking[i].save();
         // }
         // order.push(booking[i]);
-        // console.log(order)
         // }
+
+        // console.log(order)
+        // return res.status(200).send({ status: true, message: 'ดึงข้อมูลสำเร็จ', data: order })
+
         if (booking) {
             return res.status(200).send({ status: true, message: 'ดึงข้อมูลสำเร็จ', data: booking })
         } else {
@@ -93,7 +96,7 @@ getAll = async (req, res) => {
     }
 }
 
-getById = async (req, res) => {
+module.exports.getById = async (req, res) => {
     try {
         const id = req.params.id
         const findId = await shippopBooking.findById(id)
@@ -112,7 +115,7 @@ getById = async (req, res) => {
     }
 }
 
-updateCourierTrackingCode = async (req, res) => {
+module.exports.updateCourierTrackingCode = async (req, res) => {
     try {
         if (req.body.tracking_code === undefined) {
             return res.status(400).send({ message: "ไม่พบ traking_code" });
@@ -150,7 +153,27 @@ updateCourierTrackingCode = async (req, res) => {
     }
 }
 
-callToPickup = async (req, res) => {
+module.exports.updateStatus = async (req, res) => {
+    try {
+        const booking = await shippopBooking.find();
+        for (let i = 0; i < booking.length; i++) {
+            const value = {
+                tracking_code: booking[i].tracking_code,
+            };
+            const resp = await axios.post(`${process.env.SHIPPOP_URL}/tracking/`, value, {
+                headers: { "Accept-Encoding": "gzip,deflate,compress" },
+            });
+            booking[i].order_status = resp.data.order_status;
+            booking[i].save();
+        };
+        return res.status(200).send({ status: true, message: 'อัพเดตข้อมูลสำเร็จ' })
+    } catch (error) {
+        console.log(err);
+        return res.status(500).send({ message: "มีบางอย่างผิดพลาด" });
+    }
+}
+
+module.exports.callToPickup = async (req, res) => {
     try {
         if (req.body.courier_tracking_code === undefined) {
             return res.status(400).send({ message: "ไม่พบเลขติดตามพัสดุ" });
@@ -170,4 +193,4 @@ callToPickup = async (req, res) => {
     }
 }
 
-module.exports = { update, delend, getAll, getById, callToPickup, updateCourierTrackingCode }
+// module.exports = { update, delend, getAll, getById, callToPickup, updateCourierTrackingCode }
