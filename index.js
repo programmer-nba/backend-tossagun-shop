@@ -135,14 +135,14 @@ app.use(prefix + "/api/api_service", require("./routes/api/api.service"));
 app.use(prefix + "/api/api_topup", require("./routes/api/api.topup"));
 
 // ฟังก์ชั่นเรียกใช้ API อัตโนมัติ
-cron.schedule('* * * * *', () => {
+cron.schedule('0 */3 * * *', () => {
   console.log('Running a job every 1 minute');
 
   // Deverlop
   axios.post("https:/api.tossaguns.online/tossagun-shop/express/booking/updatestatus").then((res) => {
-    console.log("API Response : ", res.data);
+    console.log("API Response : ", res.data.message);
   }).catch((err) => {
-    console.error('Error calling API : ', err);
+    console.error('Error calling API : ', err.response.data.message);
   })
 
   // Production
