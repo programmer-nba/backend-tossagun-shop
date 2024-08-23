@@ -157,7 +157,7 @@ cron.schedule('0 */3 * * *', () => {
   // app.use(prefix + "/express/updatestatus", require("./routes/shippop/shippop.update"));
 });
 
-cron.schedule('* * * * *', () => {
+cron.schedule('0 0 * * *', () => {
   // Deverlop
   axios.post("https:/api.tossaguns.online/tossagun-shop/backup").then((res) => {
     console.log("API Response : ", res.data.message);
