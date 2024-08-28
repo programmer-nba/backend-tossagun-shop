@@ -53,7 +53,7 @@ module.exports.getProduct = async (req, res) => {
 	try {
 
 		// Develment
-		const api_image = `https://api.tossaguns.com/tossagun-shop/product/api_product/image/`
+		const api_image = `https://api.tossaguns.com/tossagun-shop/api/api_product/image/`
 		// Production
 		// const api_image = `https://api.tossaguns.com/tossagun-shop/product/api_product/image/`
 
