@@ -5,6 +5,7 @@ const auth = require("../../lib/auth");
 
 router.post("/price/list", auth, shippop.priceList);
 router.post("/booking", auth, shippop.booking);
+router.post("/booking/box", auth, shippop.bookingBox);
 router.post("/cancel", auth, shippop.cancelOrder);
 router.post("/tracking/:id", shippop.tracking);
 

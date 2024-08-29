@@ -438,6 +438,17 @@ module.exports.booking = async (req, res) => {
     }
 }
 
+module.exports.bookingBox = async (req, res) => {
+    try {
+
+    } catch (error) {
+        console.log(err)
+        return res
+            .status(500)
+            .send({ status: false, message: err.message })
+    }
+}
+
 module.exports.cancelOrder = async (req, res) => {
     try {
         const { purchase_id, shop_id, maker_id } = req.body;

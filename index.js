@@ -172,7 +172,7 @@ cron.schedule('0 0 * * *', () => {
   // console.error('Error calling API : ', err);
   // })
   // app.use(prefix + "/express/updatestatus", require("./routes/shippop/shippop.update"));
-})
+});
 
 const port = process.env.PORT || 9999;
 

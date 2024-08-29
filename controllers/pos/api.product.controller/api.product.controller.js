@@ -58,20 +58,20 @@ module.exports.getProduct = async (req, res) => {
 		// const api_image = `https://api.tossaguns.com/tossagun-shop/product/api_product/image/`
 
 		const pipeline = [
-			{
-				$lookup: {
-					from: "category",
-					localField: "productTG_category",
-					foreignField: "_id",
-					as: "category_info"
-				}
-			},
-			{
-				$unwind: {
-					path: "$category_info", // Unwind the `category_info` array to a single document
-					preserveNullAndEmptyArrays: true // Keep documents that do not have a matching `category_info`
-				}
-			},
+			// {
+			// $lookup: {
+			// from: "category",
+			// localField: "productTG_category",
+			// foreignField: "_id",
+			// as: "category_info"
+			// }
+			// },
+			// {
+			// $unwind: {
+			// path: "$category_info", // Unwind the `category_info` array to a single document
+			// preserveNullAndEmptyArrays: true // Keep documents that do not have a matching `category_info`
+			// }
+			// },
 			{
 				$project: {
 					_id: 0,
@@ -79,7 +79,7 @@ module.exports.getProduct = async (req, res) => {
 					product_id: `$_id`,
 					product_image: { $concat: [api_image, `$productTG_image`] },
 					product_name: '$productTG_name',
-					product_category: '$category_info.name',
+					product_category: '$productTG_category',
 					product_detail: {
 						$replaceAll: {
 							input: {
@@ -102,6 +102,20 @@ module.exports.getProduct = async (req, res) => {
 
 		const result = await ProductTG.aggregate(pipeline);
 		return res.status(200).send(result);
+	} catch (error) {
+		console.log(error)
+		return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
+	}
+};
+
+module.exports.getCategory = async (req, res) => {
+	try {
+		const category = await Categorys.find();
+		if (category) {
+			return res.status(200).send({ status: true, data: category });
+		} else {
+			return res.status(400).send({ message: "ดึงข้อมูลไม่สำเร็จ" });
+		}
 	} catch (error) {
 		console.log(error)
 		return res.status(500).send({ message: "มีบางอย่างผิดพลาด", status: false });
