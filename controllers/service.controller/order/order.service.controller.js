@@ -637,9 +637,6 @@ module.exports.cancelOrder = async (req, res) => {
             invoice: order.invoice
         };
 
-        console.log('สร้างรายการออเดอร์สำเร็จ')
-        await office.OrderOfficeCancel(cancel_office);
-
         const cost = order.price / 2;
         const freight = order.freight;
         const net = cost + freight;
@@ -665,6 +662,8 @@ module.exports.cancelOrder = async (req, res) => {
         };
         await WalletHistory.create(money_history);
         console.log("---เสร็จสิ้น---");
+        // console.log('สร้างรายการออเดอร์สำเร็จ')
+        await office.OrderOfficeCancel(cancel_office);
         return res.status(200).send({ status: true, message: "ยกเลิกรายการสำเร็จ" });
     } catch (error) {
         console.error(error);
