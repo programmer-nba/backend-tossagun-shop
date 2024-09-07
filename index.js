@@ -100,7 +100,7 @@ app.use(prefix + "/commission", require("./routes/commission/commission"));
 app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
 // Credit
 app.use(prefix + "/credit", require("./routes/wallet/credit"));
-app.use(prefix + "/check-slip", require("./routes/checkslip"));
+// app.use(prefix + "/check-slip", require("./routes/checkslip"));
 
 // AOC สายการบิน
 app.use(prefix + "/aoc", require("./routes/AOC/order.aoc"));
