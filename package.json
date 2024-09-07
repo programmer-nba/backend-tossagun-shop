@@ -32,6 +32,7 @@
     "nodemon": "^3.0.3",
     "qrcode-reader": "^1.0.4",
     "request": "^2.88.2",
+    "sharp": "^0.33.5",
     "tesseract.js": "^5.1.0",
     "twilio": "^4.20.1",
     "uuid": "^9.0.1"

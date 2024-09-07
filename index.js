@@ -100,6 +100,7 @@ app.use(prefix + "/commission", require("./routes/commission/commission"));
 app.use(prefix + "/wallet", require("./routes/wallet/wallet"));
 // Credit
 app.use(prefix + "/credit", require("./routes/wallet/credit"));
+app.use(prefix + "/check-slip", require("./routes/checkslip"));
 
 // AOC สายการบิน
 app.use(prefix + "/aoc", require("./routes/AOC/order.aoc"));
@@ -142,34 +143,34 @@ cron.schedule('0 */3 * * *', () => {
   console.log('Running a job every 3 hours');
 
   // Deverlop
-  // axios.post("https:/api.tossaguns.online/tossagun-shop/express/booking/updatestatus").then((res) => {
-  // console.log("API Response : ", res.data.message);
-  // }).catch((err) => {
-  // console.error('Error calling API : ', err.response.data.message);
-  // })
+  axios.post("https:/api.tossaguns.online/tossagun-shop/express/booking/updatestatus").then((res) => {
+    console.log("API Response : ", res.data.message);
+  }).catch((err) => {
+    console.error('Error calling API : ', err.response.data.message);
+  })
 
   // Production
-  axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
-    console.log("API Response : ", res.data);
-  }).catch((err) => {
-    console.error('Error calling API : ', err);
-  })
+  // axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
+  // console.log("API Response : ", res.data);
+  // }).catch((err) => {
+  // console.error('Error calling API : ', err);
+  // })
 });
 
 cron.schedule('0 0 * * *', () => {
   // Deverlop
-  // axios.post("https:/api.tossaguns.online/tossagun-shop/backup").then((res) => {
-  // console.log("API Response : ", res.data.message);
-  // }).catch((err) => {
-  // console.error('Error calling API : ', err.response.data.message);
-  // })
+  axios.post("https:/api.tossaguns.online/tossagun-shop/backup").then((res) => {
+    console.log("API Response : ", res.data.message);
+  }).catch((err) => {
+    console.error('Error calling API : ', err.response.data.message);
+  })
 
   // Production
-  axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
-    console.log("API Response : ", res.data);
-  }).catch((err) => {
-    console.error('Error calling API : ', err);
-  })
+  // axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
+  // console.log("API Response : ", res.data);
+  // }).catch((err) => {
+  // console.error('Error calling API : ', err);
+  // })
 });
 
 const port = process.env.PORT || 9999;
