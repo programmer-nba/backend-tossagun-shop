@@ -825,7 +825,7 @@ module.exports.getOrderPurchaseId = async (req, res) => {
 
 module.exports.getOrderAppPremium = async (req, res) => {
     try {
-        const order = await OrderApppremium.find();
+        const order = await AppPremiumBooking.find();
         if (order) {
             return res.status(200).send({ status: true, message: 'ดึงข้อมูลออเดอร์สำเร็จ', data: order })
         } else {
