@@ -58,7 +58,7 @@ const checkEmployee = async (req, res) => {
                 return res.status(403).send({ message: "ร้านค้าดังกล่าวไม่สามารถทำรายการได้" });
             }
 
-            const invoice = await GenerateRiceiptNumber(req.body.shop_type, req.body.shop_id, shop.shop_number);
+            const invoice = await invoiceNumber();
             let obj = [];
             let p_id;
 
@@ -104,7 +104,7 @@ const checkEmployee = async (req, res) => {
                         profit_shop: Number(profit_shop.toFixed(2)),
                         total_platform: Number(total_platform.toFixed(2)),
                         tossagun_tel: req.body.platform,
-                        order_status: 'สั่งซื้อสินค้าสำเร็จ',
+                        order_status: res.data.msg,
                         timestamp: dayjs(Date.now()).format(),
                     };
                     obj.push(o);
@@ -226,38 +226,16 @@ const checkEmployee = async (req, res) => {
     }
 }
 
-async function GenerateRiceiptNumber(shop_type, id, number) {
-    if (shop_type === 'One Stop Service') {
-        const pipelint = [
-            {
-                $match: { shop_type: shop_type },
-            },
-            {
-                $group: { _id: 0, count: { $sum: 1 } },
-            },
-        ];
-        const count = await OrderApppremium.aggregate(pipelint);
-        const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `TG${dayjs(Date.now()).format("YYMM")}${countValue
-            .toString()
-            .padStart(3, "0")}`;
-        return data;
-    } else if (shop_type === 'One Stop Platform') {
-        const pipelint = [
-            {
-                $match: { shop_type: shop_type },
-            },
-            {
-                $group: { _id: 0, count: { $sum: 1 } },
-            },
-        ];
-        const count = await OrderApppremium.aggregate(pipelint);
-        const countValue = count.length > 0 ? count[0].count + 1 : 1;
-        const data = `PF${dayjs(Date.now()).format("YYMM")}${countValue
-            .toString()
-            .padStart(3, "0")}`;
-        return data;
-    }
+async function invoiceNumber() {
+    const pipelint = [
+        {
+            $group: { _id: 0, count: { $sum: 1 } },
+        },
+    ];
+    const count = await OrderApppremium.aggregate(pipelint);
+    const countValue = count.length > 0 ? count[0].count + 1 : 1;
+    const data = `APP${dayjs(Date.now()).format("YYMMDD")}${countValue.toString().padStart(3, "0")}`;
+    return data;
 };
 
 async function GetTeamMember(tel) {

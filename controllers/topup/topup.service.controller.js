@@ -7,7 +7,7 @@ const { WalletHistory } = require("../../model/wallet/wallet.history.model");
 const { Commission } = require("../../model/pos/commission/commission.model");
 const { Shops } = require("../../model/pos/shop.model");
 const commissions = require("../../function/commission");
-const { default: axios } = require("axios");
+const axios = require("axios");
 
 module.exports.booking = async (req, res) => {
     try {

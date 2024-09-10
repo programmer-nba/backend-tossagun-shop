@@ -89,7 +89,10 @@ app.use(prefix + "/service/program", require("./routes/service/program")); // �
 app.use(prefix + "/service/account", require("./routes/service/account")); // บัญชี
 
 // AppPremium
-app.use(prefix + "/service/apppremium", require("./routes/service/apppremium"));
+app.use(prefix + "/service/topup", require("./routes/service/topup")); // ของแอพพรีเมี่ยม
+app.use(prefix + "/service/apppremium", require("./routes/service/apppremium")); // ของแอพพรีเมี่ยม
+app.use(prefix + "/service/game", require("./routes/service/game")); // ของแอพพรีเมี่ยม
+app.use(prefix + "/service/cashcard", require("./routes/service/cashcard")); // ของแอพพรีเมี่ยม
 app.use(prefix + "/apppremium/percent", require("./routes/apppremium/percent"));
 
 // Order
