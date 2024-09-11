@@ -89,8 +89,8 @@ const checkEmployee = async (req, res) => {
                 const profit_tg = profit * (p.profit_tg / 100);
                 const profit_shop = profit * (p.profit_shop / 100);
                 const total_platform = profit * (p.platform / 100);
-                await axios.request(config).then((res) => {
-                    p_id = res.data.p_id;
+                await axios.request(config).then((result) => {
+                    p_id = result.data.p_id;
                     const o = {
                         employee_id: req.body.employee,
                         shop_id: req.body.shop_id,
@@ -104,14 +104,16 @@ const checkEmployee = async (req, res) => {
                         profit_shop: Number(profit_shop.toFixed(2)),
                         total_platform: Number(total_platform.toFixed(2)),
                         tossagun_tel: req.body.platform,
-                        order_status: res.data.msg,
+                        order_status: result.data.msg,
                         timestamp: dayjs(Date.now()).format(),
                     };
                     obj.push(o);
-                }).catch((err) => {
-                    console.log(err)
-                })
+                });
             };
+
+            if (!p_id) {
+                return res.status(403).send({ status: false, message: 'ทำรายการไม่สำเร็จ กรุณาติดต่อแอดมิน' })
+            }
 
             const total_net = obj.reduce((sum, el) => sum + el.total, 0);
             const total_cost = obj.reduce((sum, el) => sum + el.cost, 0);
@@ -124,12 +126,14 @@ const checkEmployee = async (req, res) => {
                 shop_id: req.body.shop_id,
                 platform: req.body.platform,
                 invoice: invoice,
+                customer_name: req.body.customer_name,
+                customer_tel: req.body.customer_tel,
+                customer_line: req.body.customer_line,
                 total: Number(total_net.toFixed(2)),
                 total_cost: Number(total_cost.toFixed(2)),
                 total_profit: Number(total_profit.toFixed(2)),
                 total_profit_tg: Number(total_profit_tg.toFixed(2)),
                 total_profit_shop: Number(total_profit_shop.toFixed(2)),
-                // total_cost_tg: Number(total_profit.toFixed(2)),
                 total_platform: Number(total_platform.toFixed(2)),
                 payment_type: req.body.paymenttype,
                 moneyreceive: req.body.moneyreceive,
@@ -152,19 +156,9 @@ const checkEmployee = async (req, res) => {
 
             // ตัดเงิน
             const wallet = (shop.shop_wallet - total_net) + total_profit_shop;
-            // const findShop = await Shops.findByIdAndUpdate(req.body.shop_id, { shop_walelt: wallet }, { useFindAndModify: false })
-            // console.log(findShop)
             shop.shop_wallet = wallet;
             shop.save();
             console.log('ปรับยอดในกระเป่าสำเร็จ')
-            // const findShop = await Shops.findByIdAndUpdate(req.body.shop_id, {
-            // $inc: {
-            // shop_wallet: wallet
-            // }
-            // }, { new: true })
-            // if (!findShop) {
-            // return res.status(404).send({ status: false, message: "ไม่สามารถค้นหาร้านที่ท่านระบุได้" })
-            // }
 
             const getteammember = await GetTeamMember(req.body.platform);
             if (!getteammember) {
@@ -207,7 +201,6 @@ const checkEmployee = async (req, res) => {
                 if (!record2) {
                     return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติเงินเข้าได้" })
                 }
-                // console.log(wallet_history)
 
                 // จ่ายค่าคอมมิชชั่น
                 const commissionData = await commissions.Commission(createOrder, total_platform, getteammember, 'AppPremium', total_net);
