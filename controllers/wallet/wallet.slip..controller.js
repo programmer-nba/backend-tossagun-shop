@@ -11,86 +11,170 @@ const axios = require("axios");
 const Tesseract = require('tesseract.js');
 const Jimp = require('jimp');
 const FormData = require('form-data');
+const QrCodeReader = require("qrcode-reader");
+const { DataCheckSlip } = require("../../model/slip/slip.model");
 
 const uploadFolder = path.join(__dirname, '../../assets/wallet');
 fs.mkdirSync(uploadFolder, { recursive: true });
-
-const uploadFolderTest = path.join(__dirname, '../../assets/test');
-fs.mkdirSync(uploadFolderTest, { recursive: true });
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, uploadFolder)
     },
     filename: function (req, file, cb) {
-        cb(null, 'act' + Date.now() + file.originalname);
+        cb(null, Date.now() + '.jpg');
     },
 });
-
-const storageTest = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadFolderTest)
-    },
-    filename: function (req, file, cb) {
-        cb(null, "Test" + Date.now() + file.originalname);
-    },
-})
 
 exports.create = async (req, res) => {
     try {
         let upload = multer({ storage: storage }).single("slip_image");
         upload(req, res, async function (err) {
-            console.log(req.file)
             const { error } = validate(req.body);
             if (error) {
-                // fs.unlinkSync(req.file.path);
                 return res
                     .status(400)
                     .send({ message: error.details[0].message, status: false });
             } else {
                 // const slip = await checkSlipData(req.file.path, req.body.amount);
                 const invoice = await invoiceNumber();
+
                 if (req.file) {
-                    if (req.body.payment_type === 'One Stop Platform') {
-                        const member = await Members.findById(req.decoded._id);
-                        await new TopupWallet({
-                            ...req.body,
-                            invoice: invoice,
-                            maker_id: req.decoded._id,
-                            detail: req.file.filename,
-                            timestamp: dayjs(Date.now()).format(),
-                        }).save();
-                        const message = `
-แจ้งเติมเงินเข้าระบบ : 
-เลขที่ทำรายการ: ${invoice}
-ชื่อ: ${member.fristname} ${member.lastname}
-จำนวน: ${req.body.amount} บาท
+                    const data = await fs.promises.readFile(req.file.path);
+                    // โหลดภาพด้วย Jimp
+                    const image = await Jimp.read(data);
+                    // สร้าง Promise ถอดรหัส QR code
+                    const code = await new Promise((reslove, reject) => {
+                        const qr = new QrCodeReader();
+                        qr.callback = (err, value) => {
+                            if (err) {
+                                console.error(err);
+                            }
+                            if (!value) {
+                                return res.status(408).send({ status: false, message: "สลิปดังกล่าวไม่สามารถใช้งานได้ กรุณาติดต่อแอดมิน" })
+                            }
 
-ตรวจสอบได้ที่ : https://shop-admin.tossaguns.com/`;
-                        await line.linenotify(message);
-                        return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
-                    } else {
-                        const shop = await Shops.findById(req.decoded.shop_id);
-                        await new TopupWallet({
-                            ...req.body,
-                            invoice: invoice,
-                            maker_id: req.decoded._id,
-                            shop_id: req.decoded.shop_id,
-                            detail: req.file.filename,
-                            timestamp: dayjs(Date.now()).format(),
-                        }).save();
-                        const message = `
-แจ้งเติมเงินเข้าระบบ 
-เลขที่ทำรายการ: ${invoice}
-ชื่อ: ${shop.shop_name_main} (สาขา ${shop.shop_name_second})
-จำนวน: ${req.body.amount} บาท
+                            reslove(value.result);
+                        };
+                        qr.decode(image.bitmap);   
+                    });
 
-ตรวจสอบได้ที่ : https://shop-admin.tossaguns.com/`;
-                        await line.linenotify(message);
-                        return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
+                    const value = {
+                        code: code,
+                    };
+
+                    let status = false;
+                    let data_slip = null;
+
+                    while (!status) {
+                        const resp = await axios.post(`${process.env.CHECK_SLIP}/check-slip`, value, {
+                            headers: {
+                                "Accept-Encoding": "gzip,deflate,compress",
+                                "Content-Type": "application/json"
+                            },
+                        });
+
+                        if (resp.data.status === 'success') {
+                            status = true;
+                            data_slip = resp.data;
+                            console.log('ดึงข้อมูลสำเร็จ')
+                        }
+                    }
+
+                    const amount = Number(req.body.amount);
+
+                    if (data_slip.status !== 'success') {
+                        fs.unlinkSync(req.file.path);
+                        return res.status(403).send({ status: false, message: 'กรุณาทำรายการใหม่อีกครั้ง หรือติดต่อแอดมิน' })
+                    }
+
+                    if (data_slip.data.amount !== amount) {
+                        fs.unlinkSync(req.file.path);
+                        return res.status(403).send({ status: false, message: 'ทำรายการไม่สำเร็จ ยอดเงินไม่ตรงกัน' })
+                    }
+
+                    if (data_slip.data.toAccount !== "xxx-x-x3295-x") {
+                        fs.unlinkSync(req.file.path);
+                        return res.status(403).send({ status: false, message: 'ทำรายการไม่สำเร็จ บัญชีผู้รับไม่ถูกต้อง' })
+                    }
+
+                    const slip = await DataCheckSlip.findOne({ referenceNo: data_slip.data.referenceNo });
+                    if (slip) {
+                        fs.unlinkSync(req.file.path);
+                        return res.status(403).send({ status: false, message: 'สลิปดังกล่าวถูกใช้งานแล้ว' })
+                    }
+
+                    const new_data = new DataCheckSlip(data_slip.data);
+                    // console.log(new_data)
+                    if (new_data) {
+                        new_data.save();
+                        if (req.body.payment_type === 'One Stop Platform') {
+                            const member = await Members.findById(req.decoded._id);
+                            await new TopupWallet({
+                                ...req.body,
+                                invoice: invoice,
+                                maker_id: req.decoded._id,
+                                detail: req.file.filename,
+                                status: "รายการสำเร็จ",
+                                employee: `เช็คสลิปอัตโนมัติ ${dayjs(Date.now()).format("DD/MM/YYYY เวลา HH:mm:ss น.")}`,
+                                timestamp: dayjs(Date.now()).format(),
+                            }).save();
+
+                            const wallet = member.wallet;
+                            const new_wallet = member.wallet + amount;
+                            member.wallet = new_wallet;
+                            member.save();
+
+                            const wallet_history = {
+                                maker_id: req.decoded._id,
+                                orderid: invoice,
+                                type: "เงินเข้า",
+                                category: "Wallet",
+                                before: wallet,
+                                after: new_wallet,
+                                amount: amount,
+                                name: `เติมเงินเข้าระบบใบเสร็จเลขที่ ${invoice}`,
+                                timestamp: dayjs(Date.now()).format(""),
+                            };
+
+                            await WalletHistory.create(wallet_history);
+                            return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
+                        } else {
+                            const shop = await Shops.findById(req.decoded.shop_id);
+                            await new TopupWallet({
+                                ...req.body,
+                                invoice: invoice,
+                                maker_id: req.decoded._id,
+                                shop_id: req.decoded.shop_id,
+                                detail: req.file.filename,
+                                status: "รายการสำเร็จ",
+                                employee: `เช็คสลิปอัตโนมัติ ${dayjs(Date.now()).format("DD/MM/YYYY เวลา HH:mm:ss น.")}`,
+                                timestamp: dayjs(Date.now()).format(),
+                            }).save();
+
+                            const wallet = shop.shop_wallet;
+                            const new_wallet = shop.shop_wallet + amount;
+                            shop.shop_wallet = new_wallet;
+                            shop.save();
+
+                            const wallet_history = {
+                                maker_id: req.decoded._id,
+                                shop_id: req.decoded.shop_id,
+                                orderid: invoice,
+                                type: "เงินเข้า",
+                                category: "Wallet",
+                                before: wallet,
+                                after: new_wallet,
+                                amount: amount,
+                                name: `เติมเงินเข้าระบบใบเสร็จเลขที่ ${invoice}`,
+                                timestamp: dayjs(Date.now()).format(""),
+                            };
+                            await WalletHistory.create(wallet_history);
+                            return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
+                        }
                     }
                 } else {
-                    return res.status(403).send({ message: "ไม่สามารถทำรายการได้", status: false });
+                    return res.status(404).send({ status: false, message: 'กรุณาแนบรูปภาพสลิปโอนเงิน' })
                 }
             }
         });
@@ -159,53 +243,6 @@ module.exports.getImage = async (req, res) => {
     }
 };
 
-
-module.exports.checkClip = async (req, res) => {
-    try {
-        let upload = multer({ storage: storageTest }).single("image");
-        upload(req, res, async function (err) {
-            console.log(req.file)
-            const formData = new FormData();
-            formData.append("image", fs.createReadStream(req.file.path));
-            const resq = await axios.post(`https://9464-2001-fb1-148-1198-c5b2-7c6c-f09b-d8de.ngrok-free.app/detect-slip`, formData);
-            console.log(resq);
-            if (resq.data.status === 'error') {
-                return res.status(403).send({ status: false, message: resq.data.message })
-            }
-            if (resq.data.status === 'success') {
-
-            }
-        })
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send({ message: "Internal Server Error" });
-    }
-};
-
-async function checkSlipData(data, amount) {
-    const formData = new FormData();
-    formData.append("image", fs.createReadStream(data));
-    const resq = await axios.post(`https://9464-2001-fb1-148-1198-c5b2-7c6c-f09b-d8de.ngrok-free.app/detect-slip`, formData);
-    if (resq.data.status === 'error') {
-        return false;
-    }
-    if (resq.data.status === 'success') {
-        const transaction = resq.data.data.referenceNo;
-        const wallet = await TopupWallet.findOne({ transaction: transaction });
-        if (wallet) {
-            return false;
-        }
-        return resq.data.data.referenceNo;
-        // if (
-        // resq.data.data.amount === amount &&
-        // resq.data.data.toAccountName === 'บริษัท ทศกัณฐ์ ดิจิตอล นิวเจนเนอเรชั่น จำกัด' && 
-        // resq.data.data.receivingBankName === 'กสิกรไทย' &&
-        // resq.data.data.toAccount === 'xxx-x-x8293-x'
-        // ) {
-        // return resq.data.data.referenceNo;
-        // }
-    }
-};
 
 async function invoiceNumber() {
     data = `TSW`

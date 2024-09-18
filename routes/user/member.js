@@ -10,7 +10,7 @@ router.get("/check/:tel", member.checkTel); //ตรวจสอบ otp
 router.post("/create", member.create); //สร้าง user
 
 router.get("/", authAdmin, member.getMemberAll);
-router.get("/:id", auth, member.getMemberById);
+router.get("/:id", member.getMemberById);
 router.get("/team/:tel", auth, member.getMemberTeam);
 router.put("/:id", auth, member.update);
 

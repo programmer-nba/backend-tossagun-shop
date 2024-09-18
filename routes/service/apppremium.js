@@ -4,7 +4,7 @@ const authAdmin = require("../../lib/auth.admin");
 const auth = require("../../lib/auth");
 
 // Product
-router.get("/", auth, apppremium.getProductAll);
+router.post("/", auth, apppremium.getProductAll);
 
 router.post("/order", auth, apppremium.createOrder);
 // router.post("/", authAdmin, apppremium.create);

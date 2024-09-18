@@ -14,8 +14,6 @@ router.get("/shop/:shopid", auth, wallet.getWalletByShop);
 router.get("/member/:memberid", auth, wallet.getWalletByMember);
 router.put("/:id", authAdmin, slip.update);
 
-router.post("/check/slip", slip.checkClip);
-
 // history
 router.post("/history", auth, history.create);
 router.get("/history", auth, history.getHistory);
