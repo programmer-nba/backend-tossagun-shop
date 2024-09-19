@@ -1,4 +1,4 @@
-const shippop = require('../../controllers/shippop/shippop.controller.js')
+const shippop = require('../../controllers/shippop/shippop.controller');
 const router = require("express").Router();
 const authAdmin = require("../../lib/auth.admin");
 const auth = require("../../lib/auth");

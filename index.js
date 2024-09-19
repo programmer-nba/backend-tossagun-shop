@@ -127,6 +127,7 @@ app.use(prefix + "/topup/percent", require("./routes/topup/percent"));
 
 // Partner
 app.use(prefix + "/e-market", require("./routes/ddscpartner/emarking"));
+app.use(prefix + "/e-market/express" ,require("./routes/ddscpartner/express"));
 app.use(prefix + "/store", require("./routes/ddscpartner/store"));
 
 // Easybook

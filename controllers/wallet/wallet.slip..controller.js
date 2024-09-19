@@ -56,7 +56,7 @@ exports.create = async (req, res) => {
 
                             reslove(value.result);
                         };
-                        qr.decode(image.bitmap);   
+                        qr.decode(image.bitmap);
                     });
 
                     const value = {
@@ -93,7 +93,15 @@ exports.create = async (req, res) => {
                         return res.status(403).send({ status: false, message: 'ทำรายการไม่สำเร็จ ยอดเงินไม่ตรงกัน' })
                     }
 
-                    if (data_slip.data.toAccount !== "xxx-x-x3295-x") {
+                    console.log(data_slip.data.toAccount)
+
+                    if (data_slip.data.toAccount !== "xxx-x-x3295-x" && // k-plus
+                        data_slip.data.toAccount !== "xxx-xxx295-1" && // scb
+                        data_slip.data.toAccount !== "816-2-xxx951" && // bangkok
+                        data_slip.data.toAccount !== "xxx-2-83295-x" && // krungsri
+                        data_slip.data.toAccount !== "xxx-x-xx295-1" && // krungthai & ttb
+                        data_slip.data.toAccount !== "81xxxxx2951" // mymo
+                    ) {
                         fs.unlinkSync(req.file.path);
                         return res.status(403).send({ status: false, message: 'ทำรายการไม่สำเร็จ บัญชีผู้รับไม่ถูกต้อง' })
                     }
