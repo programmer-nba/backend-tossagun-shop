@@ -244,6 +244,7 @@ module.exports.booking = async (req, res) => {
         if (!findTossagun_tel) {
             return res.status(404).send({ status: false, message: "คุณยังไม่ได้เป็นสมาชิกทศกัณฐ์แฟมิลี่" })
         }
+
         const value = {
             api_key: process.env.SHIPPOP_API_KEY,
             email: "tossagundigitalnewgeneration@gmail.com",
@@ -261,6 +262,7 @@ module.exports.booking = async (req, res) => {
                 "Content-Type": "application/json"
             },
         });
+        
         if (!resp.data.status) {
             return res.status(400).send({ status: false, message: resp.data.data[0] });
         }

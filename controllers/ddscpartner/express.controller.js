@@ -113,4 +113,22 @@ module.exports.priceList = async (req, res) => {
 		console.log(error)
 		return res.status(500).send({ status: false, message: error.message })
 	}
-}
+};
+
+module.exports.booking = async (req, res) => {
+	try {
+		const value = {
+			api_key: process.env.SHIPPOP_API_KEY,
+			email: "tossagundigitalnewgeneration@gmail.com",
+			url: {
+				"success": "http://shippop.com/?success",
+				"fail": "http://shippop.com/?fail"
+			},
+			data: req.body.product_detail,
+			force_confirm: 1
+		};
+	} catch (error) {
+		console.log(error)
+		return res.status(500).send({ status: false, message: error.message })
+	}
+};

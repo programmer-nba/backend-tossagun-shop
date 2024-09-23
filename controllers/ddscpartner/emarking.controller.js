@@ -2,7 +2,6 @@ const axios = require('axios');
 // ดึงข้อมูลสินค้าที่ยังเปิดขายอยู่
 exports.getOpenProduct = async (req, res) => {
     try {
-
         const resp = await axios.get(`${process.env.PARTNER_URL}/product/getshopproduct`, {
             headers: {
                 "Content-Type": "application/json",
