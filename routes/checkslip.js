@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
 							return reject(new Error("สลิปดังกล่าวไม่สามารถใช้งานได้ กรุณาติดต่อแอดมิน"));
 						}
 						reslove(value.result);
-					};
+					}; 
 					qr.decode(image.bitmap);
 				});
 

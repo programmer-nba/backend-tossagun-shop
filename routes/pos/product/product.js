@@ -31,7 +31,7 @@ router.get("/category/:id", auth, category.getById);
 router.put("/category/:id", authAdmin, category.update);
 router.delete("/category/:id", authAdmin, category.delete);
 
-router.post("/type", authAdmin, type.create);
+router.post("/type", type.create);
 router.get("/type/all", type.getTypeAll);
 router.get("/type/:id", auth, type.getTypeById);
 router.put("/type/:id", authAdmin, type.update);
