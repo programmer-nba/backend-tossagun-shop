@@ -55,21 +55,18 @@ router.post("/", async (req, res) => {
 					code: code,
 				};
 
-				let status = false;
+				// let status = false;
 				let data_slip = null;
-				while (!status) {
+				for (let i = 0; i < 3; i++) {
 					const resp = await axios.post(`${process.env.CHECK_SLIP}/check-slip`, value, {
 						headers: {
 							"Accept-Encoding": "gzip,deflate,compress",
 							"Content-Type": "application/json"
 						},
 					});
-					if (resp.data.status === 'success') {
-						status = true;
-						data_slip = resp.data;
-						console.log('ดึงข้อมูลสำเร็จ')
-					}
+					data_slip = resp.data;
 				}
+
 				// console.log(data_slip)
 				if (data_slip.status === 'success') {
 					const slip = await DataCheckSlip.findOne({ referenceNo: data_slip.data.referenceNo });
@@ -98,6 +95,9 @@ router.post("/", async (req, res) => {
 							return res.status(201).send({ status: true, message: 'สลิปดังกล่าวสามารถใช้งานได้', data: data })
 						}
 					}
+				} else if (data_slip.status === 'error') {
+					fs.unlinkSync(req.file.path);
+					return res.status(404).send({ status: false, message: "ตรวจไม่พบสลิปดังกล่าว กรุณาติดต่อแอดมิน" })
 				}
 			} else {
 				return res.status(400).send({ status: false, message: "กรุณาอัปโหลดไฟล์สลิป" });
