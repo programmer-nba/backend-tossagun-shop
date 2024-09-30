@@ -9,7 +9,6 @@ exports.create = async (req, res) => {
         .send({ status: false, message: error.details[0].message });
     }
     const checkcategory = await Categorys.findOne({ name: req.body.name });
-    console.log(checkcategory)
     if (checkcategory) {
       return res
         .status(400)

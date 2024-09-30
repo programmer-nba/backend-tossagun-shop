@@ -215,7 +215,12 @@ module.exports.update = async (req, res) => {
                             message: "แก้ไขสินค้าสำเร็จ",
                             status: true,
                         });
-                })
+                }).catch((err) => {
+                    res.status(500).send({
+                        message: "มีบ่างอย่างผิดพลาด",
+                        status: false,
+                    });
+                });
             }
         });
     } catch (error) {

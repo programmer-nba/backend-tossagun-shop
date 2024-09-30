@@ -8,6 +8,7 @@ const ProductSchema = new mongoose.Schema({
   productTG_barcode: { type: String, required: false, default: "" },
   productTG_image: { type: String, required: false, default: "" },
   productTG_category: { type: String, required: false, default: "" },
+  productTG_type: { type: Array, required: false, default: [] },
   productTG_cost_tg: {
     cost_tg: { type: Number, required: true },
     cost_tg_vat: { type: Number, required: true },
@@ -56,6 +57,7 @@ const validate = (data) => {
     productTG_barcode: Joi.string().default(""),
     productTG_image: Joi.string().default(""),
     productTG_category: Joi.string().default(""),
+    productTG_type: Joi.array().default([]),
     productTG_cost_tg: Joi.object({
       cost_tg: Joi.number().required().default(0),
       cost_tg_vat: Joi.number().required().default(0),
