@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const Jimp = require('jimp');
 const QrCodeReader = require("qrcode-reader");
+const jsQR = require("jsqr");
 const axios = require("axios");
 
 const { DataCheckSlip } = require("../model/slip/slip.model");
@@ -41,13 +42,17 @@ router.post("/", async (req, res) => {
 					const qr = new QrCodeReader();
 					qr.callback = (err, value) => {
 						if (err) {
-							return reject(err);
+							console.log(err)
 						}
 						if (!value) {
-							return reject(new Error("สลิปดังกล่าวไม่สามารถใช้งานได้ กรุณาติดต่อแอดมิน"));
+							fs.unlinkSync(req.file.path);
+							return res.status(408).send({ status: false, message: "ทำรายการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" })
+							// return reject(new Error("สลิปดังกล่าวไม่สามารถใช้งานได้ กรุณาติดต่อแอดมิน"));
 						}
+						// reslove(value.result);
+						console.log(value.result);
 						reslove(value.result);
-					}; 
+					};
 					qr.decode(image.bitmap);
 				});
 
