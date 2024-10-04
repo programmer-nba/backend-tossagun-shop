@@ -229,7 +229,7 @@ module.exports.booking = async (req, res) => {
 				commission.save();
 			}
 
-			return res.status(200).send({ status: true, data: o, invoice: invoice })
+			return res.status(200).send({ status: true, data: obj})
 		}
 	} catch (error) {
 		console.log(error)
