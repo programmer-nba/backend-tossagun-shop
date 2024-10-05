@@ -1,5 +1,6 @@
 const { Categorys } = require("../../../model/pos/product/category.model");
 const { ProductTG } = require("../../../model/pos/product/product.tossagun.model");
+const { ObjectId } = require('mongoose').Types;
 const path = require("path");
 
 module.exports.getProductAll = async (req, res) => {
@@ -58,20 +59,21 @@ module.exports.getProduct = async (req, res) => {
 		// const api_image = `https://api.tossaguns.com/tossagun-shop/product/api_product/image/`
 
 		const pipeline = [
-			// {
-			// $lookup: {
-			// from: "category",
-			// localField: "productTG_category",
-			// foreignField: "_id",
-			// as: "category_info"
-			// }
-			// },
-			// {
-			// $unwind: {
-			// path: "$category_info", // Unwind the `category_info` array to a single document
-			// preserveNullAndEmptyArrays: true // Keep documents that do not have a matching `category_info`
-			// }
-			// },
+			{
+				$addFields: {
+					productTG_category: { $toObjectId: "$productTG_category" }  // แปลง productTG_category เป็น ObjectId
+				}
+			},
+			{
+				$lookup: {
+					from: "categories",
+					localField: "productTG_category",
+					foreignField: "_id",
+					as: "category_detail"
+				}
+			},
+			{ $unwind: "$category_detail" },
+
 			{
 				$project: {
 					_id: 0,
@@ -79,7 +81,8 @@ module.exports.getProduct = async (req, res) => {
 					product_id: `$_id`,
 					product_image: { $concat: [api_image, `$productTG_image`] },
 					product_name: '$productTG_name',
-					product_category: '$productTG_category',
+					product_category_id: '$productTG_category',
+					product_category: '$category_detail.name',
 					product_detail: {
 						$replaceAll: {
 							input: {
@@ -97,10 +100,12 @@ module.exports.getProduct = async (req, res) => {
 					product_price: '$productTG_cost_tg.cost_tg',
 					product_package: '$productTG_pack_name',
 				}
-			}
+			},
+			{ $match: { product_package: "ลัง" } },
 		];
 
 		const result = await ProductTG.aggregate(pipeline);
+		// console.log(result)
 		return res.status(200).send(result);
 	} catch (error) {
 		console.log(error)
