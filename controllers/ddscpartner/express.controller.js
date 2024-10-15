@@ -181,8 +181,6 @@ module.exports.booking = async (req, res) => {
 			cod_vat += percel.price_cod_vat;
 		});
 
-		console.log('test')
-
 		const o = {
 			shop_id: req.body.shop_id,
 			platform: req.body.platform,

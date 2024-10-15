@@ -128,7 +128,7 @@ module.exports.booking = async (req, res) => {
 			};
 			new_data.push(v);
 			// cost += percel.cost;
-			cost = Number(percel.cost);
+			cost += Number(percel.cost);
 		})
 
 		const createOrderShippop = await shippopBooking.insertMany(new_data);

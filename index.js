@@ -149,9 +149,9 @@ cron.schedule('0 */3 * * *', () => {
 
   // Deverlop
   axios.post("https:/api.tossaguns.online/tossagun-shop/express/booking/updatestatus").then((res) => {
-    console.log("API Response : ", res.data.message);
+    console.log("API Response :", res.data.message);
   }).catch((err) => {
-    console.error('Error calling API : ', err.response.data.message);
+    console.error('Error calling API :', err.response.data.message);
   })
 
   // Production
@@ -165,9 +165,9 @@ cron.schedule('0 */3 * * *', () => {
 cron.schedule('0 0 * * *', () => {
   // Deverlop
   axios.post("https:/api.tossaguns.online/tossagun-shop/backup").then((res) => {
-    console.log("API Response : ", res.data.message);
+    console.log("API Response :", res.data.message);
   }).catch((err) => {
-    console.error('Error calling API : ', err.response.data.message);
+    console.error('Error calling API :', err.response.data.message);
   })
 
   // Production

@@ -46,12 +46,50 @@ exports.create = async (req, res) => {
                     // สร้าง Promise ถอดรหัส QR code
                     const code = await new Promise((reslove, reject) => {
                         const qr = new QrCodeReader();
-                        qr.callback = (err, value) => {
+                        qr.callback = async (err, value) => {
                             if (err) {
                                 console.error(err);
                             }
                             if (!value) {
-                                return res.status(408).send({ status: false, message: "สลิปดังกล่าวไม่สามารถใช้งานได้ กรุณาติดต่อแอดมิน" })
+                                if (req.body.payment_type === 'One Stop Platform') {
+                                    const member = await Members.findById(req.decoded._id);
+                                    await new TopupWallet({
+                                        ...req.body,
+                                        invoice: invoice,
+                                        maker_id: req.decoded._id,
+                                        detail: req.file.filename,
+                                        timestamp: dayjs(Date.now()).format(),
+                                    }).save();
+                                    const message = `
+แจ้งเติมเงินเข้าระบบ : 
+เลขที่ทำรายการ: ${invoice}
+ชื่อ: ${member.fristname} ${member.lastname}
+จำนวน: ${req.body.amount} บาท
+                                    
+ตรวจสอบได้ที่ : https://shop-admin.tossaguns.com/`;
+                                    await line.linenotify(message);
+                                    return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
+                                } else {
+                                    const shop = await Shops.findById(req.decoded.shop_id);
+                                    await new TopupWallet({
+                                        ...req.body,
+                                        invoice: invoice,
+                                        maker_id: req.decoded._id,
+                                        shop_id: req.decoded.shop_id,
+                                        detail: req.file.filename,
+                                        timestamp: dayjs(Date.now()).format(),
+                                    }).save();
+                                    const message = `
+แจ้งเติมเงินเข้าระบบ 
+เลขที่ทำรายการ: ${invoice}
+ชื่อ: ${shop.shop_name_main} (สาขา ${shop.shop_name_second})
+จำนวน: ${req.body.amount} บาท
+            
+ตรวจสอบได้ที่ : https://shop-admin.tossaguns.com/`;
+                                    await line.linenotify(message);
+                                    return res.status(201).send({ message: "สร้างรายงานใหม่เเล้ว", status: true });
+                                }
+                                // return res.status(408).send({ status: false, message: "สลิปดังกล่าวไม่สามารถใช้งานได้ กรุณาติดต่อแอดมิน" })
                             }
 
                             reslove(value.result);

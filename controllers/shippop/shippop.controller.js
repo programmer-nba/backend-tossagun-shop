@@ -245,29 +245,34 @@ module.exports.booking = async (req, res) => {
             return res.status(404).send({ status: false, message: "คุณยังไม่ได้เป็นสมาชิกทศกัณฐ์แฟมิลี่" })
         }
 
-        const value = {
-            api_key: process.env.SHIPPOP_API_KEY,
-            email: "tossagundigitalnewgeneration@gmail.com",
-            url: {
-                "success": "http://shippop.com/?success",
-                "fail": "http://shippop.com/?fail"
-            },
-            data: req.body.product_detail,
-            force_confirm: 1
-        };
+        let obj = [];
+        let purchase_id = "";
 
-        const resp = await axios.post(`${process.env.SHIPPOP_URL}/booking/`, value, {
-            headers: {
-                "Accept-Encoding": "gzip,deflate,compress",
-                "Content-Type": "application/json"
-            },
-        });
-        
-        if (!resp.data.status) {
-            return res.status(400).send({ status: false, message: resp.data.data[0] });
+        if (req.body.product_detail.length !== 0) {
+            const value = {
+                api_key: process.env.SHIPPOP_API_KEY,
+                email: "tossagundigitalnewgeneration@gmail.com",
+                url: {
+                    "success": "http://shippop.com/?success",
+                    "fail": "http://shippop.com/?fail"
+                },
+                data: req.body.product_detail,
+                force_confirm: 1
+            };
+            const resp = await axios.post(`${process.env.SHIPPOP_URL}/booking/`, value, {
+                headers: {
+                    "Accept-Encoding": "gzip,deflate,compress",
+                    "Content-Type": "application/json"
+                },
+            });
+            if (!resp.data.status) {
+                return res.status(400).send({ status: false, message: resp.data.data[0] });
+            }
+
+            obj = resp.data.data;
+            purchase_id = resp.data.purchase_id;
         }
 
-        const obj = resp.data.data;
         const new_dataFull = [];
         const new_data = [];
         const new_dataBox = [];
@@ -280,14 +285,16 @@ module.exports.booking = async (req, res) => {
         let cod_vat = 0;
         let total_box = 0;
 
-        for (let item of req.body.box_detail) {
-            const b = {
-                ...item,
-            };
-            new_dataFull.push(b);
-            new_dataBox.push(b);
-            total += item.total;
-            total_box += item.total;
+        if (req.body.box_detail.length !== 0) {
+            for (let item of req.body.box_detail) {
+                const b = {
+                    ...item,
+                };
+                new_dataFull.push(b);
+                new_dataBox.push(b);
+                total += item.total;
+                total_box += item.total;
+            }
         }
 
         Object.keys(obj).forEach(async (ob) => {
@@ -296,7 +303,7 @@ module.exports.booking = async (req, res) => {
                 ...obj[ob],
                 ...percel,
                 invoice: invoice,
-                purchase_id: String(resp.data.purchase_id),
+                purchase_id: String(purchase_id),
                 shop_id: req.body.shop_id,
                 employee_id: req.body.employee,
                 type_payment: req.body.paymenttype,
@@ -331,7 +338,7 @@ module.exports.booking = async (req, res) => {
             moneyreceive: req.body.moneyreceive,
             change: req.body.change,
             discount: req.body.discount,
-            purchase_id: String(resp.data.purchase_id),
+            purchase_id: String(purchase_id),
             product: new_dataFull,
             employee: req.body.employee,
             status: [
@@ -349,9 +356,6 @@ module.exports.booking = async (req, res) => {
 
         // ตัดเงิน
         const shop = await Shops.findOne({ _id: req.body.shop_id });
-        // const findShop = await Shops.findByIdAndUpdate(req.body.shop_id, {
-        // $inc: { shop_wallet: -cost }
-        // }, { new: true })
 
         const wallet1 = shop.shop_wallet - cost;
         const wallet2 = wallet1 + total_box;
@@ -404,22 +408,25 @@ module.exports.booking = async (req, res) => {
                 return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติเงินเข้าได้" })
             }
 
-            let doto2 = {
-                shop_id: shop._id,
-                maker_id: req.body.maker_id,
-                orderid: createOrder._id,
-                name: `รายการขายกล่องพัสดุหมายเลขที่ ${invoice}`,
-                type: `เงินเข้า`,
-                category: 'Income',
-                amount: total_box,
-                before: (shop.shop_wallet - total) + profit,
-                after: ((shop.shop_wallet - total) + profit) + total_box,
-                timestamp: dayjs(Date.now()).format(""),
-            }
+            if (req.body.box_detail.length !== 0) {
 
-            const record2 = await WalletHistory.create(doto2)
-            if (!record2) {
-                return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติเงินเข้าได้" })
+                let doto2 = {
+                    shop_id: shop._id,
+                    maker_id: req.body.maker_id,
+                    orderid: createOrder._id,
+                    name: `รายการขายกล่องพัสดุหมายเลขที่ ${invoice}`,
+                    type: `เงินเข้า`,
+                    category: 'Income',
+                    amount: total_box,
+                    before: (shop.shop_wallet - total) + profit,
+                    after: ((shop.shop_wallet - total) + profit) + total_box,
+                    timestamp: dayjs(Date.now()).format(""),
+                }
+                const record2 = await WalletHistory.create(doto2)
+                if (!record2) {
+                    return res.status(400).send({ status: false, message: "ไม่สามารถสร้างประวัติเงินเข้าได้" })
+                }
+
             }
 
             // จ่ายค่าคอมมิชชั่น
