@@ -148,34 +148,34 @@ cron.schedule('0 */3 * * *', () => {
   console.log('Running a job every 3 hours');
 
   // Deverlop
-  axios.post("https:/api.tossaguns.online/tossagun-shop/express/booking/updatestatus").then((res) => {
-    console.log("API Response :", res.data.message);
-  }).catch((err) => {
-    console.error('Error calling API :', err.response.data.message);
-  })
+  // axios.post("https:/api.tossaguns.online/tossagun-shop/express/booking/updatestatus").then((res) => {
+  // console.log("API Response :", res.data.message);
+  // }).catch((err) => {
+  // console.error('Error calling API :', err.response.data.message);
+  // })
 
   // Production
-  // axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
-  // console.log("API Response : ", res.data);
-  // }).catch((err) => {
-  // console.error('Error calling API : ', err);
-  // })
+  axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
+    console.log("API Response : ", res.data);
+  }).catch((err) => {
+    console.error('Error calling API : ', err);
+  })
 });
 
 cron.schedule('0 0 * * *', () => {
   // Deverlop
-  axios.post("https:/api.tossaguns.online/tossagun-shop/backup").then((res) => {
-    console.log("API Response :", res.data.message);
-  }).catch((err) => {
-    console.error('Error calling API :', err.response.data.message);
-  })
+  // axios.post("https:/api.tossaguns.online/tossagun-shop/backup").then((res) => {
+  // console.log("API Response :", res.data.message);
+  // }).catch((err) => {
+  // console.error('Error calling API :', err.response.data.message);
+  // })
 
   // Production
-  // axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
-  // console.log("API Response : ", res.data);
-  // }).catch((err) => {
-  // console.error('Error calling API : ', err);
-  // })
+  axios.post("https:/api.tossaguns.com/tossagun-shop/express/booking/updatestatus").then((res) => {
+    console.log("API Response : ", res.data);
+  }).catch((err) => {
+    console.error('Error calling API : ', err);
+  })
 });
 
 const port = process.env.PORT || 9999;
