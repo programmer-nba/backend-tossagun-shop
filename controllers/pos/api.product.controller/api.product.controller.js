@@ -101,7 +101,7 @@ module.exports.getProduct = async (req, res) => {
 					product_package: '$productTG_pack_name',
 				}
 			},
-			{ $match: { product_package: "ลัง" } },
+			// { $match: { product_package: "ลัง" } },
 		];
 
 		const result = await ProductTG.aggregate(pipeline);
